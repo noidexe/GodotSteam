@@ -1,16 +1,16 @@
-# GodotSteam for Godot Engine
+# GodotSteam for Godot Engine 2.x
 An ecosystem of tools for [Godot Engine](https://godotengine.org) and [Valve's Steam](https://store.steampowered.com). For the Windows, Linux, and Mac platforms.
+
+**Notice: GodotSteam for Godot 2.x is now retired. This branch still works fine but will not receive any further updates.**
 
 Additional Flavors
 ---
-Pre-Compiles | Plug-ins | Server | Examples/Demos
+Pre-Compiles | Plug-ins | Server | Examples
 --- | --- | --- | ---
-[Godot 2.x](https://github.com/GodotSteam/GodotSteam/tree/godot2)| [GDNative](https://github.com/GodotSteam/GodotSteam/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot3) | [Godot 3.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/godot3)
-[Godot 3.x](https://github.com/GodotSteam/GodotSteam/tree/godot3) | [GDExtension](https://github.com/GodotSteam/GodotSteam/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot4) |  [Godot 4.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/godot4)
-[Godot 4.x](https://github.com/GodotSteam/GodotSteam/tree/godot4) | --- | [GDNative](https://github.com/GodotSteam/GodotSteam-Server/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/server3)
-[MultiplayerPeer](https://github.com/GodotSteam/MultiplayerPeer)| --- | [GDExtension](https://github.com/GodotSteam/GodotSteam-Server/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/server4)
-
-**Notice:** GodotSteam for Godot 2.x is now retired. Please use the Godot 3.x version and update your game. This branch still works fine but will not receive any further updates.
+[Godot 2.x](https://github.com/GodotSteam/GodotSteam/tree/godot2) | [GDNative](https://github.com/GodotSteam/GodotSteam/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot3) | [Skillet](https://github.com/GodotSteam/Skillet)
+[Godot 3.x](https://github.com/GodotSteam/GodotSteam/tree/godot3) | [GDExtension](https://github.com/GodotSteam/GodotSteam/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot4) | ---
+[Godot 4.x](https://github.com/GodotSteam/GodotSteam/tree/godot4) | --- | [GDNative](https://github.com/GodotSteam/GodotSteam-Server/tree/gdnative) | ---
+[MultiplayerPeer](https://github.com/GodotSteam/MultiplayerPeer)| --- | [GDExtension](https://github.com/GodotSteam/GodotSteam-Server/tree/gdextension) | ---
 
 Documentation
 ---
@@ -20,11 +20,11 @@ Feel free to chat with us about GodotSteam or ask for assistance on the [Discord
 
 Donate
 ---
-Pull-requests are the best way to help the project out but you can also donate through [Github Sponsors](https://github.com/sponsors/Gramps) or [Patreon](https://patreon.com/godotsteam)! Both types of contributions keep things rolling!
+Pull-requests are the best way to help the project out but you can also donate through [Github Sponsors](https://github.com/sponsors/Gramps)!
 
 Current Build
 ---
-You can download pre-compiled versions _(currently v1.10)_ of this repo here: https://github.com/CoaguCo-Industries/GodotSteam/releases
+You can [download pre-compiled versions of this repo here](https://github.com/GodotSteam/GodotSteam/releases).
 
 **Version 1.10 Changes**
 - Added: more verbose response to steamInit, now returns a dictionary
