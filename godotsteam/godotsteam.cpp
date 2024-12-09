@@ -5256,16 +5256,16 @@ uint32_t Steam::writeScreenshot(const PackedByteArray &rgb, int width, int heigh
 ///// TIMELINE
 /////////////////////////////////////////////////
 //
-void Steam::setTimelineTooltip(String description, float timeDelta)
+void Steam::setTimelineTooltip(String description, float time_delta)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineTooltip");
-	SteamTimeline()->SetTimelineTooltip(description.utf8().get_data(), timeDelta);
+	SteamTimeline()->SetTimelineTooltip(description.utf8().get_data(), time_delta);
 }
 
-void Steam::clearTimelineTooltip(float timeDelta)
+void Steam::clearTimelineTooltip(float time_delta)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: clearTimelineTooltip");
-	SteamTimeline()->ClearTimelineTooltip(timeDelta);
+	SteamTimeline()->ClearTimelineTooltip(time_delta);
 }
 
 void Steam::setTimelineGameMode(TimelineGameMode mode)
@@ -5274,46 +5274,46 @@ void Steam::setTimelineGameMode(TimelineGameMode mode)
 	SteamTimeline()->SetTimelineGameMode((ETimelineGameMode)mode);
 }
 
-uint64_t Steam::addInstantaneousTimelineEvent(String pchTitle, String pchDescription, String pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, TimelineEventClipPriority ePossibleClip)
+uint64_t Steam::addInstantaneousTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, TimelineEventClipPriority possible_clip)
 {
 	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: addInstantaneousTimelineEvent");
-	return SteamTimeline()->AddInstantaneousTimelineEvent(pchTitle.utf8().get_data(), pchDescription.utf8().get_data(), pchIcon.utf8().get_data(), unIconPriority, flStartOffsetSeconds, (ETimelineEventClipPriority)ePossibleClip);
+	return SteamTimeline()->AddInstantaneousTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), icon_priority, start_offset_seconds, (ETimelineEventClipPriority)possible_clip);
 }
 
-uint64_t Steam::addRangeTimelineEvent(String pchTitle, String pchDescription, String pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, float flDuration, TimelineEventClipPriority ePossibleClip)
+uint64_t Steam::addRangeTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, float duration, TimelineEventClipPriority possible_clip)
 {
 	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: addRangeTimelineEvent");
-	return (uint64_t)SteamTimeline()->AddRangeTimelineEvent(pchTitle.utf8().get_data(), pchDescription.utf8().get_data(), pchIcon.utf8().get_data(), unIconPriority, flStartOffsetSeconds, flDuration, (ETimelineEventClipPriority)ePossibleClip);
+	return (uint64_t)SteamTimeline()->AddRangeTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), icon_priority, start_offset_seconds, duration, (ETimelineEventClipPriority)possible_clip);
 }
 
-uint64_t Steam::startRangeTimelineEvent(String pchTitle, String pchDescription, String pchIcon, uint32 unPriority, float flStartOffsetSeconds, TimelineEventClipPriority ePossibleClip)
+uint64_t Steam::startRangeTimelineEvent(String title, String description, String icon, uint32 priority, float start_offset_seconds, TimelineEventClipPriority possible_clip)
 {
 	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: startRangeTimelineEvent");
-	return (uint64_t)SteamTimeline()->StartRangeTimelineEvent(pchTitle.utf8().get_data(), pchDescription.utf8().get_data(), pchIcon.utf8().get_data(), unPriority, flStartOffsetSeconds, (ETimelineEventClipPriority)ePossibleClip);
+	return (uint64_t)SteamTimeline()->StartRangeTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), priority, start_offset_seconds, (ETimelineEventClipPriority)possible_clip);
 }
 
-void Steam::updateRangeTimelineEvent( uint64_t ulEvent, String pchTitle, String pchDescription, String pchIcon, uint32 unPriority, TimelineEventClipPriority ePossibleClip)
+void Steam::updateRangeTimelineEvent(uint64_t event, String title, String description, String icon, uint32 priority, TimelineEventClipPriority possible_clip)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: updateRangeTimelineEvent");
-	SteamTimeline()->UpdateRangeTimelineEvent(ulEvent, pchTitle.utf8().get_data(), pchDescription.utf8().get_data(), pchIcon.utf8().get_data(), unPriority, (ETimelineEventClipPriority)ePossibleClip);
+	SteamTimeline()->UpdateRangeTimelineEvent(event, title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), priority, (ETimelineEventClipPriority)possible_clip);
 }
 
-void Steam::endRangeTimelineEvent(uint64_t ulEvent, float flEndOffsetSeconds)
+void Steam::endRangeTimelineEvent(uint64_t event, float end_offset_seconds)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: endRangeTimelineEvent");
-	SteamTimeline()->EndRangeTimelineEvent(ulEvent, flEndOffsetSeconds);
+	SteamTimeline()->EndRangeTimelineEvent(event, end_offset_seconds);
 }
 
-void Steam::removeTimelineEvent(uint64_t ulEvent)
+void Steam::removeTimelineEvent(uint64_t event)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: removeTimelineEvent");
-	SteamTimeline()->RemoveTimelineEvent(ulEvent);
+	SteamTimeline()->RemoveTimelineEvent(event);
 }
 
-void Steam::doesEventRecordingExist(uint64_t ulEvent)
+void Steam::doesEventRecordingExist(uint64_t event)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: doesEventRecordingExist");
-	SteamAPICall_t api_call = SteamTimeline()->DoesEventRecordingExist(ulEvent);
+	SteamAPICall_t api_call = SteamTimeline()->DoesEventRecordingExist(event);
 	callSteamTimelineEventRecordingExists.Set(api_call, this, &Steam::event_recording_exists);
 }
 
@@ -5329,41 +5329,41 @@ void Steam::endGamePhase()
 	SteamTimeline()->EndGamePhase();
 }
 
-void Steam::setGamePhaseID(String pchPhaseID)
+void Steam::setGamePhaseID(String phase_id)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setGamePhaseID");
-	SteamTimeline()->SetGamePhaseID(pchPhaseID.utf8().get_data());
+	SteamTimeline()->SetGamePhaseID(phase_id.utf8().get_data());
 }
 
-void Steam::doesGamePhaseRecordingExist(String pchPhaseID)
+void Steam::doesGamePhaseRecordingExist(String phase_id)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: doesGamePhaseRecordingExist");
-	SteamAPICall_t api_call = SteamTimeline()->DoesGamePhaseRecordingExist(pchPhaseID.utf8().get_data());
+	SteamAPICall_t api_call = SteamTimeline()->DoesGamePhaseRecordingExist(phase_id.utf8().get_data());
 	callSteamTimelineGamePhaseRecordingExists.Set(api_call, this, &Steam::phase_recording_exists);
 }
 
-void Steam::addGamePhaseTag(String pchTagName, String pchTagIcon, String pchTagGroup, uint32 unPriority)
+void Steam::addGamePhaseTag(String tag_name, String tag_icon, String tag_group, uint32 priority)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: addGamePhaseTag");
-	SteamTimeline()->AddGamePhaseTag(pchTagName.utf8().get_data(), pchTagIcon.utf8().get_data(), pchTagGroup.utf8().get_data(), unPriority);
+	SteamTimeline()->AddGamePhaseTag(tag_name.utf8().get_data(), tag_icon.utf8().get_data(), tag_group.utf8().get_data(), priority);
 }
 
-void Steam::setGamePhaseAttribute(String pchAttributeGroup, String pchAttributeValue, uint32 unPriority)
+void Steam::setGamePhaseAttribute(String attribute_group, String attribute_value, uint32 priority)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setGamePhaseAttribute");
-	SteamTimeline()->SetGamePhaseAttribute(pchAttributeGroup.utf8().get_data(), pchAttributeValue.utf8().get_data(), unPriority);
+	SteamTimeline()->SetGamePhaseAttribute(attribute_group.utf8().get_data(), attribute_value.utf8().get_data(), priority);
 }
 
-void Steam::openOverlayToGamePhase(String pchPhaseID)
+void Steam::openOverlayToGamePhase(String phase_id)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: openOverlayToGamePhase");
-	SteamTimeline()->OpenOverlayToGamePhase(pchPhaseID.utf8().get_data());
+	SteamTimeline()->OpenOverlayToGamePhase(phase_id.utf8().get_data());
 }
 
-void Steam::openOverlayToTimelineEvent(uint64_t ulEvent)
+void Steam::openOverlayToTimelineEvent(uint64_t event)
 {
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: openOverlayToTimelineEvent");
-	SteamTimeline()->OpenOverlayToTimelineEvent(ulEvent);
+	SteamTimeline()->OpenOverlayToTimelineEvent(event);
 }
 
 

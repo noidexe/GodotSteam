@@ -645,24 +645,24 @@ public:
 	uint32_t writeScreenshot(const PackedByteArray &rgb, int width, int height);
 
 	// Timeline
-	void setTimelineTooltip(String description, float timeDelta);
-	void clearTimelineTooltip(float timeDelta);
+	void setTimelineTooltip(String description, float time_delta);
+	void clearTimelineTooltip(float time_delta);
 	void setTimelineGameMode(TimelineGameMode mode);
-	uint64_t addInstantaneousTimelineEvent(String pchTitle, String pchDescription, String pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, TimelineEventClipPriority ePossibleClip);
-	uint64_t addRangeTimelineEvent(String pchTitle, String pchDescription, String pchIcon, uint32 unIconPriority, float flStartOffsetSeconds, float flDuration, TimelineEventClipPriority ePossibleClip);
-	uint64_t startRangeTimelineEvent(String pchTitle, String pchDescription, String pchIcon, uint32 unPriority, float flStartOffsetSeconds, TimelineEventClipPriority ePossibleClip );
-	void updateRangeTimelineEvent( uint64_t ulEvent, String pchTitle, String pchDescription, String pchIcon, uint32 unPriority, TimelineEventClipPriority ePossibleClip);
-	void endRangeTimelineEvent(uint64_t ulEvent, float flEndOffsetSeconds);
-	void removeTimelineEvent(uint64_t ulEvent);
-	void doesEventRecordingExist(uint64_t ulEvent);
+	uint64_t addInstantaneousTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, TimelineEventClipPriority possible_clip);
+	uint64_t addRangeTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, float duration, TimelineEventClipPriority possible_clip);
+	uint64_t startRangeTimelineEvent(String title, String description, String icon, uint32 priority, float start_offset_seconds, TimelineEventClipPriority possible_clip);
+	void updateRangeTimelineEvent(uint64_t event, String title, String description, String icon, uint32 priority, TimelineEventClipPriority possible_clip);
+	void endRangeTimelineEvent(uint64_t event, float end_offset_seconds);
+	void removeTimelineEvent(uint64_t event);
+	void doesEventRecordingExist(uint64_t event);
 	void startGamePhase();
 	void endGamePhase();
-	void setGamePhaseID(String pchPhaseID);
-	void doesGamePhaseRecordingExist(String pchPhaseID);
-	void addGamePhaseTag(String pchTagName, String pchTagIcon, String pchTagGroup, uint32 unPriority);
-	void setGamePhaseAttribute(String pchAttributeGroup, String pchAttributeValue, uint32 unPriority);
-	void openOverlayToGamePhase(String pchPhaseID );
-	void openOverlayToTimelineEvent(uint64_t ulEvent);
+	void setGamePhaseID(String phase_id);
+	void doesGamePhaseRecordingExist(String phase_id);
+	void addGamePhaseTag(String tag_name, String tag_icon, String tag_group, uint32 priority);
+	void setGamePhaseAttribute(String attribute_group, String attribute_value, uint32 priority);
+	void openOverlayToGamePhase(String phase_id);
+	void openOverlayToTimelineEvent(uint64_t event);
 
 	// UGC
 	void addAppDependency(uint64_t published_file_id, uint32_t app_id);
