@@ -9819,7 +9819,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("startGamePhase"), &Steam::startGamePhase);
 	ClassDB::bind_method(D_METHOD("endGamePhase"), &Steam::endGamePhase);
 	ClassDB::bind_method(D_METHOD("setGamePhaseID", "phase_id"), &Steam::setGamePhaseID);
-	ClassDB::bind_method(D_METHOD("doesGamePhaseRecordingExist", "phase_id", &Steam::doesGamePhaseRecordingExist);
+	ClassDB::bind_method(D_METHOD("doesGamePhaseRecordingExist", "phase_id"), &Steam::doesGamePhaseRecordingExist);
 	ClassDB::bind_method(D_METHOD("addGamePhaseTag", "tag_name", "tag_icon","tag_group", "priority"), &Steam::addGamePhaseTag);
 	ClassDB::bind_method(D_METHOD("setGamePhaseAttribute", "attribute_group", "attribute_value","priority"), &Steam::setGamePhaseAttribute);
 	ClassDB::bind_method(D_METHOD("openOverlayToGamePhase" ,"phase_id"), &Steam::openOverlayToGamePhase);
