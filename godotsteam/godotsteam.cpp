@@ -9806,6 +9806,24 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("writeScreenshot", "rgb", "width", "height"), &Steam::writeScreenshot);
 
 	// TIMELINE BIND METHODS ////////////////////
+	ClassDB::bind_method(D_METHOD("setTimelineTooltip", "description", "time_delta"), &Steam::setTimelineTooltip);
+	ClassDB::bind_method(D_METHOD("clearTimelineTooltip", "time_delta"), &Steam::clearTimelineTooltip);
+	ClassDB::bind_method(D_METHOD("setTimelineGameMode","mode"), &Steam::setTimelineGameMode);
+	ClassDB::bind_method(D_METHOD("addInstantaneousTimelineEvent","title","description","icon","icon_priority","start_offset_seconds","possible_clip"), &Steam::addInstantaneousTimelineEvent);
+	ClassDB::bind_method(D_METHOD("addRangeTimelineEvent","title","description","icon","icon_priority","start_offset_seconds","duration","possible_clip"), &Steam::addRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("startRangeTimelineEvent","title"," description","icon","priority","start_offset_seconds","possible_clip"), &Steam::startRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("updateRangeTimelineEvent","event","title","description","icon","priority","possible_clip"), &Steam::updateRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("endRangeTimelineEvent","event","end_offset_seconds"), &Steam::endRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("removeTimelineEvent","event"), &Steam::removeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("doesEventRecordingExist","event"), &Steam::doesEventRecordingExist);
+	ClassDB::bind_method(D_METHOD("startGamePhase"), &Steam::startGamePhase);
+	ClassDB::bind_method(D_METHOD("endGamePhase"), &Steam::endGamePhase);
+	ClassDB::bind_method(D_METHOD("setGamePhaseID", "phase_id"), &Steam::setGamePhaseID);
+	ClassDB::bind_method(D_METHOD("doesGamePhaseRecordingExist", "phase_id", &Steam::doesGamePhaseRecordingExist);
+	ClassDB::bind_method(D_METHOD("addGamePhaseTag", "tag_name", "tag_icon","tag_group", "priority"), &Steam::addGamePhaseTag);
+	ClassDB::bind_method(D_METHOD("setGamePhaseAttribute", "attribute_group", "attribute_value","priority"), &Steam::setGamePhaseAttribute);
+	ClassDB::bind_method(D_METHOD("openOverlayToGamePhase" ,"phase_id"), &Steam::openOverlayToGamePhase);
+	ClassDB::bind_method(D_METHOD("openOverlayToTimelineEvent", "event"), &Steam::openOverlayToTimelineEvent);
 
 	// UGC BIND METHODS ////////////////////
 	ClassDB::bind_method(D_METHOD("addAppDependency", "published_file_id", "app_id"), &Steam::addAppDependency);
