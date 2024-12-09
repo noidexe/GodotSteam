@@ -9236,8 +9236,8 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("isSteamRunning"), &Steam::isSteamRunning);
 	ClassDB::bind_method(D_METHOD("run_callbacks"), &Steam::run_callbacks);
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
-	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id"), &Steam::steamInit, DEFVAL(true), DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id"), &Steam::steamInitEx, DEFVAL(true), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("steamInit", "app_id"), &Steam::steamInit, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("steamInitEx", "app_id"), &Steam::steamInitEx, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("steamShutdown"), &Steam::steamShutdown);
 
 	ClassDB::bind_method(D_METHOD("get_browser_handle"), &Steam::get_browser_handle);
