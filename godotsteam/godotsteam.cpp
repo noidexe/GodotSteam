@@ -9411,7 +9411,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("waitForData", "wait_forever", "timeout"), &Steam::waitForData);
 	ClassDB::bind_method(D_METHOD("newDataAvailable"), &Steam::newDataAvailable);
 	ClassDB::bind_method(D_METHOD("enableDeviceCallbacks"), &Steam::enableDeviceCallbacks);
-//	ClassDB::bind_method(D_METHOD("enableActionEventCallbacks"), &Steam::enableActionEventCallbacks);
+	ClassDB::bind_method(D_METHOD("enableActionEventCallbacks"), &Steam::enableActionEventCallbacks);
 	ClassDB::bind_method(D_METHOD("getGlyphPNGForActionOrigin", "origin", "size", "flags"), &Steam::getGlyphPNGForActionOrigin);
 	ClassDB::bind_method(D_METHOD("getGlyphSVGForActionOrigin", "origin", "flags"), &Steam::getGlyphSVGForActionOrigin);
 	ClassDB::bind_method(D_METHOD("triggerVibrationExtended", "input_handle", "left_speed", "right_speed", "left_trigger_speed", "right_trigger_speed"), &Steam::triggerVibrationExtended);
