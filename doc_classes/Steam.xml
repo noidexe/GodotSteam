@@ -175,6 +175,16 @@
 				Adds the game server to the local list; updates the time played of the server if it already exists in the list.
 			</description>
 		</method>
+		<method name="addGamePhaseTag">
+			<return type="void" />
+			<param index="0" name="tag_name" type="String" />
+			<param index="1" name="tag_icon" type="String" />
+			<param index="2" name="tag_group" type="String" />
+			<param index="3" name="priority" type="int" />
+			<description>
+				Add a tag that applies to the entire phase.
+			</description>
+		</method>
 		<method name="addGameSearchParams">
 			<return type="int" />
 			<param index="0" name="key" type="String" />
@@ -191,6 +201,18 @@
 			<description>
 				Add a header to any HTTP requests from this browser. A full list of standard request fields are available here on Wikipedia.
 				If no handle is passed, GodotSteam will use the internal one.
+			</description>
+		</method>
+		<method name="addInstantaneousTimelineEvent">
+			<return type="int" />
+			<param index="0" name="title" type="String" />
+			<param index="1" name="description" type="String" />
+			<param index="2" name="icon" type="String" />
+			<param index="3" name="icon_priority" type="int" />
+			<param index="4" name="start_offset_seconds" type="float" />
+			<param index="5" name="possible_clip" type="int" enum="TimelineEventClipPriority" default="1" />
+			<description>
+				Use this to mark an event (A) on the Timeline. This event will be instantaneous. (See [method Steam.addRangeTimelineEvent] to add events that happened over time.)
 			</description>
 		</method>
 		<method name="addItemKeyValueTag">
@@ -210,7 +232,7 @@
 			<return type="bool" />
 			<param index="0" name="query_handle" type="int" />
 			<param index="1" name="preview_file" type="String" />
-			<param index="2" name="type" type="int" enum="Steam.ItemPreviewType" />
+			<param index="2" name="type" type="int" enum="ItemPreviewType" />
 			<description>
 				Adds an additional preview file for the item.
 				Then the format of the image should be one that both the web and the application (if necessary) can render, and must be under 1MB. Suggested formats include JPG, PNG and GIF.
@@ -256,9 +278,22 @@
 				The inventory handle, which is also stored internally. It will overwrite any previously stored inventory handle.
 			</description>
 		</method>
+		<method name="addRangeTimelineEvent">
+			<return type="int" />
+			<param index="0" name="title" type="String" />
+			<param index="1" name="description" type="String" />
+			<param index="2" name="icon" type="String" />
+			<param index="3" name="icon_priority" type="int" />
+			<param index="4" name="start_offset_seconds" type="float" />
+			<param index="5" name="duration" type="float" />
+			<param index="6" name="possible_clip" type="int" enum="TimelineEventClipPriority" default="1" />
+			<description>
+				Use this to mark an event (A) on the Timeline that takes some amount of time to complete.
+			</description>
+		</method>
 		<method name="addRequestLobbyListDistanceFilter">
 			<return type="void" />
-			<param index="0" name="distance_filter" type="int" enum="Steam.LobbyDistanceFilter" />
+			<param index="0" name="distance_filter" type="int" enum="LobbyDistanceFilter" />
 			<description>
 				Sets the physical distance for which we should search for lobbies, this is based on the users IP address and a IP location map on the Steam backed.
 			</description>
@@ -283,7 +318,7 @@
 			<return type="void" />
 			<param index="0" name="key_to_match" type="String" />
 			<param index="1" name="value_to_match" type="int" />
-			<param index="2" name="comparison_type" type="int" enum="Steam.LobbyComparison" />
+			<param index="2" name="comparison_type" type="int" enum="LobbyComparison" />
 			<description>
 				Adds a numerical comparison filter to the next [method Steam.requestLobbyList] call.
 			</description>
@@ -299,7 +334,7 @@
 			<return type="void" />
 			<param index="0" name="key_to_match" type="String" />
 			<param index="1" name="value_to_match" type="String" />
-			<param index="2" name="comparison_type" type="int" enum="Steam.LobbyComparison" />
+			<param index="2" name="comparison_type" type="int" enum="LobbyComparison" />
 			<description>
 				Adds a string comparison filter to the next [method Steam.requestLobbyList] call.
 			</description>
@@ -350,14 +385,14 @@
 			<param index="3" name="priority" type="int" />
 			<param index="4" name="start_offet" type="float" />
 			<param index="5" name="duration" type="float" />
-			<param index="6" name="possible_clip" type="int" enum="Steam.TimelineEventClipPriority" />
+			<param index="6" name="possible_clip" type="int" enum="TimelineEventClipPriority" />
 			<description>
 				Use this to mark an event on the Timeline. The event can be instantaneous or take some amount of time to complete, depending on the value passed in duration.
 			</description>
 		</method>
 		<method name="addVRScreenshotToLibrary">
 			<return type="int" />
-			<param index="0" name="type" type="int" enum="Steam.VRScreenshotType" />
+			<param index="0" name="type" type="int" enum="VRScreenshotType" />
 			<param index="1" name="filename" type="String" />
 			<param index="2" name="vr_filename" type="String" />
 			<description>
@@ -416,7 +451,7 @@
 			</description>
 		</method>
 		<method name="beginAuthSession">
-			<return type="int" enum="Steam.BeginAuthSessionResult" />
+			<return type="int" enum="BeginAuthSessionResult" />
 			<param index="0" name="ticket" type="PackedByteArray" />
 			<param index="1" name="ticket_size" type="int" />
 			<param index="2" name="steam_id" type="int" />
@@ -518,7 +553,7 @@
 				Clear the game information in Steam; used in 'View Game Info'.
 			</description>
 		</method>
-		<method name="clearTimelineStateDescription">
+		<method name="clearTimelineTooltip">
 			<return type="void" />
 			<param index="0" name="time_delta" type="float" />
 			<description>
@@ -658,7 +693,7 @@
 			<return type="void" />
 			<param index="0" name="open_slots" type="int" />
 			<param index="1" name="location_id" type="int" />
-			<param index="2" name="type" type="int" enum="Steam.PartyBeaconLocationType" />
+			<param index="2" name="type" type="int" enum="PartyBeaconLocationType" />
 			<param index="3" name="connect_string" type="String" />
 			<param index="4" name="beacon_metadata" type="String" />
 			<description>
@@ -697,7 +732,7 @@
 		</method>
 		<method name="createHTTPRequest">
 			<return type="int" />
-			<param index="0" name="request_method" type="int" enum="Steam.HTTPMethod" />
+			<param index="0" name="request_method" type="int" enum="HTTPMethod" />
 			<param index="1" name="absolute_url" type="String" />
 			<description>
 				Initializes a new HTTP request. Requires the method such as GET or POST and the absolute URL for the request. Both http and https are supported, so this string must start with "http://" or "https://" and should look like "http://store.steampowered.com/app/10/" or similar. This call returns a handle that you can use to make further calls to setup and then send the HTTP request with [method Steam.sendHTTPRequest] or [method Steam.sendHTTPRequestAndStreamResponse]. Don't forget to free the HTTP request when you're done with it to prevent leaking memory by calling [method Steam.releaseHTTPRequest].
@@ -717,7 +752,7 @@
 		<method name="createItem">
 			<return type="void" />
 			<param index="0" name="app_id" type="int" />
-			<param index="1" name="file_type" type="int" enum="Steam.WorkshopFileType" />
+			<param index="1" name="file_type" type="int" enum="WorkshopFileType" />
 			<description>
 				Creates a new workshop item with no content attached yet.
 				Triggers a [signal Steam.item_created] callback.
@@ -754,7 +789,7 @@
 		</method>
 		<method name="createLobby">
 			<return type="void" />
-			<param index="0" name="lobby_type" type="int" enum="Steam.LobbyType" />
+			<param index="0" name="lobby_type" type="int" enum="LobbyType" />
 			<param index="1" name="max_members" type="int" default="2" />
 			<description>
 				Create a new matchmaking lobby.
@@ -771,8 +806,8 @@
 		</method>
 		<method name="createQueryAllUGCRequest">
 			<return type="int" />
-			<param index="0" name="query_type" type="int" enum="Steam.UGCQuery" />
-			<param index="1" name="matching_type" type="int" enum="Steam.UGCMatchingUGCType" />
+			<param index="0" name="query_type" type="int" enum="UGCQuery" />
+			<param index="1" name="matching_type" type="int" enum="UGCMatchingUGCType" />
 			<param index="2" name="creator_id" type="int" />
 			<param index="3" name="consumer_id" type="int" />
 			<param index="4" name="page" type="int" />
@@ -798,9 +833,9 @@
 		<method name="createQueryUserUGCRequest">
 			<return type="int" />
 			<param index="0" name="account_id" type="int" />
-			<param index="1" name="list_type" type="int" enum="Steam.UserUGCList" />
-			<param index="2" name="matching_ugc_type" type="int" enum="Steam.UGCMatchingUGCType" />
-			<param index="3" name="sort_order" type="int" enum="Steam.UserUGCListSortOrder" />
+			<param index="1" name="list_type" type="int" enum="UserUGCList" />
+			<param index="2" name="matching_ugc_type" type="int" enum="UGCMatchingUGCType" />
+			<param index="3" name="sort_order" type="int" enum="UserUGCListSortOrder" />
 			<param index="4" name="creator_id" type="int" />
 			<param index="5" name="consumer_id" type="int" />
 			<param index="6" name="page" type="int" />
@@ -957,6 +992,20 @@
 				Dismisses the full-screen text input dialog.
 			</description>
 		</method>
+		<method name="doesEventRecordingExist">
+			<return type="void" />
+			<param index="0" name="this_event" type="int" />
+			<description>
+				Add a tag to whatever time range is represented by the event.
+			</description>
+		</method>
+		<method name="doesGamePhaseRecordingExist">
+			<return type="void" />
+			<param index="0" name="phase_id" type="String" />
+			<description>
+				Use this to determine if video recordings exist for the specified game phase. Steam will sent a [signal Steam.timeline_game_phase_recording_exists] callback with the result. This can be useful when the game needs to decide whether or not to show a control that will call [method Steam.openOverlayToGamePhase].
+			</description>
+		</method>
 		<method name="downloadClanActivityCounts">
 			<return type="void" />
 			<param index="0" name="chat_id" type="int" />
@@ -981,7 +1030,7 @@
 			<return type="void" />
 			<param index="0" name="start" type="int" />
 			<param index="1" name="end" type="int" />
-			<param index="2" name="type" type="int" enum="Steam.LeaderboardDataRequest" default="0" />
+			<param index="2" name="type" type="int" enum="LeaderboardDataRequest" default="0" />
 			<param index="3" name="this_leaderboard" type="int" default="0" />
 			<description>
 				If no leaderboard_handle is passed, then the function will use the last internally-stored handle.
@@ -1079,10 +1128,24 @@
 				Ends the game. No further [method Steam.submitPlayerResult] for game_id will be accepted.
 			</description>
 		</method>
+		<method name="endGamePhase">
+			<return type="void" />
+			<description>
+				Use this to end a game phase that was started with [method Steam.startGamePhase].
+			</description>
+		</method>
 		<method name="endGameSearch">
 			<return type="int" />
 			<description>
 				Leaves queue if still waiting.
+			</description>
+		</method>
+		<method name="endRangeTimelineEvent">
+			<return type="void" />
+			<param index="0" name="this_event" type="int" />
+			<param index="1" name="end_offset_seconds" type="float" />
+			<description>
+				Ends a range timeline event and shows it in the UI.
 			</description>
 		</method>
 		<method name="enumerateFollowingList">
@@ -1255,7 +1318,7 @@
 		</method>
 		<method name="filterText">
 			<return type="String" />
-			<param index="0" name="context" type="int" enum="Steam.TextFilteringContext" />
+			<param index="0" name="context" type="int" enum="TextFilteringContext" />
 			<param index="1" name="steam_id" type="int" />
 			<param index="2" name="message" type="String" />
 			<description>
@@ -1285,8 +1348,8 @@
 		<method name="findOrCreateLeaderboard">
 			<return type="void" />
 			<param index="0" name="leaderboard_name" type="String" />
-			<param index="1" name="sort_method" type="int" enum="Steam.LeaderboardSortMethod" />
-			<param index="2" name="display_type" type="int" enum="Steam.LeaderboardDisplayType" />
+			<param index="1" name="sort_method" type="int" enum="LeaderboardSortMethod" />
+			<param index="2" name="display_type" type="int" enum="LeaderboardDisplayType" />
 			<description>
 				Gets a leaderboard by name, it will create it if it's not yet created.
 				You must call either this or [method Steam.findLeaderboard] to obtain the leaderboard handle which is valid for the game session for each leaderboard you wish to access prior to calling any other Leaderboard functions.
@@ -1421,7 +1484,7 @@
 			</description>
 		</method>
 		<method name="getActionOriginFromXboxOrigin">
-			<return type="int" enum="Steam.InputActionOrigin" />
+			<return type="int" enum="InputActionOrigin" />
 			<param index="0" name="input_handle" type="int" />
 			<param index="1" name="origin" type="int" />
 			<description>
@@ -1555,7 +1618,7 @@
 			</description>
 		</method>
 		<method name="getAuthenticationStatus">
-			<return type="int" enum="Steam.NetworkingAvailability" />
+			<return type="int" enum="NetworkingAvailability" />
 			<description>
 				Query our readiness to participate in authenticated communications. A [signal Steam.network_authentication_status] callback is posted any time this status changes, but you can use this function to query it at any time.
 			</description>
@@ -1623,8 +1686,8 @@
 		<method name="getBeaconLocationData">
 			<return type="String" />
 			<param index="0" name="location_id" type="int" />
-			<param index="1" name="location_type" type="int" enum="Steam.PartyBeaconLocationType" />
-			<param index="2" name="location_data" type="int" enum="Steam.PartyBeaconLocationData" />
+			<param index="1" name="location_type" type="int" enum="PartyBeaconLocationType" />
+			<param index="2" name="location_data" type="int" enum="PartyBeaconLocationData" />
 			<description>
 				Query general metadata for the given beacon location. For instance the Name, or the URL for an icon if the location type supports icons (for example, the icon for a Steam Chat Room Group).
 			</description>
@@ -1753,8 +1816,8 @@
 		</method>
 		<method name="getConfigValue">
 			<return type="Dictionary" />
-			<param index="0" name="config_value" type="int" enum="Steam.NetworkingConfigValue" />
-			<param index="1" name="scope_type" type="int" enum="Steam.NetworkingConfigScope" />
+			<param index="0" name="config_value" type="int" enum="NetworkingConfigValue" />
+			<param index="1" name="scope_type" type="int" enum="NetworkingConfigScope" />
 			<param index="2" name="connection_handle" type="int" />
 			<description>
 				Get a configuration value.
@@ -1766,7 +1829,7 @@
 		</method>
 		<method name="getConfigValueInfo">
 			<return type="Dictionary" />
-			<param index="0" name="config_value" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="0" name="config_value" type="int" enum="NetworkingConfigValue" />
 			<description>
 				Returns info about a configuration value. For values to pass to config_value, check the SDK's listing. next_value can be used to iterate through all of the known configuration values.
 				The returned dictionary contains the following keys: [b]type (int), scope (int), and next_value (int).[/b]
@@ -2099,7 +2162,7 @@
 		<method name="getFriendByIndex">
 			<return type="int" />
 			<param index="0" name="friend_number" type="int" />
-			<param index="1" name="friend_flags" type="int" enum="Steam.FriendFlags" is_bitfield="true" />
+			<param index="1" name="friend_flags" type="int" enum="FriendFlags" is_bitfield="true" />
 			<description>
 				Gets the Steam ID of the user at the given index.
 				[b]Note:[/b] You must call [method Steam.getFriendCount] before calling this.
@@ -2121,7 +2184,7 @@
 		</method>
 		<method name="getFriendCount">
 			<return type="int" />
-			<param index="0" name="friend_flags" type="int" enum="Steam.FriendFlags" is_bitfield="true" default="65535" />
+			<param index="0" name="friend_flags" type="int" enum="FriendFlags" is_bitfield="true" default="65535" />
 			<description>
 				Gets the number of users the client knows about who meet a specified criteria. (Friends, blocked, users on the same server, etc). This can be used to iterate over all of the users by calling [method Steam.getFriendByIndex] to get the Steam IDs of each user.
 				[b]Note:[/b] Returns -1 if the current user is not logged on.
@@ -2191,7 +2254,7 @@
 			</description>
 		</method>
 		<method name="getFriendPersonaState">
-			<return type="int" enum="Steam.PersonaState" />
+			<return type="int" enum="PersonaState" />
 			<param index="0" name="steam_id" type="int" />
 			<description>
 				Gets the current status of the specified user. This will only be known to the current user if the other user is in their friends list, on the same game server, in a chat room or lobby, or in a small Steam group with the local user. To get the state of the current user use [method Steam.getPersonaState].
@@ -2208,7 +2271,7 @@
 			</description>
 		</method>
 		<method name="getFriendRelationship">
-			<return type="int" enum="Steam.FriendRelationship" />
+			<return type="int" enum="FriendRelationship" />
 			<param index="0" name="steam_id" type="int" />
 			<description>
 				Gets a relationship to a specified user.
@@ -2345,7 +2408,7 @@
 		</method>
 		<method name="getGlyphForActionOrigin">
 			<return type="String" />
-			<param index="0" name="origin" type="int" enum="Steam.InputActionOrigin" />
+			<param index="0" name="origin" type="int" enum="InputActionOrigin" />
 			<description>
 				Get a local path to art for on-screen glyph for a particular origin.
 			</description>
@@ -2359,8 +2422,8 @@
 		</method>
 		<method name="getGlyphPNGForActionOrigin">
 			<return type="String" />
-			<param index="0" name="origin" type="int" enum="Steam.InputActionOrigin" />
-			<param index="1" name="size" type="int" enum="Steam.InputGlyphSize" />
+			<param index="0" name="origin" type="int" enum="InputActionOrigin" />
+			<param index="1" name="size" type="int" enum="InputGlyphSize" />
 			<param index="2" name="flags" type="int" />
 			<description>
 				Get a local path to a PNG file for the provided origin's glyph.
@@ -2368,7 +2431,7 @@
 		</method>
 		<method name="getGlyphSVGForActionOrigin">
 			<return type="String" />
-			<param index="0" name="origin" type="int" enum="Steam.InputActionOrigin" />
+			<param index="0" name="origin" type="int" enum="InputActionOrigin" />
 			<param index="1" name="flags" type="int" />
 			<description>
 				Get a local path to a SVG file for the provided origin's glyph.
@@ -2483,7 +2546,7 @@
 			</description>
 		</method>
 		<method name="getInputTypeForHandle">
-			<return type="int" enum="Steam.InputType" />
+			<return type="int" enum="InputType" />
 			<param index="0" name="input_handle" type="int" />
 			<description>
 				Returns the input type (device model) for the specified controller. This tells you if a given controller is a Steam controller, Xbox 360 controller, PS4 controller, etc.
@@ -2954,7 +3017,7 @@
 			</description>
 		</method>
 		<method name="getPersonaState">
-			<return type="int" enum="Steam.PersonaState" />
+			<return type="int" enum="PersonaState" />
 			<description>
 				Gets the friend status of the current user. To get the state of other users use [method Steam.getFriendPersonaState].
 				Should be one of the following:
@@ -2982,7 +3045,7 @@
 			</description>
 		</method>
 		<method name="getPlaybackStatus">
-			<return type="int" enum="Steam.AudioPlaybackStatus" />
+			<return type="int" enum="AudioPlaybackStatus" />
 			<description>
 				Gets the current status of the Steam Music player.
 			</description>
@@ -3019,8 +3082,8 @@
 		<method name="getProfileItemPropertyInt">
 			<return type="int" />
 			<param index="0" name="steam_id" type="int" />
-			<param index="1" name="item_type" type="int" enum="Steam.CommunityProfileItemType" />
-			<param index="2" name="item_property" type="int" enum="Steam.CommunityProfileItemProperty" />
+			<param index="1" name="item_type" type="int" enum="CommunityProfileItemType" />
+			<param index="2" name="item_property" type="int" enum="CommunityProfileItemProperty" />
 			<description>
 				Returns an unsigned integer property for a user's equipped profile item.
 			</description>
@@ -3028,8 +3091,8 @@
 		<method name="getProfileItemPropertyString">
 			<return type="String" />
 			<param index="0" name="steam_id" type="int" />
-			<param index="1" name="item_type" type="int" enum="Steam.CommunityProfileItemType" />
-			<param index="2" name="item_property" type="int" enum="Steam.CommunityProfileItemProperty" />
+			<param index="1" name="item_type" type="int" enum="CommunityProfileItemType" />
+			<param index="2" name="item_property" type="int" enum="CommunityProfileItemProperty" />
 			<description>
 				Returns a string property for a user's equipped profile item.
 			</description>
@@ -3203,7 +3266,7 @@
 			<return type="Dictionary" />
 			<param index="0" name="query_handle" type="int" />
 			<param index="1" name="index" type="int" />
-			<param index="2" name="stat_type" type="int" enum="Steam.ItemStatistic" />
+			<param index="2" name="stat_type" type="int" enum="ItemStatistic" />
 			<description>
 				Retrieve various statistics of an individual workshop item after receiving a querying UGC call result.
 				The returned dictionary contains the following keys:
@@ -3268,7 +3331,7 @@
 			</description>
 		</method>
 		<method name="getRelayNetworkStatus">
-			<return type="int" enum="Steam.NetworkingAvailability" />
+			<return type="int" enum="NetworkingAvailability" />
 			<description>
 				Fetch current status of the relay network.
 				[signal Steam.relay_network_status] is also a callback. It will be triggered on both the user and gameserver interfaces any time the status changes, or ping measurement starts or stops.
@@ -3337,7 +3400,7 @@
 			</description>
 		</method>
 		<method name="getResultStatus">
-			<return type="int" enum="Steam.Result" />
+			<return type="int" enum="Result" />
 			<param index="0" name="this_inventory_handle" type="int" default="0" />
 			<description>
 				Find out the status of an asynchronous inventory result handle. This is a polling equivalent to registering a callback function for [signal Steam.inventory_result_ready].
@@ -3522,7 +3585,7 @@
 		</method>
 		<method name="getStringForActionOrigin">
 			<return type="String" />
-			<param index="0" name="origin" type="int" enum="Steam.InputActionOrigin" />
+			<param index="0" name="origin" type="int" enum="InputActionOrigin" />
 			<description>
 				Returns a localized string (from Steam's language setting) for the specified origin.
 			</description>
@@ -3816,7 +3879,7 @@
 		<method name="hasEquippedProfileItem">
 			<return type="bool" />
 			<param index="0" name="steam_id" type="int" />
-			<param index="1" name="friend_flags" type="int" enum="Steam.CommunityProfileItemType" />
+			<param index="1" name="friend_flags" type="int" enum="CommunityProfileItemType" />
 			<description>
 				After calling [method Steam.requestEquippedProfileItems], you can use this function to check if the user has a type of profile item equipped or not.
 				[b]Note:[/b] Triggers a [signal Steam.equipped_profile_items] callback.
@@ -3825,7 +3888,7 @@
 		<method name="hasFriend">
 			<return type="bool" />
 			<param index="0" name="steam_id" type="int" />
-			<param index="1" name="friend_flags" type="int" enum="Steam.FriendFlags" is_bitfield="true" />
+			<param index="1" name="friend_flags" type="int" enum="FriendFlags" is_bitfield="true" />
 			<description>
 				Returns true if the specified user meets any of the criteria specified in friend_flags:
 				[codeblock]
@@ -3883,7 +3946,7 @@
 			</description>
 		</method>
 		<method name="initAuthentication">
-			<return type="int" enum="Steam.NetworkingAvailability" />
+			<return type="int" enum="NetworkingAvailability" />
 			<description>
 				Indicate our desire to be ready participate in authenticated communications. If we are currently not ready, then steps will be taken to obtain the necessary certificates. (This includes a certificate for us, as well as any CA certificates needed to authenticate peers.)
 			</description>
@@ -4125,14 +4188,14 @@
 		</method>
 		<method name="isFeatureBlocked">
 			<return type="bool" />
-			<param index="0" name="feature" type="int" enum="Steam.ParentalFeature" />
+			<param index="0" name="feature" type="int" enum="ParentalFeature" />
 			<description>
 				Check if the given feature is blocked by parental settings.
 			</description>
 		</method>
 		<method name="isFeatureInBlockList">
 			<return type="bool" />
-			<param index="0" name="feature" type="int" enum="Steam.ParentalFeature" />
+			<param index="0" name="feature" type="int" enum="ParentalFeature" />
 			<description>
 				Check if the given feature is in the block list.
 			</description>
@@ -4360,7 +4423,7 @@
 		<method name="keyChar">
 			<return type="void" />
 			<param index="0" name="unicode_char" type="int" />
-			<param index="1" name="key_modifiers" type="int" enum="Steam.HTMLKeyModifiers" is_bitfield="true" />
+			<param index="1" name="key_modifiers" type="int" enum="HTMLKeyModifiers" is_bitfield="true" />
 			<param index="2" name="this_handle" type="int" default="0" />
 			<description>
 				unicode_char is the unicode character point for this keypress (and potentially multiple chars per press).
@@ -4369,7 +4432,7 @@
 		<method name="keyDown">
 			<return type="void" />
 			<param index="0" name="native_key_code" type="int" />
-			<param index="1" name="key_modifiers" type="int" enum="Steam.HTMLKeyModifiers" is_bitfield="true" />
+			<param index="1" name="key_modifiers" type="int" enum="HTMLKeyModifiers" is_bitfield="true" />
 			<param index="2" name="this_handle" type="int" default="0" />
 			<description>
 				Keyboard interactions, native keycode is the virtual key code value from your OS.
@@ -4378,7 +4441,7 @@
 		<method name="keyUp">
 			<return type="void" />
 			<param index="0" name="native_key_code" type="int" />
-			<param index="1" name="key_modifiers" type="int" enum="Steam.HTMLKeyModifiers" is_bitfield="true" />
+			<param index="1" name="key_modifiers" type="int" enum="HTMLKeyModifiers" is_bitfield="true" />
 			<param index="2" name="this_handle" type="int" default="0" />
 			<description>
 				Keyboard interactions, native keycode is the virtual key code value from your OS.
@@ -4433,7 +4496,7 @@
 		</method>
 		<method name="mouseDoubleClick">
 			<return type="void" />
-			<param index="0" name="mouse_button" type="int" enum="Steam.HTMLMouseButton" />
+			<param index="0" name="mouse_button" type="int" enum="HTMLMouseButton" />
 			<param index="1" name="this_handle" type="int" default="0" />
 			<description>
 				Tells an HTML surface that a mouse button has been double clicked. The click will occur where the surface thinks the mouse is based on the last call to [method Steam.mouseMove].
@@ -4441,7 +4504,7 @@
 		</method>
 		<method name="mouseDown">
 			<return type="void" />
-			<param index="0" name="mouse_button" type="int" enum="Steam.HTMLMouseButton" />
+			<param index="0" name="mouse_button" type="int" enum="HTMLMouseButton" />
 			<param index="1" name="this_handle" type="int" default="0" />
 			<description>
 				Tells an HTML surface that a mouse button has been pressed. The click will occur where the surface thinks the mouse is based on the last call to [method Steam.mouseMove].
@@ -4458,7 +4521,7 @@
 		</method>
 		<method name="mouseUp">
 			<return type="void" />
-			<param index="0" name="mouse_button" type="int" enum="Steam.HTMLMouseButton" />
+			<param index="0" name="mouse_button" type="int" enum="HTMLMouseButton" />
 			<param index="1" name="this_handle" type="int" default="0" />
 			<description>
 				Tells an HTML surface that a mouse button has been released. The click will occur where the surface thinks the mouse is based on the last call to [method Steam.mouseMove].
@@ -4541,6 +4604,20 @@
 			<param index="0" name="chat_id" type="int" />
 			<description>
 				Opens the specified Steam group chat room in the Steam UI.
+			</description>
+		</method>
+		<method name="openOverlayToGamePhase">
+			<return type="void" />
+			<param index="0" name="phase_id" type="String" />
+			<description>
+				Opens the Steam overlay to a game phase.
+			</description>
+		</method>
+		<method name="openOverlayToTimelineEvent">
+			<return type="void" />
+			<param index="0" name="this_event" type="int" />
+			<description>
+				Opens the Steam overlay to a timeline event.
 			</description>
 		</method>
 		<method name="overlayNeedsPresent">
@@ -4865,6 +4942,13 @@
 			<description>
 				Removes a dynamic property for the given item.
 				[b]Note:[/b] If the argument this_inventory_update_handle is omitted, GodotSteam will use the internally stored ID. This is different from this_inventory_handle and is stored separately.
+			</description>
+		</method>
+		<method name="removeTimelineEvent">
+			<return type="void" />
+			<param index="0" name="this_event" type="int" />
+			<description>
+				Delete the event from the timeline. This can be called on a timeline event from [method Steam.addInstantaneousTimelineEvent], [method Steam.addRangeTimelineEvent], or [method Steam.startRangeTimelineEvent] / [method Steam.endRangeTimelineEvent]. The timeline event handle must be from the current game process.
 			</description>
 		</method>
 		<method name="replyToFriendMessage">
@@ -5244,7 +5328,7 @@
 			<return type="bool" />
 			<param index="0" name="remote_steam_id" type="int" />
 			<param index="1" name="data" type="PackedByteArray" />
-			<param index="2" name="send_type" type="int" enum="Steam.P2PSend" />
+			<param index="2" name="send_type" type="int" enum="P2PSend" />
 			<param index="3" name="channel" type="int" default="0" />
 			<description>
 				Sends a P2P packet to the specified user.
@@ -5372,7 +5456,7 @@
 		<method name="setConnectionConfigValueFloat">
 			<return type="bool" />
 			<param index="0" name="connection" type="int" />
-			<param index="1" name="config" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="1" name="config" type="int" enum="NetworkingConfigValue" />
 			<param index="2" name="value" type="float" />
 			<description>
 				Set a configuration value.
@@ -5381,7 +5465,7 @@
 		<method name="setConnectionConfigValueInt32">
 			<return type="bool" />
 			<param index="0" name="connection" type="int" />
-			<param index="1" name="config" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="1" name="config" type="int" enum="NetworkingConfigValue" />
 			<param index="2" name="value" type="int" />
 			<description>
 				Set a configuration value.
@@ -5390,7 +5474,7 @@
 		<method name="setConnectionConfigValueString">
 			<return type="bool" />
 			<param index="0" name="connection" type="int" />
-			<param index="1" name="config" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="1" name="config" type="int" enum="NetworkingConfigValue" />
 			<param index="2" name="value" type="String" />
 			<description>
 				Set a configuration value.
@@ -5466,7 +5550,7 @@
 			<param index="0" name="input_handle" type="int" />
 			<param index="1" name="parameters" type="int" />
 			<param index="2" name="trigger_mask" type="int" />
-			<param index="3" name="effect_mode" type="int" enum="Steam.SCEPadTriggerEffectMode" />
+			<param index="3" name="effect_mode" type="int" enum="SCEPadTriggerEffectMode" />
 			<param index="4" name="position" type="int" />
 			<param index="5" name="amplitude" type="int" />
 			<param index="6" name="frequency" type="int" />
@@ -5496,9 +5580,25 @@
 				In game launchers that don't have controller support you can call this to have Steam Input translate the controller input into mouse/kb to navigate the launcher.
 			</description>
 		</method>
+		<method name="setGamePhaseAttribute">
+			<return type="void" />
+			<param index="0" name="attribute_group" type="String" />
+			<param index="1" name="attribute_value" type="String" />
+			<param index="2" name="priority" type="int" />
+			<description>
+				Add a text attribute that applies to the entire phase.
+			</description>
+		</method>
+		<method name="setGamePhaseID">
+			<return type="void" />
+			<param index="0" name="phase_id" type="String" />
+			<description>
+				Games can set a phase ID so they can refer back to a phase in [method Steam.openOverlayToPhase].
+			</description>
+		</method>
 		<method name="setGlobalConfigValueFloat">
 			<return type="bool" />
-			<param index="0" name="config" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="0" name="config" type="int" enum="NetworkingConfigValue" />
 			<param index="1" name="value" type="float" />
 			<description>
 				Set a configuration value.
@@ -5506,7 +5606,7 @@
 		</method>
 		<method name="setGlobalConfigValueInt32">
 			<return type="bool" />
-			<param index="0" name="config" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="0" name="config" type="int" enum="NetworkingConfigValue" />
 			<param index="1" name="value" type="int" />
 			<description>
 				Set a configuration value.
@@ -5514,7 +5614,7 @@
 		</method>
 		<method name="setGlobalConfigValueString">
 			<return type="bool" />
-			<param index="0" name="config" type="int" enum="Steam.NetworkingConfigValue" />
+			<param index="0" name="config" type="int" enum="NetworkingConfigValue" />
 			<param index="1" name="value" type="String" />
 			<description>
 				Set a configuration value.
@@ -5717,7 +5817,7 @@
 		<method name="setItemVisibility">
 			<return type="bool" />
 			<param index="0" name="update_handle" type="int" />
-			<param index="1" name="visibility" type="int" enum="Steam.RemoteStoragePublishedFileVisibility" />
+			<param index="1" name="visibility" type="int" enum="RemoteStoragePublishedFileVisibility" />
 			<description>
 				Sets the visibility of an item.
 			</description>
@@ -5834,7 +5934,7 @@
 		<method name="setLobbyType">
 			<return type="bool" />
 			<param index="0" name="steam_lobby_id" type="int" />
-			<param index="1" name="lobby_type" type="int" enum="Steam.LobbyType" />
+			<param index="1" name="lobby_type" type="int" enum="LobbyType" />
 			<description>
 				Updates what type of lobby this is.
 				This is also set when you create the lobby with [method Steam.createLobby].
@@ -6155,12 +6255,12 @@
 		</method>
 		<method name="setTimelineGameMode">
 			<return type="void" />
-			<param index="0" name="mode" type="int" enum="Steam.TimelineGameMode" />
+			<param index="0" name="mode" type="int" enum="TimelineGameMode" />
 			<description>
 				Changes the color of the timeline bar. See TimelineGameMode comments for how to use each value.
 			</description>
 		</method>
-		<method name="setTimelineStateDescription">
+		<method name="setTimelineTooltip">
 			<return type="void" />
 			<param index="0" name="description" type="String" />
 			<param index="1" name="time_delta" type="float" />
@@ -6209,7 +6309,7 @@
 		</method>
 		<method name="showFloatingGamepadTextInput">
 			<return type="bool" />
-			<param index="0" name="input_mode" type="int" enum="Steam.FloatingGamepadTextInputMode" />
+			<param index="0" name="input_mode" type="int" enum="FloatingGamepadTextInputMode" />
 			<param index="1" name="text_field_x_position" type="int" />
 			<param index="2" name="text_field_y_position" type="int" />
 			<param index="3" name="text_field_width" type="int" />
@@ -6221,8 +6321,8 @@
 		</method>
 		<method name="showGamepadTextInput">
 			<return type="bool" />
-			<param index="0" name="input_mode" type="int" enum="Steam.GamepadTextInputMode" />
-			<param index="1" name="line_input_mode" type="int" enum="Steam.GamepadTextInputLineMode" />
+			<param index="0" name="input_mode" type="int" enum="GamepadTextInputMode" />
+			<param index="1" name="line_input_mode" type="int" enum="GamepadTextInputLineMode" />
 			<param index="2" name="description" type="String" />
 			<param index="3" name="max_text" type="int" />
 			<param index="4" name="preset_text" type="String" />
@@ -6234,6 +6334,12 @@
 			<return type="bool" />
 			<description>
 				Show the app's latest Workshop EULA to the user in an overlay window, where they can accept it or not.
+			</description>
+		</method>
+			<method name="startGamePhase">
+			<return type="void" />
+			<description>
+				Use this to start a game phase. Game phases allow the user to navigate their background recordings and clips. Exactly what a game phase means will vary game to game, but the game phase should be a section of gameplay that is usually between 10 minutes and a few hours in length, and should be the main way a user would think to divide up the game. These are presented to the user in a UI that shows the date the game was played, with one row per game slice. Game phases should be used to mark sections of gameplay that the user might be interested in watching.
 			</description>
 		</method>
 		<method name="startItemUpdate">
@@ -6266,6 +6372,18 @@
 				[b]Note:[/b] You must call [method Steam.destroyResult] on the inventory result for when you are done with it.
 			</description>
 		</method>
+		<method name="startRangeTimelineEvent">
+			<return type="int" />
+			<param index="0" name="title" type="String" />
+			<param index="1" name="description" type="String" />
+			<param index="2" name="icon" type="String" />
+			<param index="3" name="priority" type="int" />
+			<param index="4" name="start_offset_seconds" type="float" />
+			<param index="5" name="possible_clip" type="int" enum="TimelineEventClipPriority" default="1" />
+			<description>
+				Starts a timeline event at a the current time, plus an offset in seconds. This event must be ended with [method Steam.endRangeTimelineEvent]. Any timeline events that have not been ended when the game exits will be discarded.
+			</description>
+		</method>
 		<method name="startRemotePlayTogether">
 			<return type="bool" />
 			<param index="0" name="show_overlay" type="bool" default="true" />
@@ -6294,7 +6412,7 @@
 		</method>
 		<method name="steamInit">
 			<return type="Dictionary" />
-			<param index="0" name="retrieve_stats" type="bool" default="true" />
+			<param index="0" name="retrieve_stats" type="bool" default="false" />
 			<param index="1" name="app_id" type="int" default="0" />
 			<param index="2" name="embed_callbacks" type="bool" default="false" />
 			<description>
@@ -6312,7 +6430,7 @@
 		</method>
 		<method name="steamInitEx">
 			<return type="Dictionary" />
-			<param index="0" name="retrieve_stats" type="bool" default="true" />
+			<param index="0" name="retrieve_stats" type="bool" default="false" />
 			<param index="1" name="app_id" type="int" default="0" />
 			<param index="2" name="embed_callbacks" type="bool" default="false" />
 			<description>
@@ -6406,7 +6524,7 @@
 			<return type="int" />
 			<param index="0" name="game_id" type="int" />
 			<param index="1" name="player_id" type="int" />
-			<param index="2" name="player_result" type="int" enum="Steam.PlayerResult" />
+			<param index="2" name="player_result" type="int" enum="PlayerResult" />
 			<description>
 				Submit a result for one player; does not end the game. game_id continues to describe this game.
 			</description>
@@ -6477,8 +6595,8 @@
 		</method>
 		<method name="translateActionOrigin">
 			<return type="int" />
-			<param index="0" name="destination_input" type="int" enum="Steam.InputType" />
-			<param index="1" name="source_origin" type="int" enum="Steam.InputActionOrigin" />
+			<param index="0" name="destination_input" type="int" enum="InputType" />
+			<param index="1" name="source_origin" type="int" enum="InputActionOrigin" />
 			<description>
 				Get the equivalent origin for a given controller type or the closest controller type that existed in the SDK you built into your game if destination_inputis 0. This action origin can be used in your glyph look up table or passed into [method Steam.getGlyphForActionOrigin] or [method Steam.getStringForActionOrigin].
 			</description>
@@ -6580,7 +6698,7 @@
 			<param index="0" name="content" type="int" />
 			<param index="1" name="data_size" type="int" />
 			<param index="2" name="offset" type="int" />
-			<param index="3" name="action" type="int" enum="Steam.UGCReadAction" />
+			<param index="3" name="action" type="int" enum="UGCReadAction" />
 			<description>
 				After download, gets the content of the file.
 			</description>
@@ -6662,7 +6780,7 @@
 		</method>
 		<method name="updatePlaybackStatus">
 			<return type="bool" />
-			<param index="0" name="status" type="int" enum="Steam.AudioPlaybackStatus" />
+			<param index="0" name="status" type="int" enum="AudioPlaybackStatus" />
 			<description>
 				Update the current playback status:
 				[codeblock]
@@ -6671,6 +6789,18 @@
 				• 2 / paused
 				• 3 / idle
 				[/codeblock]
+			</description>
+		</method>
+		<method name="updateRangeTimelineEvent">
+			<return type="void" />
+			<param index="0" name="this_event" type="int" />
+			<param index="1" name="title" type="String" />
+			<param index="2" name="description" type="String" />
+			<param index="3" name="icon" type="String" />
+			<param index="4" name="priority" type="int" />
+			<param index="5" name="possible_clip" type="int" enum="TimelineEventClipPriority" default="1" />
+			<description>
+				Updates fields on a range timeline event that was started with StartRangeTimelineEvent, and which has not been ended.
 			</description>
 		</method>
 		<method name="updateShuffled">
@@ -8189,6 +8319,23 @@
 			<param index="3" name="seconds_played" type="int" />
 			<description>
 				Called for games in Timed Trial mode.
+			</description>
+		</signal>
+		<signal name="timeline_event_recording_exists">
+			<param index="0" name="event_id" type="int" />
+			<param index="1" name="recording_exists" type="bool" />
+			<description>
+				Called when asking if recordings exist for a game phase ID.
+			</description>
+		</signal>
+		<signal name="timeline_game_phase_recording_exists">
+			<param index="0" name="phase_id" type="String" />
+			<param index="1" name="recording_ms" type="int" />
+			<param index="2" name="longest_clip_ms" type="int" />
+			<param index="3" name="clip_count" type="int" />
+			<param index="4" name="screenshot_count" type="int" />
+			<description>
+				Called when asking if recordings exist for an event handle.
 			</description>
 		</signal>
 		<signal name="ugc_query_completed">
@@ -9892,7 +10039,15 @@
 		</constant>
 		<constant name="INPUT_ACTION_ORIGIN_STEAMDECK_RESERVED20" value="405" enum="InputActionOrigin">
 		</constant>
-		<constant name="INPUT_ACTION_ORIGIN_COUNT" value="406" enum="InputActionOrigin">
+		<constant name="INPUT_ACTION_ORIGIN_HORIPAD_M1" value="406" enum="InputActionOrigin">
+		</constant>
+		<constant name="INPUT_ACTION_ORIGIN_HORIPAD_M2" value="407" enum="InputActionOrigin">
+		</constant>
+		<constant name="INPUT_ACTION_ORIGIN_HORIPAD_L4" value="408" enum="InputActionOrigin">
+		</constant>
+		<constant name="INPUT_ACTION_ORIGIN_HORIPAD_R4" value="409" enum="InputActionOrigin">
+		</constant>
+		<constant name="INPUT_ACTION_ORIGIN_COUNT" value="410" enum="InputActionOrigin">
 		</constant>
 		<constant name="INPUT_ACTION_ORIGIN_MAXIMUM_POSSIBLE_VALUE" value="32767" enum="InputActionOrigin">
 		</constant>
@@ -10390,6 +10545,8 @@
 		</constant>
 		<constant name="NETWORKING_CONFIG_ENABLE_DIAGNOSTICS_UI" value="46" enum="NetworkingConfigValue">
 		</constant>
+		<constant name="NETWORKING_CONFIG_SEND_TIME_SINCE_PREVIOUS_PACKET" value="59" enum="NetworkingConfigValue">
+		</constant>
 		<constant name="NETWORKING_CONFIG_SDR_CLIENT_CONSEC_PING_TIMEOUT_FAIL_INITIAL" value="19" enum="NetworkingConfigValue">
 		</constant>
 		<constant name="NETWORKING_CONFIG_SDR_CLIENT_CONSEC_PING_TIMEOUT_FAIL" value="20" enum="NetworkingConfigValue">
@@ -10577,8 +10734,6 @@
 		<constant name="IDENTITY_TYPE_XBOX_PAIRWISE" value="17" enum="NetworkingIdentityType">
 		</constant>
 		<constant name="IDENTITY_TYPE_SONY_PSN" value="18" enum="NetworkingIdentityType">
-		</constant>
-		<constant name="IDENTITY_TYPE_GOOGLE_STADIA" value="19" enum="NetworkingIdentityType">
 		</constant>
 		<constant name="IDENTITY_TYPE_FORCE_32BIT" value="2147483647" enum="NetworkingIdentityType">
 		</constant>
@@ -11033,6 +11188,8 @@
 		<constant name="RESULT_NOT_SUPPORTED" value="128" enum="Result">
 		</constant>
 		<constant name="RESULT_FAMILY_SIZE_LIMIT_EXCEEDED" value="129" enum="Result">
+		</constant>
+		<constant name="RESULT_OFFLINE_APP_CACHE_INVALID" value="130" enum="Result">
 		</constant>
 		<constant name="PAD_TRIGGER_EFFECT_MODE_OFF" value="0" enum="SCEPadTriggerEffectMode">
 		</constant>
