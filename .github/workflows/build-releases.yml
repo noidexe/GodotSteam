@@ -8,7 +8,7 @@ on:
         description: 'Steamworks SDK Tag:'
         required: true
         type: string
-        default: 'sdk-1.60'
+        default: 'sdk-1.61'
 
       godot_cpp_version:
         description: 'Godot CPP Tag:'
@@ -20,7 +20,7 @@ on:
         description: 'GodotSteam GDExtension Tag:'
         required: true
         type: string
-        default: 'v4.11-gde'
+        default: 'v4.12-gde'
 
 
 jobs:
