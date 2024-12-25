@@ -1,14 +1,14 @@
-# GodotSteam for GDExtension
+# GodotSteam for GDExtension | Community Edition
 An ecosystem of tools for [Godot Engine](https://godotengine.org) and [Valve's Steam](https://store.steampowered.com). For the Windows, Linux, and Mac platforms.
 
 Additional Flavors
 ---
-Pre-Compiles | Plug-ins | Server | Examples/Demos
+Pre-Compiles | Plug-ins | Server | Examples
 --- | --- | --- | ---
-[Godot 2.x](https://github.com/GodotSteam/GodotSteam/tree/godot2)| [GDNative](https://github.com/GodotSteam/GodotSteam/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot3) | [Godot 3.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/godot3)
-[Godot 3.x](https://github.com/GodotSteam/GodotSteam/tree/godot3) | [GDExtension](https://github.com/GodotSteam/GodotSteam/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot4) |  [Godot 4.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/godot4)
-[Godot 4.x](https://github.com/GodotSteam/GodotSteam/tree/godot4) | --- | [GDNative](https://github.com/GodotSteam/GodotSteam-Server/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/server3)
-[MultiplayerPeer](https://github.com/GodotSteam/MultiplayerPeer)| --- | [GDExtension](https://github.com/GodotSteam/GodotSteam-Server/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/server4)
+[Godot 2.x](https://github.com/GodotSteam/GodotSteam/tree/godot2) | [GDNative](https://github.com/GodotSteam/GodotSteam/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot3) | [Skillet](https://github.com/GodotSteam/Skillet)
+[Godot 3.x](https://github.com/GodotSteam/GodotSteam/tree/godot3) | [GDExtension](https://github.com/GodotSteam/GodotSteam/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot4) | ---
+[Godot 4.x](https://github.com/GodotSteam/GodotSteam/tree/godot4) | --- | [GDNative](https://github.com/GodotSteam/GodotSteam-Server/tree/gdnative) | ---
+[MultiplayerPeer](https://github.com/GodotSteam/MultiplayerPeer)| --- | [GDExtension](https://github.com/GodotSteam/GodotSteam-Server/tree/gdextension) | ---
 
 Documentation
 ---
@@ -24,24 +24,19 @@ Current Build
 ---
 You can [download pre-compiled versions of this repo here](https://github.com/GodotSteam/GodotSteam/releases).
 
-**Version 4.11 Changes**
-- Added: `getDLCData` to get all DLC information and `getDLCDataByIndex` now acts as Steam intended with an index passed
-- Added: properties for all variants GodotSteam stores
-- Changed: using Godot's macros for error reporting back to the editor
-- Changed: buffer_size argument to `decompressVoice` with default of original value
-- Changed: `steamworksError` replaced with prints to editor
-- Changed: all options array parameters for all Sockets class functions changed to dictionaries, [check class docs](https://godotsteam.com/classes/networking_sockets/)
-- Changed: deprecated `getAvailableVoice`, merged functionality into `getVoice`
-- Changed: `setLeaderboardDetailsMax` changed to the set/get for leaderboard_details_max, now `set_leaderboard_details_max`
-- Changed: Steam singleton now removed during uninitialization
-- Fixed: proper type for `network_connection_status_changed`, thanks to ***stickyShift***
-- Fixed: `getResultItemProperty` now takes empty string to send all property list, thanks to ***Stralor***
-- Fixed: missing return value hints from `lobby_data_update`
-- Fixed: `get_app_dependencies_result` now passed back app_ids array
-- Fixed: missing argument hints for `item_installed` callback
-- Fixed: both global stat history functions - `getGlobalStatIntHistory` and `getGlobalStatFloatHistory`
-- Fixed: broken returned variable in `network_connection_status_changed`
-- Fixed: a variety of small tweaks
+**Version 4.12 Changes**
+- Added: new Timeline functions, call results, and enums
+- Added: new Inputs enums for Horipad; `INPUT_ACTION_ORIGIN`
+- Added: new Networking config enum `NETWORKING_CONFIG_SEND_TIME_SINCE_PREVIOUS_PACKET`
+- Added: new Networking config enums for fake packet jitter; `NETWORKING_CONFIG_FAKE_JITTER_`
+- Changed: `equipped_profile_items` callback now sends `from_cache` bool
+- Changed: first argument for `steamInit` and `steamInitEx` no longer calls for stats as they are synced by client; left to prevent compatibility breakage
+- Fixed: `getAchievement` and related achievement functions breaking under rare conditions
+- Fixed: incorrect type for `set_inventory_update_handle`
+- Removed: `setTimelineGameMode` function which was removed in 1.61
+- Removed: `current_stats_received` callback removed for redundancy
+- Removed: Google Stadia, Nintendo, Epic Games, and WeGame Networking identity types fully removed, from 1.61
+- Removed: unncessary commenting
 
 [You can read more change-logs here](https://godotsteam.com/changelog/gdextension/).
 
@@ -66,7 +61,7 @@ Known Issues
 ---
 - GDExtension for 4.1 is **not** compatible with 4.0.3 or lower. Please check the versions you are using.
 - Overlay will not work in the editor but will work in export projects when uploaded to Steam.  This seems to a limitation with Vulkan currently.
-- When self-compiling, using MinGW will cause crashes unless you are using GodotSteam 4.10 or newer.
+- When self-compiling, **do not** use MinGW as it will cause crashes.
 
 Quick How-To
 ---
