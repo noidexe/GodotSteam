@@ -1,4 +1,4 @@
-# GodotSteam for GDNative
+# GodotSteam for GDNative | Community Edition
 An ecosystem of tools for [Godot Engine](https://godotengine.org) and [Valve's Steam](https://store.steampowered.com). For the Windows, Linux, and Mac platforms.
 
 **Notice: GodotSteam GDNative is now retired. This branch still works fine but will not receive any further updates.**
