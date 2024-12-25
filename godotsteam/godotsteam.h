@@ -2,9 +2,6 @@
 #define GODOTSTEAM_H
 
 
-// SILENCE STEAMWORKS WARNINGS
-/////////////////////////////////////////////////
-//
 // Turn off MSVC-only warning about strcpy
 #include <cstdint>
 #ifdef _MSC_VER
@@ -14,11 +11,13 @@
 #endif
 
 
-// INCLUDE HEADERS
-/////////////////////////////////////////////////
-//
 // Include INT types header
 #include <inttypes.h>
+
+// Include Steamworks API headers
+#include "steam/steam_api_flat.h"
+#include "steam/steamnetworkingfakeip.h"
+#include "steam/isteamdualsense.h"
 
 // Include Godot headers
 #include <godot_cpp/core/class_db.hpp>
@@ -53,9 +52,8 @@ public:
 	Steam();
 	~Steam();
 
+
 	// STEAMWORKS FUNCTIONS
-	/////////////////////////////////////////
-	//
 	// Main
 	String get_godotsteam_version() const { return godotsteam_version; }
 	uint32_t getSteamID32(uint64_t steam_id);
@@ -68,8 +66,8 @@ public:
 	bool isLobby(uint64_t steam_id);
 	bool isSteamRunning();
 	bool restartAppIfNecessary(uint32 app_id);
-	Dictionary steamInit(uint32_t app_id = 0);
-	Dictionary steamInitEx(uint32_t app_id = 0);
+	Dictionary steamInit(bool retrieve_stats = false, uint32_t app_id = 0);
+	Dictionary steamInitEx(bool retrieve_stats = false, uint32_t app_id = 0);
 	void steamShutdown();
 
 	uint32 get_browser_handle() const { return browser_handle; }
@@ -514,7 +512,7 @@ public:
 	uint32 createPollGroup();
 	Dictionary createSocketPair(bool loopback, uint64_t remote_steam_id1, uint64_t remote_steam_id2);
 	bool destroyPollGroup(uint32 poll_group);
-	//		int findRelayAuthTicketForServer(int port);	<------ Uses datagram relay structs which were removed from base SDK
+//	int findRelayAuthTicketForServer(int port);	<------ Uses datagram relay structs which were removed from base SDK
 	int flushMessagesOnConnection(uint32 connection_handle);
 	NetworkingAvailability getAuthenticationStatus();
 	Dictionary getCertificateRequest();
@@ -524,8 +522,8 @@ public:
 	uint64_t getConnectionUserData(uint32 peer);
 	Dictionary getDetailedConnectionStatus(uint32 connection_handle);
 	Dictionary getFakeIP(int first_port = 0);
-	//		int getGameCoordinatorServerLogin(const String& app_data);	<------ Uses datagram relay structs which were removed from base SDK
-	//		int getHostedDedicatedServerAddress();	<------ Uses datagram relay structs which were removed from base SDK
+//	int getGameCoordinatorServerLogin(const String& app_data);	<------ Uses datagram relay structs which were removed from base SDK
+//	int getHostedDedicatedServerAddress();	<------ Uses datagram relay structs which were removed from base SDK
 	uint32 getHostedDedicatedServerPOPId();
 	uint16 getHostedDedicatedServerPort();
 	String getListenSocketAddress(uint32 socket, bool with_port = true);
@@ -533,10 +531,10 @@ public:
 	NetworkingAvailability initAuthentication();
 	Array receiveMessagesOnConnection(uint32 connection, int max_messages);
 	Array receiveMessagesOnPollGroup(uint32 poll_group, int max_messages);
-	//		Dictionary receivedRelayAuthTicket();	<------ Uses datagram relay structs which were removed from base SDK
+//	Dictionary receivedRelayAuthTicket();	<------ Uses datagram relay structs which were removed from base SDK
 	void resetIdentity(uint64_t remote_steam_id);
 	void runNetworkingCallbacks();
-	Array sendMessages(const PackedByteArray data, uint32 connection_handle, int flags);
+//	Array sendMessages(Array messages, uint32 connection_handle, int flags);	<------ Currently does not compile on Windows but does on Linux
 	Dictionary sendMessageToConnection(uint32 connection_handle, const PackedByteArray data, int flags);
 	Dictionary setCertificate(const PackedByteArray &certificate);
 	bool setConnectionPollGroup(uint32 connection_handle, uint32 poll_group);
@@ -561,7 +559,7 @@ public:
 	bool setConnectionConfigValueFloat(uint32 connection, NetworkingConfigValue config, float value);
 	bool setConnectionConfigValueInt32(uint32 connection, NetworkingConfigValue config, int32 value);
 	bool setConnectionConfigValueString(uint32 connection, NetworkingConfigValue config, const String &value);
-	//		bool setConfigValue(NetworkingConfigValue setting, NetworkingConfigScope scope_type, uint32_t connection_handle, NetworkingConfigDataType data_type, auto value);
+//	bool setConfigValue(NetworkingConfigValue setting, NetworkingConfigScope scope_type, uint32_t connection_handle, NetworkingConfigDataType data_type, auto value);
 	bool setGlobalConfigValueFloat(NetworkingConfigValue config, float value);
 	bool setGlobalConfigValueInt32(NetworkingConfigValue config, int32 value);
 	bool setGlobalConfigValueString(NetworkingConfigValue config, const String &value);
@@ -645,24 +643,24 @@ public:
 	uint32_t writeScreenshot(const PackedByteArray &rgb, int width, int height);
 
 	// Timeline
-	void setTimelineTooltip(String description, float time_delta);
+	void addGamePhaseTag(const String &tag_name, const String &tag_icon, const String &tag_group, uint32 priority );
+	uint64_t addInstantaneousTimelineEvent(const String &title, const String &description, const String &icon, uint32 icon_priority, float start_offset_seconds, TimelineEventClipPriority possible_clip = TIMELINE_EVENT_CLIP_PRIORITY_NONE);
+	uint64_t addRangeTimelineEvent(const String &title, const String &description, const String &icon, uint32 icon_priority, float start_offset_seconds, float duration, TimelineEventClipPriority possible_clip = TIMELINE_EVENT_CLIP_PRIORITY_NONE);
 	void clearTimelineTooltip(float time_delta);
-	void setTimelineGameMode(TimelineGameMode mode);
-	uint64_t addInstantaneousTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, TimelineEventClipPriority possible_clip);
-	uint64_t addRangeTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, float duration, TimelineEventClipPriority possible_clip);
-	uint64_t startRangeTimelineEvent(String title, String description, String icon, uint32 priority, float start_offset_seconds, TimelineEventClipPriority possible_clip);
-	void updateRangeTimelineEvent(uint64_t event, String title, String description, String icon, uint32 priority, TimelineEventClipPriority possible_clip);
-	void endRangeTimelineEvent(uint64_t event, float end_offset_seconds);
-	void removeTimelineEvent(uint64_t event);
-	void doesEventRecordingExist(uint64_t event);
-	void startGamePhase();
+	void doesEventRecordingExist(uint64_t this_event);
+	void doesGamePhaseRecordingExist(const String &phase_id);
 	void endGamePhase();
-	void setGamePhaseID(String phase_id);
-	void doesGamePhaseRecordingExist(String phase_id);
-	void addGamePhaseTag(String tag_name, String tag_icon, String tag_group, uint32 priority);
-	void setGamePhaseAttribute(String attribute_group, String attribute_value, uint32 priority);
-	void openOverlayToGamePhase(String phase_id);
-	void openOverlayToTimelineEvent(uint64_t event);
+	void endRangeTimelineEvent(uint64_t this_event, float end_offset_seconds);
+	void openOverlayToGamePhase(const String &phase_id);
+	void openOverlayToTimelineEvent(const uint64_t this_event);
+	void removeTimelineEvent(uint64_t this_event );
+	void setGamePhaseAttribute(const String &attribute_group, const String &attribute_value, uint32 priority);
+	void setGamePhaseID(const String &phase_id);
+	void setTimelineGameMode(TimelineGameMode mode);
+	void setTimelineTooltip(String description, float time_delta);
+	void startGamePhase();
+	uint64_t startRangeTimelineEvent(const String &title, const String &description, const String &icon, uint32 priority, float start_offset_seconds, TimelineEventClipPriority possible_clip = TIMELINE_EVENT_CLIP_PRIORITY_NONE);
+	void updateRangeTimelineEvent(uint64_t this_event, const String &title, const String &description, const String &icon, uint32 priority, TimelineEventClipPriority possible_clip = TIMELINE_EVENT_CLIP_PRIORITY_NONE);
 
 	// UGC
 	void addAppDependency(uint64_t published_file_id, uint32_t app_id);
@@ -872,8 +870,6 @@ public:
 
 
 	// PROPERTIES
-	/////////////////////////////////////////////
-	//
 	// Friends
 	uint64_t current_clan_id = 0;
 
@@ -943,15 +939,13 @@ private:
 
 
 	// STEAM CALLBACKS
-	/////////////////////////////////////////
-	//
-	// Apps callbacks ///////////////////////
+	// Apps
 	STEAM_CALLBACK(Steam, dlc_installed, DlcInstalled_t, callbackDLCInstalled);
 	STEAM_CALLBACK(Steam, file_details_result, FileDetailsResult_t, callbackFileDetailsResult);
 	STEAM_CALLBACK(Steam, new_launch_url_parameters, NewUrlLaunchParameters_t, callbackNewLaunchURLParameters);
 	STEAM_CALLBACK(Steam, timed_trial_status, TimedTrialStatus_t, callbackTimedTrialStatus);
 
-	// Friends callbacks ////////////////////
+	// Friends
 	STEAM_CALLBACK(Steam, avatar_loaded, AvatarImageLoaded_t, callbackAvatarLoaded);
 	STEAM_CALLBACK(Steam, avatar_image_loaded, AvatarImageLoaded_t, callbackAvatarImageLoaded);
 	STEAM_CALLBACK(Steam, clan_activity_downloaded, DownloadClanActivityCountsResult_t, callbackClanActivityDownloaded);
@@ -971,7 +965,7 @@ private:
 	STEAM_CALLBACK(Steam, unread_chat_messages_changed, UnreadChatMessagesChanged_t, callbackUnreadChatMessagesChanged);
 	STEAM_CALLBACK(Steam, equipped_profile_items_changed, EquippedProfileItemsChanged_t, callbackEquippedProfileItemsChanged);
 
-	// Game Search callbacks ////////////////
+	// Game Search
 	STEAM_CALLBACK(Steam, search_for_game_progress, SearchForGameProgressCallback_t, callbackSearchForGameProgress);
 	STEAM_CALLBACK(Steam, search_for_game_result, SearchForGameResultCallback_t, callbackSearchForGameResult);
 	STEAM_CALLBACK(Steam, request_players_for_game_progress, RequestPlayersForGameProgressCallback_t, callbackRequestPlayersForGameProgress);
@@ -980,7 +974,7 @@ private:
 	STEAM_CALLBACK(Steam, submit_player_result, SubmitPlayerResultResultCallback_t, callbackSubmitPlayerResult);
 	STEAM_CALLBACK(Steam, end_game_result, EndGameResultCallback_t, callbackEndGameResult);
 
-	// HTML Surface callbacks ///////////////
+	// HTML Surface
 	STEAM_CALLBACK(Steam, html_can_go_backandforward, HTML_CanGoBackAndForward_t, callbackHTMLCanGoBackandforward);
 	STEAM_CALLBACK(Steam, html_changed_title, HTML_ChangedTitle_t, callbackHTMLChangedTitle);
 	STEAM_CALLBACK(Steam, html_close_browser, HTML_CloseBrowser_t, callbackHTMLCloseBrowser);
@@ -1003,23 +997,23 @@ private:
 	STEAM_CALLBACK(Steam, html_url_changed, HTML_URLChanged_t, callbackHTMLURLChanged);
 	STEAM_CALLBACK(Steam, html_vertical_scroll, HTML_VerticalScroll_t, callbackHTMLVerticalScroll);
 
-	// HTTP callbacks ///////////////////////
+	// HTTP
 	STEAM_CALLBACK(Steam, http_request_completed, HTTPRequestCompleted_t, callbackHTTPRequestCompleted);
 	STEAM_CALLBACK(Steam, http_request_data_received, HTTPRequestDataReceived_t, callbackHTTPRequestDataReceived);
 	STEAM_CALLBACK(Steam, http_request_headers_received, HTTPRequestHeadersReceived_t, callbackHTTPRequestHeadersReceived);
 
-	// Input callbacks //////////////////////
+	// Input
 	STEAM_CALLBACK(Steam, input_device_connected, SteamInputDeviceConnected_t, callbackInputDeviceConnected);
 	STEAM_CALLBACK(Steam, input_device_disconnected, SteamInputDeviceDisconnected_t, callbackInputDeviceDisconnected);
 	STEAM_CALLBACK(Steam, input_configuration_loaded, SteamInputConfigurationLoaded_t, callbackInputConfigurationLoaded);
 	STEAM_CALLBACK(Steam, input_gamepad_slot_change, SteamInputGamepadSlotChange_t, callbackInputGamePadSlotChange);
 
-	// Inventory callbacks //////////////////
+	// Inventory
 	STEAM_CALLBACK(Steam, inventory_definition_update, SteamInventoryDefinitionUpdate_t, callbackInventoryDefinitionUpdate);
 	STEAM_CALLBACK(Steam, inventory_full_update, SteamInventoryFullUpdate_t, callbackInventoryFullUpdate);
 	STEAM_CALLBACK(Steam, inventory_result_ready, SteamInventoryResultReady_t, callbackInventoryResultReady);
 
-	// Matchmaking callbacks ////////////////
+	// Matchmaking
 	STEAM_CALLBACK(Steam, favorites_list_accounts_updated, FavoritesListAccountsUpdated_t, callbackFavoritesListAccountsUpdated);
 	STEAM_CALLBACK(Steam, favorites_list_changed, FavoritesListChanged_t, callbackFavoritesListChanged);
 	STEAM_CALLBACK(Steam, lobby_message, LobbyChatMsg_t, callbackLobbyMessage);
@@ -1030,7 +1024,7 @@ private:
 	STEAM_CALLBACK(Steam, lobby_invite, LobbyInvite_t, callbackLobbyInvite);
 	STEAM_CALLBACK(Steam, lobby_kicked, LobbyKicked_t, callbackLobbyKicked);
 
-	// Matchmaking Server callbacks /////////
+	// Matchmaking Server
 	// ISteamMatchmakingServerListResponse
 	void ServerResponded(HServerListRequest list_request_handle, int server);
 	void ServerFailedToRespond(HServerListRequest list_request_handle, int server);
@@ -1047,11 +1041,11 @@ private:
 	void RulesFailedToRespond();
 	void RulesRefreshComplete();
 
-	// Music callbacks //////////////////////
+	// Music
 	STEAM_CALLBACK(Steam, music_playback_status_has_changed, PlaybackStatusHasChanged_t, callbackMusicPlaybackStatusHasChanged);
 	STEAM_CALLBACK(Steam, music_volume_has_changed, VolumeHasChanged_t, callbackMusicVolumeHasChanged);
 
-	// Music Remote callbacks ///////////////
+	// Music Remote
 	STEAM_CALLBACK(Steam, music_player_remote_to_front, MusicPlayerRemoteToFront_t, callbackMusicPlayerRemoteToFront);
 	STEAM_CALLBACK(Steam, music_player_remote_will_activate, MusicPlayerRemoteWillActivate_t, callbackMusicPlayerRemoteWillActivate);
 	STEAM_CALLBACK(Steam, music_player_remote_will_deactivate, MusicPlayerRemoteWillDeactivate_t, callbackMusicPlayerRemoteWillDeactivate);
@@ -1067,47 +1061,47 @@ private:
 	STEAM_CALLBACK(Steam, music_player_wants_volume, MusicPlayerWantsVolume_t, callbackMusicPlayerWantsVolume);
 	STEAM_CALLBACK(Steam, music_player_will_quit, MusicPlayerWillQuit_t, callbackMusicPlayerWillQuit);
 
-	// Networking callbacks /////////////////
+	// Networking
 	STEAM_CALLBACK(Steam, p2p_session_connect_fail, P2PSessionConnectFail_t, callbackP2PSessionConnectFail);
 	STEAM_CALLBACK(Steam, p2p_session_request, P2PSessionRequest_t, callbackP2PSessionRequest);
 
-	// Networking Messages callbacks ////////
+	// Networking Messages
 	STEAM_CALLBACK(Steam, network_messages_session_request, SteamNetworkingMessagesSessionRequest_t, callbackNetworkMessagesSessionRequest);
 	STEAM_CALLBACK(Steam, network_messages_session_failed, SteamNetworkingMessagesSessionFailed_t, callbackNetworkMessagesSessionFailed);
 
-	// Networking Sockets callbacks /////////
+	// Networking Sockets
 	STEAM_CALLBACK(Steam, network_connection_status_changed, SteamNetConnectionStatusChangedCallback_t, callbackNetworkConnectionStatusChanged);
 	STEAM_CALLBACK(Steam, network_authentication_status, SteamNetAuthenticationStatus_t, callbackNetworkAuthenticationStatus);
 	STEAM_CALLBACK(Steam, fake_ip_result, SteamNetworkingFakeIPResult_t, callbackNetworkingFakeIPResult);
 
-	// Networking Utils callbacks ///////////
+	// Networking Utils
 	STEAM_CALLBACK(Steam, relay_network_status, SteamRelayNetworkStatus_t, callbackRelayNetworkStatus);
 
-	// Parental Settings callbacks //////////
+	// Parental Settings
 	STEAM_CALLBACK(Steam, parental_setting_changed, SteamParentalSettingsChanged_t, callbackParentlSettingChanged);
 
-	// Parties callbacks ////////////////////
+	// Parties
 	STEAM_CALLBACK(Steam, reservation_notification, ReservationNotificationCallback_t, callbackReserveNotification);
 	STEAM_CALLBACK(Steam, available_beacon_locations_updated, AvailableBeaconLocationsUpdated_t, callbackAvailableBeaconLocationsUpdated);
 	STEAM_CALLBACK(Steam, active_beacons_updated, ActiveBeaconsUpdated_t, callbackActiveBeaconsUpdated);
 
-	// Remote Play callbacks ////////////////
+	// Remote Play
 	STEAM_CALLBACK(Steam, remote_play_session_connected, SteamRemotePlaySessionConnected_t, callbackRemotePlaySessionConnected);
 	STEAM_CALLBACK(Steam, remote_play_session_disconnected, SteamRemotePlaySessionDisconnected_t, callbackRemotePlaySessionDisconnected);
 
-	// Remote Storage callbacks /////////////
+	// Remote Storage
 	STEAM_CALLBACK(Steam, local_file_changed, RemoteStorageLocalFileChange_t, callbackLocalFileChanged);
 
-	// Screenshot callbacks /////////////////
+	// Screenshot
 	STEAM_CALLBACK(Steam, screenshot_ready, ScreenshotReady_t, callbackScreenshotReady);
 	STEAM_CALLBACK(Steam, screenshot_requested, ScreenshotRequested_t, callbackScreenshotRequested);
 
-	// UGC callbacks ////////////////////////
+	// UGC
 	STEAM_CALLBACK(Steam, item_downloaded, DownloadItemResult_t, callbackItemDownloaded);
 	STEAM_CALLBACK(Steam, item_installed, ItemInstalled_t, callbackItemInstalled);
 	STEAM_CALLBACK(Steam, user_subscribed_items_list_changed, UserSubscribedItemsListChanged_t, callbackUserSubscribedItemsListChanged);
 
-	// User callbacks ///////////////////////
+	// User
 	STEAM_CALLBACK(Steam, client_game_server_deny, ClientGameServerDeny_t, callbackClientGameServerDeny);
 	STEAM_CALLBACK(Steam, game_web_callback, GameWebCallback_t, callbackGameWebCallback);
 	STEAM_CALLBACK(Steam, get_auth_session_ticket_response, GetAuthSessionTicketResponse_t, callbackGetAuthSessionTicketResponse);
@@ -1119,14 +1113,13 @@ private:
 	STEAM_CALLBACK(Steam, steam_server_disconnected, SteamServersDisconnected_t, callbackSteamServerDisconnected);
 	STEAM_CALLBACK(Steam, validate_auth_ticket_response, ValidateAuthTicketResponse_t, callbackValidateAuthTicketResponse);
 
-	// User stat callbacks //////////////////
-	STEAM_CALLBACK(Steam, current_stats_received, UserStatsReceived_t, callbackCurrentStatsReceived);
+	// User Stats
 	STEAM_CALLBACK(Steam, user_achievement_icon_fetched, UserAchievementIconFetched_t, callbackUserAchievementIconFetched);
 	STEAM_CALLBACK(Steam, user_achievement_stored, UserAchievementStored_t, callbackUserAchievementStored);
 	STEAM_CALLBACK(Steam, user_stats_stored, UserStatsStored_t, callbackUserStatsStored);
 	STEAM_CALLBACK(Steam, user_stats_unloaded, UserStatsUnloaded_t, callbackUserStatsUnloaded);
 
-	// Utility callbacks ////////////////////
+	// Utility
 	STEAM_CALLBACK(Steam, gamepad_text_input_dismissed, GamepadTextInputDismissed_t, callbackGamepadTextInputDismissed);
 	STEAM_CALLBACK(Steam, ip_country, IPCountry_t, callbackIPCountry);
 	STEAM_CALLBACK(Steam, low_power, LowBatteryPower_t, callbackLowPower);
@@ -1136,15 +1129,13 @@ private:
 	STEAM_CALLBACK(Steam, floating_gamepad_text_input_dismissed, FloatingGamepadTextInputDismissed_t, callbackFloatingGamepadTextInputDismissed);
 	STEAM_CALLBACK(Steam, filter_text_dictionary_changed, FilterTextDictionaryChanged_t, callbackFilterTextDictionaryChanged);
 
-	// Video callbacks //////////////////////
+	// Video
 	STEAM_CALLBACK(Steam, get_opf_settings_result, GetOPFSettingsResult_t, callbackGetOPFSettingsResult);
 	STEAM_CALLBACK(Steam, get_video_result, GetVideoURLResult_t, callbackGetVideoResult);
 
 
 	// STEAM CALL RESULTS
-	/////////////////////////////////////////
-	//
-	// Friends call results /////////////////
+	// Friends
 	CCallResult<Steam, ClanOfficerListResponse_t> callResultClanOfficerList;
 	void request_clan_officer_list(ClanOfficerListResponse_t *call_data, bool io_failure);
 	CCallResult<Steam, FriendsEnumerateFollowingList_t> callResultEnumerateFollowingList;
@@ -1156,11 +1147,11 @@ private:
 	CCallResult<Steam, FriendsIsFollowing_t> callResultIsFollowing;
 	void is_following(FriendsIsFollowing_t *call_data, bool io_failure);
 
-	// HTML Surface call results ////////////
+	// HTML Surface
 	CCallResult<Steam, HTML_BrowserReady_t> callResultHTMLBrowserReady;
 	void html_browser_ready(HTML_BrowserReady_t *call_data, bool io_failure);
 
-	// Inventory call results ///////////////
+	// Inventory
 	CCallResult<Steam, SteamInventoryEligiblePromoItemDefIDs_t> callResultEligiblePromoItemDefIDs;
 	void inventory_eligible_promo_item(SteamInventoryEligiblePromoItemDefIDs_t *call_data, bool io_failure);
 	CCallResult<Steam, SteamInventoryRequestPricesResult_t> callResultRequestPrices;
@@ -1168,13 +1159,13 @@ private:
 	CCallResult<Steam, SteamInventoryStartPurchaseResult_t> callResultStartPurchase;
 	void inventory_start_purchase_result(SteamInventoryStartPurchaseResult_t *call_data, bool io_failure);
 
-	// Matchmaking call results /////////////
+	// Matchmaking
 	CCallResult<Steam, LobbyCreated_t> callResultCreateLobby;
 	void lobby_created(LobbyCreated_t *call_data, bool io_failure);
 	CCallResult<Steam, LobbyMatchList_t> callResultLobbyList;
 	void lobby_match_list(LobbyMatchList_t *call_data, bool io_failure);
 
-	// Parties call results /////////////////
+	// Parties
 	CCallResult<Steam, JoinPartyCallback_t> callResultJoinParty;
 	void join_party(JoinPartyCallback_t *call_data, bool io_failure);
 	CCallResult<Steam, CreateBeaconCallback_t> callResultCreateBeacon;
@@ -1182,7 +1173,7 @@ private:
 	CCallResult<Steam, ChangeNumOpenSlotsCallback_t> callResultChangeNumOpenSlots;
 	void change_num_open_slots(ChangeNumOpenSlotsCallback_t *call_data, bool io_failure);
 
-	// Remote Storage call results //////////
+	// Remote Storage
 	CCallResult<Steam, RemoteStorageFileReadAsyncComplete_t> callResultFileReadAsyncComplete;
 	void file_read_async_complete(RemoteStorageFileReadAsyncComplete_t *call_data, bool io_failure);
 	CCallResult<Steam, RemoteStorageFileShareResult_t> callResultFileShareResult;
@@ -1196,7 +1187,13 @@ private:
 	CCallResult<Steam, RemoteStorageSubscribePublishedFileResult_t> callResultSubscribeItem;
 	void subscribe_item(RemoteStorageSubscribePublishedFileResult_t *call_data, bool io_failure);
 
-	// UGC call results /////////////////////
+	// Timeline
+	CCallResult<Steam, SteamTimelineEventRecordingExists_t> callResultTimelineEvenRecordingExists;
+	void timeline_event_recording_exists(SteamTimelineEventRecordingExists_t *call_data, bool io_failure);
+	CCallResult<Steam, SteamTimelineGamePhaseRecordingExists_t> callResultTimelineGamePhaseRecordingExists;
+	void timeline_game_phase_recording_exists(SteamTimelineGamePhaseRecordingExists_t *call_data, bool io_failure);
+
+	// UGC
 	CCallResult<Steam, AddAppDependencyResult_t> callResultAddAppDependency;
 	void add_app_dependency_result(AddAppDependencyResult_t *call_data, bool io_failure);
 	CCallResult<Steam, AddUGCDependencyResult_t> callResultAddUGCDependency;
@@ -1228,7 +1225,7 @@ private:
 	CCallResult<Steam, WorkshopEULAStatus_t> callResultWorkshopEULAStatus;
 	void workshop_eula_status(WorkshopEULAStatus_t *call_data, bool io_failure);
 
-	// User call results ////////////////////
+	// User
 	CCallResult<Steam, DurationControl_t> callResultDurationControl;
 	void duration_control(DurationControl_t *call_data, bool io_failure);
 	CCallResult<Steam, EncryptedAppTicketResponse_t> callResultEncryptedAppTicketResponse;
@@ -1238,7 +1235,7 @@ private:
 	CCallResult<Steam, StoreAuthURLResponse_t> callResultStoreAuthURLResponse;
 	void store_auth_url_response(StoreAuthURLResponse_t *call_data, bool io_failure);
 
-	// User stat call results ///////////////
+	// User Stats
 	CCallResult<Steam, GlobalAchievementPercentagesReady_t> callResultGlobalAchievementPercentagesReady;
 	void global_achievement_percentages_ready(GlobalAchievementPercentagesReady_t *call_data, bool io_failure);
 	CCallResult<Steam, GlobalStatsReceived_t> callResultGlobalStatsReceived;
@@ -1256,17 +1253,9 @@ private:
 	CCallResult<Steam, UserStatsReceived_t> callResultUserStatsReceived;
 	void user_stats_received(UserStatsReceived_t *call_data, bool io_failure);
 
-	// Utility call results /////////////////
+	// Utility
 	CCallResult<Steam, CheckFileSignature_t> callResultCheckFileSignature;
 	void check_file_signature(CheckFileSignature_t *call_data, bool io_failure);
-
-
-	// Timeline call results /////////////
-	CCallResult<Steam, SteamTimelineEventRecordingExists_t> callSteamTimelineEventRecordingExists;
-	void event_recording_exists(SteamTimelineEventRecordingExists_t *call_data, bool io_failure);
-
-	CCallResult<Steam, SteamTimelineGamePhaseRecordingExists_t> callSteamTimelineGamePhaseRecordingExists;
-	void phase_recording_exists(SteamTimelineGamePhaseRecordingExists_t *call_data, bool io_failure);	
 };
 
 
