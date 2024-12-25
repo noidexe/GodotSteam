@@ -5,7 +5,6 @@
 #pragma warning(disable : 4828)
 #endif
 
-
 // Include GodotSteam header
 #include "godotsteam.h"
 
@@ -428,7 +427,7 @@ bool Steam::restartAppIfNecessary(uint32 app_id) {
 }
 
 // Initialize the SDK, without worrying about the cause of failure.
-Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id) {
+Dictionary Steam::steamInit(uint32_t app_id) {
 	// Set the app ID
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
@@ -447,11 +446,6 @@ Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id) {
 
 		current_app_id = app_id;
 		current_steam_id = SteamUser()->GetSteamID().ConvertToUint64();
-
-		// Get the current stats, if set
-		if (SteamUserStats() != NULL && retrieve_stats) {
-			SteamUserStats()->RequestCurrentStats();
-		}
 	}
 	else {
 		// The Steam client is not running
@@ -475,7 +469,7 @@ Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id) {
 
 // Initialize the Steamworks SDK. On success STEAM_API_INIT_RESULT_OK is returned.
 // Otherwise, if error_message is non-NULL, it will receive a non-localized message that explains the reason for the failure.
-Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id) {
+Dictionary Steam::steamInitEx(uint32_t app_id) {
 	// Set the app ID
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
@@ -493,11 +487,6 @@ Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id) {
 		is_init_success = true;
 		current_app_id = app_id;
 		current_steam_id = SteamUser()->GetSteamID().ConvertToUint64();
-
-		// Get the current stats, if set
-		if (SteamUserStats() != NULL && retrieve_stats) {
-			requestCurrentStats();
-		}
 	}
 	initialize["status"] = initialize_result;
 	initialize["verbal"] = error_message;
@@ -1103,14 +1092,14 @@ String Steam::getFriendPersonaNameHistory(uint64_t steam_id, int name_history) {
 }
 
 // Returns the current status of the specified user.
-Steam::PersonaState Steam::getFriendPersonaState(uint64_t steam_id) {
+PersonaState Steam::getFriendPersonaState(uint64_t steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, PERSONA_STATE_OFFLINE, "[STEAM] Friends class not found when calling: getFriendPersonaState");
 	CSteamID user_id = (uint64)steam_id;
 	return PersonaState(SteamFriends()->GetFriendPersonaState(user_id));
 }
 
 // Returns a relationship to a user.
-Steam::FriendRelationship Steam::getFriendRelationship(uint64_t steam_id) {
+FriendRelationship Steam::getFriendRelationship(uint64_t steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, FRIEND_RELATION_NONE, "[STEAM] Friends class not found when calling: getFriendRelationship");
 	CSteamID user_id = (uint64)steam_id;
 	return FriendRelationship(SteamFriends()->GetFriendRelationship(user_id));
@@ -1205,7 +1194,7 @@ String Steam::getPersonaName() {
 }
 
 // Gets the status of the current user.
-Steam::PersonaState Steam::getPersonaState() {
+PersonaState Steam::getPersonaState() {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, PERSONA_STATE_OFFLINE, "[STEAM] Friends class not found when calling: getPersonaState");
 	return PersonaState(SteamFriends()->GetPersonaState());
 }
@@ -2191,7 +2180,7 @@ uint64_t Steam::getActionSetHandle(const String &action_set_name) {
 
 // Get an action origin that you can use in your glyph look up table or passed into GetGlyphForActionOrigin or
 // GetStringForActionOrigin.
-Steam::InputActionOrigin Steam::getActionOriginFromXboxOrigin(uint64_t input_handle, int origin) {
+InputActionOrigin Steam::getActionOriginFromXboxOrigin(uint64_t input_handle, int origin) {
 	ERR_FAIL_COND_V_MSG(SteamInput() == NULL, INPUT_ACTION_ORIGIN_NONE, "[STEAM] Input not found when calling: getActionOriginFromXboxOrigin");
 	return InputActionOrigin(SteamInput()->GetActionOriginFromXboxOrigin((InputHandle_t)input_handle, (EXboxOrigin)origin));
 }
@@ -2350,10 +2339,10 @@ String Steam::getGlyphSVGForActionOrigin(InputActionOrigin origin, uint32 flags)
 }
 
 // Get the input type (device model) for the specified controller.
-Steam::InputType Steam::getInputTypeForHandle(uint64_t input_handle) {
+InputType Steam::getInputTypeForHandle(uint64_t input_handle) {
 	ERR_FAIL_COND_V_MSG(SteamInput() == NULL, INPUT_TYPE_UNKNOWN, "[STEAM] Input not found when calling: getInputTypeForHandle");
 	ESteamInputType this_input_type = SteamInput()->GetInputTypeForHandle((InputHandle_t)input_handle);
-	return (Steam::InputType)this_input_type;
+	return (InputType)this_input_type;
 }
 
 // Returns raw motion data for the specified controller.
@@ -2796,12 +2785,12 @@ Array Steam::getResultItems(int32 this_inventory_handle) {
 }
 
 // Find out the status of an asynchronous inventory result handle.
-Steam::Result Steam::getResultStatus(int32 this_inventory_handle) {
+Result Steam::getResultStatus(int32 this_inventory_handle) {
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, RESULT_FAIL, "[STEAM] Inventory class not found when calling: getResultStatus");
 	if (this_inventory_handle == 0) {
 		this_inventory_handle = inventory_handle;
 	}
-	return (Steam::Result)SteamInventory()->GetResultStatus((SteamInventoryResult_t)this_inventory_handle);
+	return (Result)SteamInventory()->GetResultStatus((SteamInventoryResult_t)this_inventory_handle);
 }
 
 // Gets the server time at which the result was generated.
@@ -3445,7 +3434,7 @@ bool Steam::musicIsPlaying() {
 }
 
 // Gets the current status of the Steam Music player
-Steam::AudioPlaybackStatus Steam::getPlaybackStatus() {
+AudioPlaybackStatus Steam::getPlaybackStatus() {
 	ERR_FAIL_COND_V_MSG(SteamMusic() == NULL, AUDIO_PLAYBACK_UNDEFINED, "[STEAM] Music class not found when calling: getPlaybackStatus");
 	return AudioPlaybackStatus(SteamMusic()->GetPlaybackStatus());
 }
@@ -4171,14 +4160,14 @@ String Steam::getListenSocketAddress(uint32 socket, bool with_port) {
 // Indicate our desire to be ready participate in authenticated communications. If we are currently not ready, then steps will be
 // taken to obtain the necessary certificates. (This includes a certificate for us, as well as any CA certificates needed to
 // authenticate peers.)
-Steam::NetworkingAvailability Steam::initAuthentication() {
+NetworkingAvailability Steam::initAuthentication() {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, NETWORKING_AVAILABILITY_UNKNOWN, "[STEAM] Networking Sockets class not found when calling: initAuthentication");
 	return NetworkingAvailability(SteamNetworkingSockets()->InitAuthentication());
 }
 
 // Query our readiness to participate in authenticated communications. A SteamNetAuthenticationStatus_t callback is posted any
 // time this status changes, but you can use this function to query it at any time.
-Steam::NetworkingAvailability Steam::getAuthenticationStatus() {
+NetworkingAvailability Steam::getAuthenticationStatus() {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, NETWORKING_AVAILABILITY_UNKNOWN, "[STEAM] Networking Sockets class not found when calling: getAuthenticationStatus");
 	return NetworkingAvailability(SteamNetworkingSockets()->GetAuthenticationStatus(NULL));
 }
@@ -4456,7 +4445,7 @@ void Steam::initRelayNetworkAccess() {
 }
 
 // Fetch current status of the relay network.  If you want more details, you can pass a non-NULL value.
-Steam::NetworkingAvailability Steam::getRelayNetworkStatus() {
+NetworkingAvailability Steam::getRelayNetworkStatus() {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingUtils() == NULL, NETWORKING_AVAILABILITY_UNKNOWN, "[STEAM] Networking Utils class not found when calling: getRelayNetworkStatus");
 	return NetworkingAvailability(SteamNetworkingUtils()->GetRelayNetworkStatus(NULL));
 }
@@ -5267,31 +5256,116 @@ uint32_t Steam::writeScreenshot(const PackedByteArray &rgb, int width, int heigh
 ///// TIMELINE
 /////////////////////////////////////////////////
 //
-// Use this to mark an event on the Timeline. The event can be instantaneous or take some amount of time to complete, depending on
-// the value passed in duration.
-void Steam::addTimelineEvent(String icon, String title, String description, int32_t priority, float start_offset, float duration, TimelineEventClipPriority possible_clip) {
-	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: addTimelineEvent");
-	SteamTimeline()->AddTimelineEvent(icon.utf8().get_data(), title.utf8().get_data(), description.utf8().get_data(), priority, start_offset, duration, (ETimelineEventClipPriority)possible_clip);
+void Steam::setTimelineTooltip(String description, float time_delta)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineTooltip");
+	SteamTimeline()->SetTimelineTooltip(description.utf8().get_data(), time_delta);
 }
 
-// Removes the description set for the specific clip.
-void Steam::clearTimelineStateDescription(float time_delta) {
-	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: clearTimelineStateDescription");
-	SteamTimeline()->ClearTimelineStateDescription(time_delta);		
+void Steam::clearTimelineTooltip(float time_delta)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: clearTimelineTooltip");
+	SteamTimeline()->ClearTimelineTooltip(time_delta);
 }
 
-// Changes the color of the timeline bar. See TimelineGameMode comments for how to use each value.
-void Steam::setTimelineGameMode(TimelineGameMode mode) {
+void Steam::setTimelineGameMode(TimelineGameMode mode)
+{
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineGameMode");
 	SteamTimeline()->SetTimelineGameMode((ETimelineGameMode)mode);
 }
 
-// Sets a description for the current game state in the timeline. These help the user to find specific moments in the timeline
-// when saving clips. Setting a new state description replaces any previous description.
-void Steam::setTimelineStateDescription(String description, float time_delta) {
-	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineStateDescription");
-	SteamTimeline()->SetTimelineStateDescription(description.utf8().get_data(), time_delta);
+uint64_t Steam::addInstantaneousTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, TimelineEventClipPriority possible_clip)
+{
+	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: addInstantaneousTimelineEvent");
+	return SteamTimeline()->AddInstantaneousTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), icon_priority, start_offset_seconds, (ETimelineEventClipPriority)possible_clip);
 }
+
+uint64_t Steam::addRangeTimelineEvent(String title, String description, String icon, uint32 icon_priority, float start_offset_seconds, float duration, TimelineEventClipPriority possible_clip)
+{
+	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: addRangeTimelineEvent");
+	return (uint64_t)SteamTimeline()->AddRangeTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), icon_priority, start_offset_seconds, duration, (ETimelineEventClipPriority)possible_clip);
+}
+
+uint64_t Steam::startRangeTimelineEvent(String title, String description, String icon, uint32 priority, float start_offset_seconds, TimelineEventClipPriority possible_clip)
+{
+	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: startRangeTimelineEvent");
+	return (uint64_t)SteamTimeline()->StartRangeTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), priority, start_offset_seconds, (ETimelineEventClipPriority)possible_clip);
+}
+
+void Steam::updateRangeTimelineEvent(uint64_t event, String title, String description, String icon, uint32 priority, TimelineEventClipPriority possible_clip)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: updateRangeTimelineEvent");
+	SteamTimeline()->UpdateRangeTimelineEvent(event, title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), priority, (ETimelineEventClipPriority)possible_clip);
+}
+
+void Steam::endRangeTimelineEvent(uint64_t event, float end_offset_seconds)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: endRangeTimelineEvent");
+	SteamTimeline()->EndRangeTimelineEvent(event, end_offset_seconds);
+}
+
+void Steam::removeTimelineEvent(uint64_t event)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: removeTimelineEvent");
+	SteamTimeline()->RemoveTimelineEvent(event);
+}
+
+void Steam::doesEventRecordingExist(uint64_t event)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: doesEventRecordingExist");
+	SteamAPICall_t api_call = SteamTimeline()->DoesEventRecordingExist(event);
+	callSteamTimelineEventRecordingExists.Set(api_call, this, &Steam::event_recording_exists);
+}
+
+void Steam::startGamePhase()
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: startGamePhase");
+	SteamTimeline()->StartGamePhase();
+}
+
+void Steam::endGamePhase()
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: endGamePhase");
+	SteamTimeline()->EndGamePhase();
+}
+
+void Steam::setGamePhaseID(String phase_id)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setGamePhaseID");
+	SteamTimeline()->SetGamePhaseID(phase_id.utf8().get_data());
+}
+
+void Steam::doesGamePhaseRecordingExist(String phase_id)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: doesGamePhaseRecordingExist");
+	SteamAPICall_t api_call = SteamTimeline()->DoesGamePhaseRecordingExist(phase_id.utf8().get_data());
+	callSteamTimelineGamePhaseRecordingExists.Set(api_call, this, &Steam::phase_recording_exists);
+}
+
+void Steam::addGamePhaseTag(String tag_name, String tag_icon, String tag_group, uint32 priority)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: addGamePhaseTag");
+	SteamTimeline()->AddGamePhaseTag(tag_name.utf8().get_data(), tag_icon.utf8().get_data(), tag_group.utf8().get_data(), priority);
+}
+
+void Steam::setGamePhaseAttribute(String attribute_group, String attribute_value, uint32 priority)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setGamePhaseAttribute");
+	SteamTimeline()->SetGamePhaseAttribute(attribute_group.utf8().get_data(), attribute_value.utf8().get_data(), priority);
+}
+
+void Steam::openOverlayToGamePhase(String phase_id)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: openOverlayToGamePhase");
+	SteamTimeline()->OpenOverlayToGamePhase(phase_id.utf8().get_data());
+}
+
+void Steam::openOverlayToTimelineEvent(uint64_t event)
+{
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: openOverlayToTimelineEvent");
+	SteamTimeline()->OpenOverlayToTimelineEvent(event);
+}
+
 
 
 ///// UGC
@@ -6147,7 +6221,7 @@ void Steam::advertiseGame(const String &server_ip, int port) {
 }
 
 // Authenticate the ticket from the entity Steam ID to be sure it is valid and isn't reused.
-Steam::BeginAuthSessionResult Steam::beginAuthSession(PackedByteArray ticket, int ticket_size, uint64_t steam_id) {
+BeginAuthSessionResult Steam::beginAuthSession(PackedByteArray ticket, int ticket_size, uint64_t steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamUser() == NULL, BeginAuthSessionResult(-1), "[STEAM] User class not found when calling: beginAuthSession");
 	CSteamID auth_steam_id = createSteamID(steam_id);
 	return BeginAuthSessionResult(SteamUser()->BeginAuthSession(ticket.ptr(), ticket_size, auth_steam_id));
@@ -6819,13 +6893,6 @@ int Steam::getUserStatInt(uint64_t steam_id, const String &name) {
 bool Steam::indicateAchievementProgress(const String &name, int current_progress, int max_progress) {
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, false, "[STEAM] User Stats class not found when calling: indicateAchievementProgress");
 	return SteamUserStats()->IndicateAchievementProgress(name.utf8().get_data(), current_progress, max_progress);
-}
-
-// Request all statistics and achievements from Steam servers.
-bool Steam::requestCurrentStats() {
-	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, false, "[STEAM] User Stats class not found when calling: requestCurrentStats");
-	ERR_FAIL_COND_V_MSG(!loggedOn(), false, "[STEAM] requestCurrentStats failed, user is not logged in");
-	return SteamUserStats()->RequestCurrentStats();
 }
 
 // Asynchronously fetch the data for the percentages.
@@ -9128,9 +9195,28 @@ void Steam::user_stats_received(UserStatsReceived_t *call_data, bool io_failure)
 // CallResult for checkFileSignature.
 void Steam::check_file_signature(CheckFileSignature_t *call_data, bool io_failure) {
 	ERR_FAIL_COND_MSG(io_failure, "[STEAM] check_file_signature signal failed internally");
-	emit_signal("check_file_signature", (Steam::CheckFileSignature)call_data->m_eCheckFileSignature);
+	emit_signal("check_file_signature", (CheckFileSignature)call_data->m_eCheckFileSignature);
 }
 
+
+void Steam::event_recording_exists(SteamTimelineEventRecordingExists_t *call_data, bool io_failure)
+{
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] event_recording_exists signal failed internally");
+	uint64_t eventId = call_data->m_ulEventID;
+	bool isExist = call_data->m_bRecordingExists;
+	emit_signal("event_recording_exists", isExist);
+}
+
+void Steam::phase_recording_exists(SteamTimelineGamePhaseRecordingExists_t *call_data, bool io_failure)
+{
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] phase_recording_exists signal failed internally");
+	String phaseId = call_data->m_rgchPhaseID;
+	uint64_t recodingMs = call_data->m_ulRecordingMS;
+	uint64_t longestClipMs = call_data->m_ulLongestClipMS;
+	uint32_t clipCount = call_data->m_unClipCount;
+	uint32_t screenshotCount = call_data->m_unScreenshotCount;
+	emit_signal("phase_recording_exists", phaseId, recodingMs, longestClipMs, clipCount, screenshotCount);
+}
 
 ///// BIND METHODS
 /////////////////////////////////////////////////
@@ -9150,8 +9236,8 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("isSteamRunning"), &Steam::isSteamRunning);
 	ClassDB::bind_method(D_METHOD("run_callbacks"), &Steam::run_callbacks);
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
-	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id"), &Steam::steamInit, DEFVAL(true), DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id"), &Steam::steamInitEx, DEFVAL(true), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("steamInit", "app_id"), &Steam::steamInit, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("steamInitEx", "app_id"), &Steam::steamInitEx, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("steamShutdown"), &Steam::steamShutdown);
 
 	ClassDB::bind_method(D_METHOD("get_browser_handle"), &Steam::get_browser_handle);
@@ -9720,10 +9806,24 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("writeScreenshot", "rgb", "width", "height"), &Steam::writeScreenshot);
 
 	// TIMELINE BIND METHODS ////////////////////
-	ClassDB::bind_method(D_METHOD("addTimelineEvent", "icon", "title", "description", "priority", "start_offet", "duration", "possible_clip"), &Steam::addTimelineEvent);
-	ClassDB::bind_method(D_METHOD("clearTimelineStateDescription", "time_delta"), &Steam::clearTimelineStateDescription);
-	ClassDB::bind_method(D_METHOD("setTimelineGameMode", "mode"), &Steam::setTimelineGameMode);
-	ClassDB::bind_method(D_METHOD("setTimelineStateDescription", "description", "time_delta"), &Steam::setTimelineStateDescription);
+	ClassDB::bind_method(D_METHOD("setTimelineTooltip", "description", "time_delta"), &Steam::setTimelineTooltip);
+	ClassDB::bind_method(D_METHOD("clearTimelineTooltip", "time_delta"), &Steam::clearTimelineTooltip);
+	ClassDB::bind_method(D_METHOD("setTimelineGameMode","mode"), &Steam::setTimelineGameMode);
+	ClassDB::bind_method(D_METHOD("addInstantaneousTimelineEvent","title","description","icon","icon_priority","start_offset_seconds","possible_clip"), &Steam::addInstantaneousTimelineEvent);
+	ClassDB::bind_method(D_METHOD("addRangeTimelineEvent","title","description","icon","icon_priority","start_offset_seconds","duration","possible_clip"), &Steam::addRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("startRangeTimelineEvent","title"," description","icon","priority","start_offset_seconds","possible_clip"), &Steam::startRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("updateRangeTimelineEvent","event","title","description","icon","priority","possible_clip"), &Steam::updateRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("endRangeTimelineEvent","event","end_offset_seconds"), &Steam::endRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("removeTimelineEvent","event"), &Steam::removeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("doesEventRecordingExist","event"), &Steam::doesEventRecordingExist);
+	ClassDB::bind_method(D_METHOD("startGamePhase"), &Steam::startGamePhase);
+	ClassDB::bind_method(D_METHOD("endGamePhase"), &Steam::endGamePhase);
+	ClassDB::bind_method(D_METHOD("setGamePhaseID", "phase_id"), &Steam::setGamePhaseID);
+	ClassDB::bind_method(D_METHOD("doesGamePhaseRecordingExist", "phase_id"), &Steam::doesGamePhaseRecordingExist);
+	ClassDB::bind_method(D_METHOD("addGamePhaseTag", "tag_name", "tag_icon","tag_group", "priority"), &Steam::addGamePhaseTag);
+	ClassDB::bind_method(D_METHOD("setGamePhaseAttribute", "attribute_group", "attribute_value","priority"), &Steam::setGamePhaseAttribute);
+	ClassDB::bind_method(D_METHOD("openOverlayToGamePhase" ,"phase_id"), &Steam::openOverlayToGamePhase);
+	ClassDB::bind_method(D_METHOD("openOverlayToTimelineEvent", "event"), &Steam::openOverlayToTimelineEvent);
 
 	// UGC BIND METHODS ////////////////////
 	ClassDB::bind_method(D_METHOD("addAppDependency", "published_file_id", "app_id"), &Steam::addAppDependency);
@@ -9882,7 +9982,6 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getUserStatFloat", "steam_id", "name"), &Steam::getUserStatFloat);
 	ClassDB::bind_method(D_METHOD("getUserStatInt", "steam_id", "name"), &Steam::getUserStatInt);
 	ClassDB::bind_method(D_METHOD("indicateAchievementProgress", "name", "current_progress", "max_progress"), &Steam::indicateAchievementProgress);
-	ClassDB::bind_method(D_METHOD("requestCurrentStats"), &Steam::requestCurrentStats);
 	ClassDB::bind_method(D_METHOD("requestGlobalAchievementPercentages"), &Steam::requestGlobalAchievementPercentages);
 	ClassDB::bind_method(D_METHOD("requestGlobalStats", "history_days"), &Steam::requestGlobalStats);
 	ClassDB::bind_method(D_METHOD("requestUserStats", "steam_id"), &Steam::requestUserStats);
@@ -10176,6 +10275,11 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("get_opf_settings_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("get_video_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::STRING, "url")));
 
+	
+	// TIME LINE SIGNALS //////////////
+	ADD_SIGNAL(MethodInfo("event_recording_exists", PropertyInfo(Variant::INT, "event_id"), PropertyInfo(Variant::BOOL, "exists")));
+	ADD_SIGNAL(MethodInfo("phase_recording_exists", PropertyInfo(Variant::STRING, "phase_id"), PropertyInfo(Variant::INT, "recoding_ms"), PropertyInfo(Variant::INT, "longestclip_ms"),PropertyInfo(Variant::INT, "clip_count"), PropertyInfo(Variant::INT, "screenshot_count")));
+	
 
 	///// PROPERTIES
 	/////////////////////////////////////////////
@@ -11378,6 +11482,12 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_LOSS_RECV);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_LAG_SEND);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_LAG_RECV);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_JITTER_SEND_AVG);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_JITTER_SEND_MAX);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_JITTER_SEND_PCT);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_JITTER_RECV_AVG);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_JITTER_RECV_MAX);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_JITTER_RECV_PCT);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_REORDER_SEND);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_REORDER_RECV);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_FAKE_PACKET_REORDER_TIME);
@@ -11410,6 +11520,7 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_LOCAL_VIRTUAL_PORT);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_DUAL_WIFI_ENABLE);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_ENABLE_DIAGNOSTICS_UI);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SEND_TIME_SINCE_PREVIOUS_PACKET);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SDR_CLIENT_CONSEC_PING_TIMEOUT_FAIL_INITIAL);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SDR_CLIENT_CONSEC_PING_TIMEOUT_FAIL);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SDR_CLIENT_MIN_PINGS_BEFORE_PING_ACCURATE);
@@ -11515,7 +11626,7 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_UNKNOWN_TYPE);
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_XBOX_PAIRWISE);
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_SONY_PSN);
-	BIND_ENUM_CONSTANT(IDENTITY_TYPE_GOOGLE_STADIA);
+	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_GOOGLE_STADIA);
 	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_NINTENDO);
 	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_EPIC_GS);
 	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_WEGAME);
@@ -11776,6 +11887,7 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(RESULT_PHONE_NUMBER_IS_VOIP);
 	BIND_ENUM_CONSTANT(RESULT_NOT_SUPPORTED);
 	BIND_ENUM_CONSTANT(RESULT_FAMILY_SIZE_LIMIT_EXCEEDED);
+	BIND_ENUM_CONSTANT(RESULT_OFFLINE_APP_CACHE_INVALID);
 
 	// SCEPadTriggerEffectMode Enums
 	BIND_ENUM_CONSTANT(PAD_TRIGGER_EFFECT_MODE_OFF);
@@ -11816,7 +11928,7 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(TEXT_FILTERING_CONTEXT_CHAT);
 	BIND_ENUM_CONSTANT(TEXT_FILTERING_CONTEXT_NAME);
 
-	// TimelineGameMode Enums
+	// Timeline
 	BIND_ENUM_CONSTANT(TIMELINE_GAME_MODE_INVALID);
 	BIND_ENUM_CONSTANT(TIMELINE_GAME_MODE_PLAYING);
 	BIND_ENUM_CONSTANT(TIMELINE_GAME_MODE_STAGING);
@@ -11824,7 +11936,6 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(TIMELINE_GAME_MODE_LOADING_SCREEN);
 	BIND_ENUM_CONSTANT(TIMELINE_GAME_MODE_MAX);
 
-	// TimelineEventClipPriority Enums
 	BIND_ENUM_CONSTANT(TIMELINE_EVENT_CLIP_PRIORITY_INVALID);
 	BIND_ENUM_CONSTANT(TIMELINE_EVENT_CLIP_PRIORITY_NONE);
 	BIND_ENUM_CONSTANT(TIMELINE_EVENT_CLIP_PRIORITY_STANDARD);
