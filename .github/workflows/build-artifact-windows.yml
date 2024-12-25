@@ -88,27 +88,27 @@ jobs:
         uses: ./.github/actions/setup-dependencies
 
       # Compiling templates
-      - name: ${{ matrix.bits }}-bit Debug Template Compilation (target=template_debug)
+      - name: ${{ matrix.steam-redist-bits }}-bit Debug Template Compilation (target=template_debug)
         uses: ./.github/actions/build-godot
         with:
           arch: ${{ matrix.arch }}
           platform: windows
           target: template_debug
 
-      - name: Upload ${{ matrix.bits }}-bit Debug Template
+      - name: Upload ${{ matrix.steam-redist-bits }}-bit Debug Template
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}-debug-template
           path: ./bin/libgodotsteam.windows.template_debug.x86_64.dll
 
-      - name: ${{ matrix.bits }}-bit Release Template Compilation (target=template_release)
+      - name: ${{ matrix.steam-redist-bits }}-bit Release Template Compilation (target=template_release)
         uses: ./.github/actions/build-godot
         with:
           arch: ${{ matrix.arch }}
           platform: windows
           target: template_release
 
-      - name: Upload ${{ matrix.bits }}-bit Release Template
+      - name: Upload ${{ matrix.steam-redist-bits }}-bit Release Template
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}-release-template

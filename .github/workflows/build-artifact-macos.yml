@@ -89,7 +89,7 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: macos-debug-template
-          path: ./bin/libgodotsteam.macos.template_debug
+          path: ./bin/libgodotsteam.macos.template_debug.framework/libgodotsteam.macos.template_debug
 
       - name: Release Template Compilation (target=template_release)
         uses: ./.github/actions/build-godot
@@ -102,7 +102,7 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: macos-release-template
-          path: ./bin/libgodotsteam.macos.template_release
+          path: ./bin/libgodotsteam.macos.template_release.framework/libgodotsteam.macos.template_release
 
       - name: Clear bin
         run: |
