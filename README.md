@@ -1,4 +1,4 @@
-# GodotSteam for Godot Engine 2.x
+# GodotSteam for Godot Engine 2.x | Community Edition
 An ecosystem of tools for [Godot Engine](https://godotengine.org) and [Valve's Steam](https://store.steampowered.com). For the Windows, Linux, and Mac platforms.
 
 **Notice: GodotSteam for Godot 2.x is now retired. This branch still works fine but will not receive any further updates.**
