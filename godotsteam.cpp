@@ -349,7 +349,7 @@ String Steam::getStringFromIP(uint32 ip_integer) {
 	if (ip_integer > 0) {
 		this_address.SetIPv4(ip_integer, 0);
 		char this_ip[SteamNetworkingIPAddr::k_cchMaxString];
-		this_address.ToString(this_ip, std::size(this_ip), false);
+		this_address.ToString(this_ip, SteamNetworkingIPAddr::k_cchMaxString, false);
 		ip_address = String(this_ip);
 	}
 	return ip_address;
@@ -358,7 +358,7 @@ String Steam::getStringFromIP(uint32 ip_integer) {
 // Convert a Steam IP Address to a string
 String Steam::getStringFromSteamIP(SteamNetworkingIPAddr this_address) {
 	char this_ip[SteamNetworkingIPAddr::k_cchMaxString];
-	this_address.ToString(this_ip, std::size(this_ip), false);
+	this_address.ToString(this_ip, SteamNetworkingIPAddr::k_cchMaxString, false);
 	return String(this_ip);
 }
 
@@ -2687,10 +2687,11 @@ int32 Steam::getAllItems() {
 // Gets a string property from the specified item definition.  Gets a property value for a specific item definition.
 String Steam::getItemDefinitionProperty(uint32 definition, const String &name) {
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, "", "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
-	char buffer[STEAM_BUFFER_SIZE];
-	uint32 buffer_size = std::size(buffer);
+	uint32 buffer_size = STEAM_BUFFER_SIZE;
+	char *buffer = new char[buffer_size];
 	SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
 	String property = String::utf8(buffer, buffer_size);
+	delete[] buffer;
 	return property;
 }
 
@@ -2753,8 +2754,8 @@ Array Steam::getItemsWithPrices() {
 // Gets the dynamic properties from an item in an inventory result set.
 String Steam::getResultItemProperty(uint32 index, const String &name, int32 this_inventory_handle) {
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, "", "[STEAM] Inventory class not found when calling: getResultItemProperty");
-	char value[256];
-	uint32 buffer_size = std::size(value);
+	uint32 buffer_size = 256;
+	char *value = new char[buffer_size];
 
 	if (this_inventory_handle == 0) {
 		this_inventory_handle = inventory_handle;
@@ -2766,7 +2767,9 @@ String Steam::getResultItemProperty(uint32 index, const String &name, int32 this
 	else {
 		SteamInventory()->GetResultItemProperty((SteamInventoryResult_t)this_inventory_handle, index, name.utf8().get_data(), value, &buffer_size);
 	}
-	return String::utf8(value, buffer_size);
+	String this_item_property = String::utf8(value, buffer_size);
+	delete[] value;
+	return this_item_property;
 }
 
 // Get the items associated with an inventory result handle.

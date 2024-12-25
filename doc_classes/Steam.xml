@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<class name="Steam" inherits="Object" version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
+<class name="Steam" inherits="Object" version="3.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../doc/class.xsd">
 	<brief_description>
-		Steamworks SDK / API for the Godot Game Engine.
+		An ecosystem of tools for Godot Engine and Valve's Steam.
 	</brief_description>
 	<description>
-		An open-source and fully functional Steamworks SDK / API module and plug-in for the Godot Game Engine.
 		Full documentation and tutorials are available at https://godotsteam.com/.
 	</description>
 	<tutorials>
