@@ -1,6 +1,7 @@
-#include "steam/steam_api.h"
+#ifndef GODOTSTEAM_CONSTANTS_H
+#define GODOTSTEAM_CONSTANTS_H
 
-// Define Steam API constants
+
 // Constants with 'deprecated/': these were listed in the SDK docs but do not exist in the header files; safe to remove probably
 // Possibly deprecated or never existed?
 #define ACCOUNT_ID_INVALID k_uAccountIdInvalid
@@ -133,8 +134,10 @@
 #define UFS_TAG_VALUE_MAX k_cubUFSTagValueMax
 
 // Define Timeline constants
+#define MAX_PHASE_ID_LENGTH k_cchMaxPhaseIDLength
 #define MAX_TIMELINE_PRIORITY k_unMaxTimelinePriority
 #define MAX_TIMELINE_EVENT_DURATION k_flMaxTimelineEventDuration
+#define TIMELINE_PRIORITY_KEEP_CURRENT_VALUE k_unTimelinePriority_KeepCurrentValue
 
 // Define UGC constants
 #define DEVELOPER_METADATA_MAX k_cchDeveloperMetadataMax
@@ -146,3 +149,6 @@
 #define LEADERBOARD_DETAIL_MAX k_cLeaderboardDetailsMax
 #define LEADERBOARD_NAME_MAX k_cchLeaderboardNameMax
 #define STAT_NAME_MAX k_cchStatNameMax
+
+
+#endif // GODOTSTEAM_CONSTANTS_H

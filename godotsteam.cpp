@@ -11,6 +11,7 @@
 
 // Include some system headers
 #include "fstream"
+#include "iterator"
 #include "vector"
 
 
@@ -18,13 +19,13 @@ Steam *Steam::singleton = NULL;
 
 
 Steam::Steam() :
-	// Apps callbacks ////////////////////////////
+	// Apps
 	callbackDLCInstalled(this, &Steam::dlc_installed),
 	callbackFileDetailsResult(this, &Steam::file_details_result),
 	callbackNewLaunchURLParameters(this, &Steam::new_launch_url_parameters),
 	callbackTimedTrialStatus(this, &Steam::timed_trial_status),
 
-	// Friends callbacks ////////////////////////
+	// Friends
 	callbackAvatarLoaded(this, &Steam::avatar_loaded),
 	callbackAvatarImageLoaded(this, &Steam::avatar_image_loaded),
 	callbackClanActivityDownloaded(this, &Steam::clan_activity_downloaded),
@@ -44,7 +45,7 @@ Steam::Steam() :
 	callbackUnreadChatMessagesChanged(this, &Steam::unread_chat_messages_changed),
 	callbackEquippedProfileItemsChanged(this, &Steam::equipped_profile_items_changed),
 
-	// Game Search callbacks ////////////////////
+	// Game Search
 	callbackSearchForGameProgress(this, &Steam::search_for_game_progress),
 	callbackSearchForGameResult(this, &Steam::search_for_game_result),
 	callbackRequestPlayersForGameProgress(this, &Steam::request_players_for_game_progress),
@@ -53,7 +54,7 @@ Steam::Steam() :
 	callbackSubmitPlayerResult(this, &Steam::submit_player_result),
 	callbackEndGameResult(this, &Steam::end_game_result),
 
-	// HTML Surface callbacks ///////////////////
+	// HTML Surface
 	callbackHTMLCanGoBackandforward(this, &Steam::html_can_go_backandforward),
 	callbackHTMLChangedTitle(this, &Steam::html_changed_title),
 	callbackHTMLCloseBrowser(this, &Steam::html_close_browser),
@@ -76,23 +77,23 @@ Steam::Steam() :
 	callbackHTMLURLChanged(this, &Steam::html_url_changed),
 	callbackHTMLVerticalScroll(this, &Steam::html_vertical_scroll),
 
-	// HTTP callbacks ///////////////////////////
+	// HTTP
 	callbackHTTPRequestCompleted(this, &Steam::http_request_completed),
 	callbackHTTPRequestDataReceived(this, &Steam::http_request_data_received),
 	callbackHTTPRequestHeadersReceived(this, &Steam::http_request_headers_received),
 
-	// Input callbacks //////////////////////////
+	// Input
 	callbackInputDeviceConnected(this, &Steam::input_device_connected),
 	callbackInputDeviceDisconnected(this, &Steam::input_device_disconnected),
 	callbackInputConfigurationLoaded(this, &Steam::input_configuration_loaded),
 	callbackInputGamePadSlotChange(this, &Steam::input_gamepad_slot_change),
 
-	// Inventory callbacks //////////////////////
+	// Inventory
 	callbackInventoryDefinitionUpdate(this, &Steam::inventory_definition_update),
 	callbackInventoryFullUpdate(this, &Steam::inventory_full_update),
 	callbackInventoryResultReady(this, &Steam::inventory_result_ready),
 
-	// Matchmaking callbacks ////////////////////
+	// Matchmaking
 	callbackFavoritesListAccountsUpdated(this, &Steam::favorites_list_accounts_updated),
 	callbackFavoritesListChanged(this, &Steam::favorites_list_changed),
 	callbackLobbyMessage(this, &Steam::lobby_message),
@@ -103,11 +104,11 @@ Steam::Steam() :
 	callbackLobbyInvite(this, &Steam::lobby_invite),
 	callbackLobbyKicked(this, &Steam::lobby_kicked),
 
-	// Music callbacks //////////////////////////
+	// Music
 	callbackMusicPlaybackStatusHasChanged(this, &Steam::music_playback_status_has_changed),
 	callbackMusicVolumeHasChanged(this, &Steam::music_volume_has_changed),
 
-	// Music Remote callbacks ///////////////////
+	// Music Remote
 	callbackMusicPlayerRemoteToFront(this, &Steam::music_player_remote_to_front),
 	callbackMusicPlayerRemoteWillActivate(this, &Steam::music_player_remote_will_activate),
 	callbackMusicPlayerRemoteWillDeactivate(this, &Steam::music_player_remote_will_deactivate),
@@ -123,47 +124,47 @@ Steam::Steam() :
 	callbackMusicPlayerWantsVolume(this, &Steam::music_player_wants_volume),
 	callbackMusicPlayerWillQuit(this, &Steam::music_player_will_quit),
 
-	// Networking callbacks /////////////////////
+	// Networking
 	callbackP2PSessionConnectFail(this, &Steam::p2p_session_connect_fail),
 	callbackP2PSessionRequest(this, &Steam::p2p_session_request),
 
-	// Networking Messages callbacks ////////////
+	// Networking Messages
 	callbackNetworkMessagesSessionRequest(this, &Steam::network_messages_session_request),
 	callbackNetworkMessagesSessionFailed(this, &Steam::network_messages_session_failed),
 
-	// Networking Sockets callbacks /////////////
+	// Networking Sockets
 	callbackNetworkConnectionStatusChanged(this, &Steam::network_connection_status_changed),
 	callbackNetworkAuthenticationStatus(this, &Steam::network_authentication_status),
 	callbackNetworkingFakeIPResult(this, &Steam::fake_ip_result),
 
-	// Networking Utils callbacks ///////////////
+	// Networking Utils
 	callbackRelayNetworkStatus(this, &Steam::relay_network_status),
 
-	// Parental Settings callbacks //////////////
+	// Parental Settings
 	callbackParentlSettingChanged(this, &Steam::parental_setting_changed),
 
-	// Parties callbacks ////////////////////////
+	// Parties
 	callbackReserveNotification(this, &Steam::reservation_notification),
 	callbackAvailableBeaconLocationsUpdated(this, &Steam::available_beacon_locations_updated),
 	callbackActiveBeaconsUpdated(this, &Steam::active_beacons_updated),
 
-	// Remote Play callbacks ////////////////////
+	// Remote Play
 	callbackRemotePlaySessionConnected(this, &Steam::remote_play_session_connected),
 	callbackRemotePlaySessionDisconnected(this, &Steam::remote_play_session_disconnected),
 
-	// Remote Storage callbacks /////////////////
+	// Remote Storage
 	callbackLocalFileChanged(this, &Steam::local_file_changed),
 
-	// Screenshot callbacks /////////////////////
+	// Screenshot
 	callbackScreenshotReady(this, &Steam::screenshot_ready),
 	callbackScreenshotRequested(this, &Steam::screenshot_requested),
 
-	// UGC callbacks ////////////////////////////
+	// UGC
 	callbackItemDownloaded(this, &Steam::item_downloaded),
 	callbackItemInstalled(this, &Steam::item_installed),
 	callbackUserSubscribedItemsListChanged(this, &Steam::user_subscribed_items_list_changed),
 
-	// User callbacks ///////////////////////////
+	// User
 	callbackClientGameServerDeny(this, &Steam::client_game_server_deny),
 	callbackGameWebCallback(this, &Steam::game_web_callback),
 	callbackGetAuthSessionTicketResponse(this, &Steam::get_auth_session_ticket_response),
@@ -175,14 +176,13 @@ Steam::Steam() :
 	callbackSteamServerDisconnected(this, &Steam::steam_server_disconnected),
 	callbackValidateAuthTicketResponse(this, &Steam::validate_auth_ticket_response),
 
-	// User stat callbacks //////////////////////
-	callbackCurrentStatsReceived(this, &Steam::current_stats_received),
+	// User Stats
 	callbackUserAchievementIconFetched(this, &Steam::user_achievement_icon_fetched),
 	callbackUserAchievementStored(this, &Steam::user_achievement_stored),
 	callbackUserStatsStored(this, &Steam::user_stats_stored),
 	callbackUserStatsUnloaded(this, &Steam::user_stats_unloaded),
 
-	// Utility callbacks ////////////////////////
+	// Utility
 	callbackGamepadTextInputDismissed(this, &Steam::gamepad_text_input_dismissed),
 	callbackIPCountry(this, &Steam::ip_country),
 	callbackLowPower(this, &Steam::low_power),
@@ -192,7 +192,7 @@ Steam::Steam() :
 	callbackFloatingGamepadTextInputDismissed(this, &Steam::floating_gamepad_text_input_dismissed),
 	callbackFilterTextDictionaryChanged(this, &Steam::filter_text_dictionary_changed),
 
-	// Video callbacks //////////////////////////
+	// Video
 	callbackGetOPFSettingsResult(this, &Steam::get_opf_settings_result),
 	callbackGetVideoResult(this, &Steam::get_video_result)
 {
@@ -203,8 +203,7 @@ Steam::Steam() :
 
 
 ///// INTERNAL FUNCTIONS
-/////////////////////////////////////////////////
-//
+
 // Helper function to turn an array of options into an array of SteamNetworkingConfigValue_t structs
 // These arrays contain dictionaries of { NetworkingConfigValue enum : value for config }
 const SteamNetworkingConfigValue_t *Steam::convert_config_options(Dictionary config_options) {
@@ -350,7 +349,7 @@ String Steam::getStringFromIP(uint32 ip_integer) {
 	if (ip_integer > 0) {
 		this_address.SetIPv4(ip_integer, 0);
 		char this_ip[SteamNetworkingIPAddr::k_cchMaxString];
-		this_address.ToString(this_ip, SteamNetworkingIPAddr::k_cchMaxString, false);
+		this_address.ToString(this_ip, std::size(this_ip), false);
 		ip_address = String(this_ip);
 	}
 	return ip_address;
@@ -359,14 +358,13 @@ String Steam::getStringFromIP(uint32 ip_integer) {
 // Convert a Steam IP Address to a string
 String Steam::getStringFromSteamIP(SteamNetworkingIPAddr this_address) {
 	char this_ip[SteamNetworkingIPAddr::k_cchMaxString];
-	this_address.ToString(this_ip, SteamNetworkingIPAddr::k_cchMaxString, false);
+	this_address.ToString(this_ip, std::size(this_ip), false);
 	return String(this_ip);
 }
 
 
 ///// MAIN FUNCTIONS
-/////////////////////////////////////////////////
-//
+
 // Convert a SteamID64 into a SteamID
 uint32_t Steam::getSteamID32(uint64_t steam_id) {
 	CSteamID this_steam_id = (uint64)steam_id;
@@ -446,10 +444,6 @@ Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id, bool embed_cal
 		current_app_id = app_id;
 		current_steam_id = SteamUser()->GetSteamID().ConvertToUint64();
 
-		if (SteamUserStats() != NULL && retrieve_stats) {
-			requestCurrentStats();
-		}
-
 		// Attach the callbacks, if set
 		if (embed_callbacks) {
 			were_callbacks_embedded = true;
@@ -497,11 +491,6 @@ Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id, bool embed_c
 		current_app_id = app_id;
 		current_steam_id = SteamUser()->GetSteamID().ConvertToUint64();
 
-		// Get the current stats, if set
-		if (SteamUserStats() != NULL && retrieve_stats) {
-			requestCurrentStats();
-		}
-
 		// Attach the callbacks, if set
 		if (embed_callbacks) {
 			were_callbacks_embedded = true;
@@ -529,8 +518,7 @@ void Steam::steamShutdown() {
 
 
 ///// APPS
-/////////////////////////////////////////////////
-//
+
 // Return the build ID for this app; will change based on backend updates.
 int Steam::getAppBuildId() {
 	ERR_FAIL_COND_V_MSG(SteamApps() == NULL, 0, "[STEAM] Apps class not found when calling: getAppBuildId");
@@ -810,8 +798,7 @@ void Steam::uninstallDLC(uint32_t dlc_id) {
 
 
 ///// FRIENDS
-/////////////////////////////////////////////////
-//
+
 // Activates the overlay with optional dialog to open the following: "Friends", "Community", "Players", "Settings",
 // "OfficialGameGroup", "Stats", "Achievements", "LobbyInvite".
 void Steam::activateGameOverlay(const String &url) {
@@ -1119,14 +1106,14 @@ String Steam::getFriendPersonaNameHistory(uint64_t steam_id, int name_history) {
 }
 
 // Returns the current status of the specified user.
-Steam::PersonaState Steam::getFriendPersonaState(uint64_t steam_id) {
+PersonaState Steam::getFriendPersonaState(uint64_t steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, PERSONA_STATE_OFFLINE, "[STEAM] Friends class not found when calling: getFriendPersonaState");
 	CSteamID user_id = (uint64)steam_id;
 	return PersonaState(SteamFriends()->GetFriendPersonaState(user_id));
 }
 
 // Returns a relationship to a user.
-Steam::FriendRelationship Steam::getFriendRelationship(uint64_t steam_id) {
+FriendRelationship Steam::getFriendRelationship(uint64_t steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, FRIEND_RELATION_NONE, "[STEAM] Friends class not found when calling: getFriendRelationship");
 	CSteamID user_id = (uint64)steam_id;
 	return FriendRelationship(SteamFriends()->GetFriendRelationship(user_id));
@@ -1221,7 +1208,7 @@ String Steam::getPersonaName() {
 }
 
 // Gets the status of the current user.
-Steam::PersonaState Steam::getPersonaState() {
+PersonaState Steam::getPersonaState() {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, PERSONA_STATE_OFFLINE, "[STEAM] Friends class not found when calling: getPersonaState");
 	return PersonaState(SteamFriends()->GetPersonaState());
 }
@@ -1546,8 +1533,7 @@ bool Steam::setRichPresence(const String &key, const String &value) {
 
 
 ///// GAME SEARCH
-/////////////////////////////////////////////////
-//
+
 // A keyname and a list of comma separated values: one of which is must be found in order for the match to qualify; fails if a
 // search is currently in progress.
 int Steam::addGameSearchParams(const String &key, const String &values) {
@@ -1646,8 +1632,7 @@ int Steam::endGame(uint64_t game_id) {
 
 
 ///// HTML SURFACE
-/////////////////////////////////////////////////
-//
+
 // Add a header to any HTTP requests from this browser.
 void Steam::addHeader(const String &key, const String &value, uint32 this_handle) {
 	ERR_FAIL_COND_MSG(SteamHTMLSurface() == NULL, "[STEAM] HTML Surface class not found when calling: addHeader");
@@ -1975,8 +1960,7 @@ void Steam::viewSource(uint32 this_handle) {
 
 
 ///// HTTP
-/////////////////////////////////////////////////
-//
+
 // Creates a cookie container to store cookies during the lifetime of the process. This API is just for during process lifetime,
 // after steam restarts no cookies are persisted and you have no way to access the cookie container across repeat executions of
 // your process.
@@ -2047,14 +2031,14 @@ PoolByteArray Steam::getHTTPResponseHeaderValue(uint32 request_handle, const Str
 	return header_data;
 }
 
-// Gets the body data from a streaming HTTP response.
-PoolByteArray Steam::getHTTPStreamingResponseBodyData(uint32 request_handle, uint32 offset, uint32 buffer_size) {
-	PoolByteArray body_data;
-	ERR_FAIL_COND_V_MSG(SteamHTTP() == NULL, body_data, "[STEAM] HTTP class not found when calling: getHTTPStreamingResponseBodyData");
-	body_data.resize(buffer_size);
-	SteamHTTP()->GetHTTPStreamingResponseBodyData(request_handle, offset, body_data.write().ptr(), buffer_size);
-	return body_data;
-}
+// Gets the body data from a streaming HTTP response.0
+// PoolByteArray Steam::getHTTPStreamingResponseBodyData(uint32 request_handle, uint32 offset, uint32 buffer_size) {
+// 	PoolByteArray body_data;
+// 	ERR_FAIL_COND_V_MSG(SteamHTTP() == NULL, body_data, "[STEAM] HTTP class not found when calling: getHTTPStreamingResponseBodyData");
+// 	body_data.resize(buffer_size);
+// 	SteamHTTP()->GetHTTPStreamingResponseBodyData(request_handle, offset, body_data.write().ptr(), buffer_size);
+// 	return body_data;
+// }
 
 // Prioritizes a request which has already been sent by moving it at the front of the queue.
 bool Steam::prioritizeHTTPRequest(uint32 request_handle) {
@@ -2156,8 +2140,7 @@ bool Steam::setHTTPRequestUserAgentInfo(uint32 request_handle, const String &use
 
 
 ///// INPUT
-/////////////////////////////////////////////////
-//
+
 // Reconfigure the controller to use the specified action set.
 void Steam::activateActionSet(uint64_t input_handle, uint64_t action_set_handle) {
 	ERR_FAIL_COND_MSG(SteamInput() == NULL, "[STEAM] Input not found when calling: activateActionSet");
@@ -2208,7 +2191,7 @@ uint64_t Steam::getActionSetHandle(const String &action_set_name) {
 
 // Get an action origin that you can use in your glyph look up table or passed into GetGlyphForActionOrigin or
 // GetStringForActionOrigin.
-Steam::InputActionOrigin Steam::getActionOriginFromXboxOrigin(uint64_t input_handle, int origin) {
+InputActionOrigin Steam::getActionOriginFromXboxOrigin(uint64_t input_handle, int origin) {
 	ERR_FAIL_COND_V_MSG(SteamInput() == NULL, INPUT_ACTION_ORIGIN_NONE, "[STEAM] Input not found when calling: getActionOriginFromXboxOrigin");
 	return InputActionOrigin(SteamInput()->GetActionOriginFromXboxOrigin((InputHandle_t)input_handle, (EXboxOrigin)origin));
 }
@@ -2367,10 +2350,10 @@ String Steam::getGlyphSVGForActionOrigin(InputActionOrigin origin, uint32 flags)
 }
 
 // Get the input type (device model) for the specified controller.
-Steam::InputType Steam::getInputTypeForHandle(uint64_t input_handle) {
+InputType Steam::getInputTypeForHandle(uint64_t input_handle) {
 	ERR_FAIL_COND_V_MSG(SteamInput() == NULL, INPUT_TYPE_UNKNOWN, "[STEAM] Input not found when calling: getInputTypeForHandle");
 	ESteamInputType this_input_type = SteamInput()->GetInputTypeForHandle((InputHandle_t)input_handle);
-	return (Steam::InputType)this_input_type;
+	return (InputType)this_input_type;
 }
 
 // Returns raw motion data for the specified controller.
@@ -2569,12 +2552,12 @@ bool Steam::waitForData(bool wait_forever, uint32 timeout) {
 
 
 ///// INVENTORY
-/////
+
 ///// When dealing with any inventory handles, you should call CheckResultSteamID on the result handle when it completes to verify
 ///// that a remote player is not pretending to have a different user's inventory.
 ///// Also, you must call DestroyResult on the provided inventory result when you are done with it.
-/////////////////////////////////////////////////
-//
+
+
 // Grant a specific one-time promotional item to the current user.
 int32 Steam::addPromoItem(uint32 item) {
 	int32 new_inventory_handle = 0;
@@ -2704,11 +2687,10 @@ int32 Steam::getAllItems() {
 // Gets a string property from the specified item definition.  Gets a property value for a specific item definition.
 String Steam::getItemDefinitionProperty(uint32 definition, const String &name) {
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, "", "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
-	uint32 buffer_size = STEAM_BUFFER_SIZE;
-	char *buffer = new char[buffer_size];
+	char buffer[STEAM_BUFFER_SIZE];
+	uint32 buffer_size = std::size(buffer);
 	SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
 	String property = String::utf8(buffer, buffer_size);
-	delete[] buffer;
 	return property;
 }
 
@@ -2771,8 +2753,8 @@ Array Steam::getItemsWithPrices() {
 // Gets the dynamic properties from an item in an inventory result set.
 String Steam::getResultItemProperty(uint32 index, const String &name, int32 this_inventory_handle) {
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, "", "[STEAM] Inventory class not found when calling: getResultItemProperty");
-	uint32 buffer_size = 256;
-	char *value = new char[buffer_size];
+	char value[256];
+	uint32 buffer_size = std::size(value);
 
 	if (this_inventory_handle == 0) {
 		this_inventory_handle = inventory_handle;
@@ -2784,7 +2766,6 @@ String Steam::getResultItemProperty(uint32 index, const String &name, int32 this
 	else {
 		SteamInventory()->GetResultItemProperty((SteamInventoryResult_t)this_inventory_handle, index, name.utf8().get_data(), value, &buffer_size);
 	}
-	delete[] value;
 	return String::utf8(value, buffer_size);
 }
 
@@ -2815,12 +2796,12 @@ Array Steam::getResultItems(int32 this_inventory_handle) {
 }
 
 // Find out the status of an asynchronous inventory result handle.
-Steam::Result Steam::getResultStatus(int32 this_inventory_handle) {
+Result Steam::getResultStatus(int32 this_inventory_handle) {
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, RESULT_FAIL, "[STEAM] Inventory class not found when calling: getResultStatus");
 	if (this_inventory_handle == 0) {
 		this_inventory_handle = inventory_handle;
 	}
-	return (Steam::Result)SteamInventory()->GetResultStatus((SteamInventoryResult_t)this_inventory_handle);
+	return (Result)SteamInventory()->GetResultStatus((SteamInventoryResult_t)this_inventory_handle);
 }
 
 // Gets the server time at which the result was generated.
@@ -2999,8 +2980,6 @@ int32 Steam::triggerItemDrop(uint32 definition) {
 
 
 ///// MATCHMAKING
-/////////////////////////////////////////////////
-//
 
 // Adds the game server to the local list; updates the time played of the server if it already exists in the list.
 int Steam::addFavoriteGame(String ip, uint16 port, uint16 query_port, uint32 flags, uint32 last_played) {
@@ -3278,8 +3257,7 @@ bool Steam::setLobbyType(uint64_t steam_lobby_id, LobbyType lobby_type) {
 
 
 ///// MATCHMAKING SERVERS
-/////////////////////////////////////////////////
-//
+
 // Cancel an outstanding server list request.
 void Steam::cancelQuery(uint64_t this_server_list_request) {
 	ERR_FAIL_COND_MSG(SteamMatchmakingServers() == NULL, "[STEAM] Matchmaking Servers class not found when calling: cancelQuery");
@@ -3445,8 +3423,7 @@ int Steam::serverRules(const String &ip, uint16 port) {
 
 
 ///// MUSIC
-/////////////////////////////////////////////////
-//
+
 // Is Steam music enabled.
 bool Steam::musicIsEnabled() {
 	ERR_FAIL_COND_V_MSG(SteamMusic() == NULL, false, "[STEAM] Music class not found when calling: musicIsEnabled");
@@ -3460,7 +3437,7 @@ bool Steam::musicIsPlaying() {
 }
 
 // Gets the current status of the Steam Music player
-Steam::AudioPlaybackStatus Steam::getPlaybackStatus() {
+AudioPlaybackStatus Steam::getPlaybackStatus() {
 	ERR_FAIL_COND_V_MSG(SteamMusic() == NULL, AUDIO_PLAYBACK_UNDEFINED, "[STEAM] Music class not found when calling: getPlaybackStatus");
 	return AudioPlaybackStatus(SteamMusic()->GetPlaybackStatus());
 }
@@ -3503,8 +3480,7 @@ void Steam::musicSetVolume(float volume) {
 
 
 ///// MUSIC REMOTE
-/////////////////////////////////////////////////
-//
+
 // These functions do not have any offical notes or comments.  All descriptions are assumed.
 //
 // If remote access was successfully activated.
@@ -3703,8 +3679,7 @@ bool Steam::updateVolume(float volume) {
 
 
 ///// NETWORKING
-/////////////////////////////////////////////////
-//
+
 // This allows the game to specify accept an incoming packet.
 bool Steam::acceptP2PSessionWithUser(uint64_t remote_steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamNetworking() == NULL, false, "[STEAM] Game Server class not found when calling: acceptP2PSessionWithUser");
@@ -3790,8 +3765,7 @@ bool Steam::sendP2PPacket(uint64_t remote_steam_id, PoolByteArray data, P2PSend 
 
 
 ///// NETWORKING MESSAGES
-/////////////////////////////////////////////////
-//
+
 // AcceptSessionWithUser() should only be called in response to a SteamP2PSessionRequest_t callback SteamP2PSessionRequest_t 
 // will be posted if another user tries to send you a message, and you haven't tried to talk to them.
 bool Steam::acceptSessionWithUser(uint64_t remote_steam_id) {
@@ -3906,8 +3880,7 @@ int Steam::sendMessageToUser(uint64_t remote_steam_id, const PoolByteArray data,
 
 
 ///// NETWORKING SOCKETS
-/////////////////////////////////////////////////
-//
+
 // Creates a "server" socket that listens for clients to connect to by calling ConnectByIPAddress, over ordinary UDP (IPv4 or IPv6)
 uint32 Steam::createListenSocketIP(String ip_address, Dictionary config_options) {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, 0, "[STEAM] Networking Sockets class not found when calling: createListenSocketIP");
@@ -3996,24 +3969,35 @@ Dictionary Steam::sendMessageToConnection(uint32 connection_handle, const PoolBy
 // Send one or more messages without copying the message payload. This is the most efficient way to send messages. To use this
 // function, you must first allocate a message object using ISteamNetworkingUtils::AllocateMessage. (Do not declare one on the
 // stack or allocate your own.)
-Array Steam::sendMessages(const PoolByteArray data, uint32 connection_handle, int flags) {
-	Array result;
-	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, result, "[STEAM] Networking Sockets class not found when calling: sendMessages");
-	SteamNetworkingMessage_t *networkMessage;
-	networkMessage = SteamNetworkingUtils()->AllocateMessage(0);
-	networkMessage->m_pData = (void *)data.read().ptr();
-	networkMessage->m_cbSize = data.size();
-	networkMessage->m_conn = (HSteamNetConnection)connection_handle;
-	networkMessage->m_nFlags = flags;
-	int64 *message_num_or_result = new int64[data.size()];
-	SteamNetworkingSockets()->SendMessages(data.size(), &networkMessage, message_num_or_result);
-	for (int i = 0; i < data.size(); i++ ) {
-		result.append( (int)message_num_or_result[i] );
-	}
-	delete[] message_num_or_result;
-	networkMessage->Release();
-	return result;
-}
+// Current does not compile on Windows but does on Linux
+// Array Steam::sendMessages(Array messages, uint32 connection_handle, int flags) {
+// 	Array result;
+// 	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, result, "[STEAM SERVER] Networking Sockets class not found when calling: sendMessages");
+
+// 	int total_messages = messages.size();
+// 	SteamNetworkingMessage_t *messages_payload[total_messages];
+
+// 	for(int m = 0; m < total_messages; m++) {
+// 		SteamNetworkingMessage_t *network_message = SteamNetworkingUtils()->AllocateMessage(sizeof(messages[m]));
+// 		network_message->m_pData = messages[m];
+// 		network_message->m_conn = (HSteamNetConnection)connection_handle;
+// 		network_message->m_nFlags = flags;
+
+// 		messages_payload[m] = network_message;
+// 		// Can or should we release this here?
+// 		network_message->Release();
+// 	}
+
+// 	int64 *message_num_or_result = new int64[messages.size()];
+// 	SteamNetworkingSockets()->SendMessages(total_messages, messages_payload, message_num_or_result);
+
+// 	for (int i = 0; i < messages.size(); i++ ) {
+// 		result.append( (int)message_num_or_result[i] );
+// 	}
+
+// 	delete[] message_num_or_result;
+// 	return result;
+// }
 
 // Flush any messages waiting on the Nagle timer and send them at the next transmission opportunity (often that means right now).
 int Steam::flushMessagesOnConnection(uint32 connection_handle) {
@@ -4186,14 +4170,14 @@ String Steam::getListenSocketAddress(uint32 socket, bool with_port) {
 // Indicate our desire to be ready participate in authenticated communications. If we are currently not ready, then steps will be
 // taken to obtain the necessary certificates. (This includes a certificate for us, as well as any CA certificates needed to
 // authenticate peers.)
-Steam::NetworkingAvailability Steam::initAuthentication() {
+NetworkingAvailability Steam::initAuthentication() {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, NETWORKING_AVAILABILITY_UNKNOWN, "[STEAM] Networking Sockets class not found when calling: initAuthentication");
 	return NetworkingAvailability(SteamNetworkingSockets()->InitAuthentication());
 }
 
 // Query our readiness to participate in authenticated communications. A SteamNetAuthenticationStatus_t callback is posted any
 // time this status changes, but you can use this function to query it at any time.
-Steam::NetworkingAvailability Steam::getAuthenticationStatus() {
+NetworkingAvailability Steam::getAuthenticationStatus() {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingSockets() == NULL, NETWORKING_AVAILABILITY_UNKNOWN, "[STEAM] Networking Sockets class not found when calling: getAuthenticationStatus");
 	return NetworkingAvailability(SteamNetworkingSockets()->GetAuthenticationStatus(NULL));
 }
@@ -4460,8 +4444,7 @@ void Steam::createFakeUDPPort(int fake_server_port_index) {
 
 
 ///// NETWORKING UTILS
-/////////////////////////////////////////////////
-//
+
 // If you know that you are going to be using the relay network (for example, because you anticipate making P2P connections), call
 // this to initialize the relay network. If you do not call this, the initialization will be delayed until the first time you use
 // a feature that requires access to the relay network, which will delay that first access.
@@ -4471,7 +4454,7 @@ void Steam::initRelayNetworkAccess() {
 }
 
 // Fetch current status of the relay network.  If you want more details, you can pass a non-NULL value.
-Steam::NetworkingAvailability Steam::getRelayNetworkStatus() {
+NetworkingAvailability Steam::getRelayNetworkStatus() {
 	ERR_FAIL_COND_V_MSG(SteamNetworkingUtils() == NULL, NETWORKING_AVAILABILITY_UNKNOWN, "[STEAM] Networking Utils class not found when calling: getRelayNetworkStatus");
 	return NetworkingAvailability(SteamNetworkingUtils()->GetRelayNetworkStatus(NULL));
 }
@@ -4681,8 +4664,7 @@ uint64_t Steam::getLocalTimestamp() {
 
 
 ///// PARENTAL SETTINGS
-/////////////////////////////////////////////////
-//
+
 // There are no notes about these functions, names can assume functionality.
 bool Steam::isAppBlocked(uint32 app_id) {
 	ERR_FAIL_COND_V_MSG(SteamParentalSettings() == NULL, false, "[STEAM] Parental Settings class not found when calling: isAppBlocked");
@@ -4716,8 +4698,7 @@ bool Steam::isParentalLockLocked() {
 
 
 ///// PARTIES
-/////////////////////////////////////////////////
-//
+
 // To cancel a reservation (due to timeout or user input), call this. Steam will open a new reservation slot. Note: The user may
 // already be in-flight to your game, so it's possible they will still connect and try to join your party.
 void Steam::cancelReservation(uint64_t beacon_id, uint64_t steam_id) {
@@ -4846,8 +4827,7 @@ void Steam::onReservationCompleted(uint64_t beacon_id, uint64_t steam_id) {
 
 
 ///// REMOTE PLAY
-/////////////////////////////////////////////////
-//
+
 // Get the number of currently connected Steam Remote Play sessions.
 uint32 Steam::getSessionCount() {
 	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, 0, "[STEAM] Remote Play class not found when calling: getSessionCount");
@@ -4910,8 +4890,7 @@ bool Steam::startRemotePlayTogether(bool show_overlay) {
 
 
 ///// REMOTE STORAGE
-/////////////////////////////////////////////////
-//
+
 // Indicate to Steam the beginning / end of a set of local file operations - for example, writing a game save that requires
 // updating two files.
 bool Steam::beginFileWriteBatch() {
@@ -5215,8 +5194,7 @@ PoolByteArray Steam::ugcRead(uint64_t content, int32 data_size, uint32 offset, U
 
 
 ///// SCREENSHOTS
-/////////////////////////////////////////////////
-//
+
 // Adds a screenshot to the user's Steam screenshot library from disk.
 uint32_t Steam::addScreenshotToLibrary(const String &filename, const String &thumbnail_filename, int width, int height) {
 	ERR_FAIL_COND_V_MSG(SteamScreenshots() == NULL, 0, "[STEAM] Screenshots class not found when calling: addScreenshotToLibrary");
@@ -5280,38 +5258,127 @@ uint32_t Steam::writeScreenshot(const PoolByteArray &rgb, int width, int height)
 
 
 ///// TIMELINE
-/////////////////////////////////////////////////
-//
-// Use this to mark an event on the Timeline. The event can be instantaneous or take some amount of time to complete, depending on
-// the value passed in duration.
-void Steam::addTimelineEvent(String icon, String title, String description, int32_t priority, float start_offset, float duration, TimelineEventClipPriority possible_clip) {
-	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: addTimelineEvent");
-	SteamTimeline()->AddTimelineEvent(icon.utf8().get_data(), title.utf8().get_data(), description.utf8().get_data(), priority, start_offset, duration, (ETimelineEventClipPriority)possible_clip);
+
+// Add a tag that applies to the entire phase.
+void Steam::addGamePhaseTag(const String &tag_name, const String &tag_icon, const String &tag_group, uint32 priority ){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: addGamePhaseTag");
+	SteamTimeline()->AddGamePhaseTag(tag_name.utf8().get_data(), tag_icon.utf8().get_data(), tag_group.utf8().get_data(), priority);
+}
+
+// Use this to mark an event (A) on the Timeline. This event will be instantaneous. (See addRangeTimelineEvent to add events that happened over time.)
+uint64_t Steam::addInstantaneousTimelineEvent(const String &title, const String &description, const String &icon, uint32 icon_priority, float start_offset_seconds, TimelineEventClipPriority possible_clip){
+	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: addInstantaneousTimelineEvent");
+	return SteamTimeline()->AddInstantaneousTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), icon_priority, start_offset_seconds, (ETimelineEventClipPriority)possible_clip);
+}
+
+// Use this to mark an event (A) on the Timeline that takes some amount of time to complete.
+uint64_t Steam::addRangeTimelineEvent(const String &title, const String &description, const String &icon, uint32 icon_priority, float start_offset_seconds, float duration, TimelineEventClipPriority possible_clip){
+	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: addRangeTimelineEvent");
+	return (uint64_t)SteamTimeline()->AddRangeTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), icon_priority, start_offset_seconds, duration, (ETimelineEventClipPriority)possible_clip);
 }
 
 // Removes the description set for the specific clip.
-void Steam::clearTimelineStateDescription(float time_delta) {
-	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: clearTimelineStateDescription");
-	SteamTimeline()->ClearTimelineStateDescription(time_delta);		
+void Steam::clearTimelineTooltip(float time_delta) {
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: clearTimelineTooltip");
+	SteamTimeline()->ClearTimelineTooltip(time_delta);		
 }
 
-// Changes the color of the timeline bar. See TimelineGameMode comments for how to use each value.
-void Steam::setTimelineGameMode(TimelineGameMode mode) {
+// Add a tag to whatever time range is represented by the event.
+void Steam::doesEventRecordingExist(uint64_t this_event){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: doesEventRecordingExist");
+	SteamAPICall_t api_call = SteamTimeline()->DoesEventRecordingExist(this_event);
+	callResultTimelineEvenRecordingExists.Set(api_call, this, &Steam::timeline_event_recording_exists);
+}
+
+// Use this to determine if video recordings exist for the specified game phase. Steam will sent a timeline_game_phase_recording_exists callback with the result.
+// This can be useful when the game needs to decide whether or not to show a control that will call openOverlayToGamePhase.
+void Steam::doesGamePhaseRecordingExist(const String &phase_id){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: doesGamePhaseRecordingExist");
+	SteamAPICall_t api_call = SteamTimeline()->DoesGamePhaseRecordingExist(phase_id.utf8().get_data());
+	callResultTimelineGamePhaseRecordingExists.Set(api_call, this, &Steam::timeline_game_phase_recording_exists);
+}
+
+// Use this to end a game phase that was started with startGamePhase.
+void Steam::endGamePhase(){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: endGamePhase");
+	SteamTimeline()->EndGamePhase();
+}
+
+// Ends a range timeline event and shows it in the UI.
+void Steam::endRangeTimelineEvent(uint64_t this_event, float end_offset_seconds){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: endRangeTimelineEvent");
+	SteamTimeline()->EndRangeTimelineEvent(this_event, end_offset_seconds);
+}
+
+// Opens the Steam overlay to a game phase.
+void Steam::openOverlayToGamePhase(const String &phase_id){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: openOverlayToGamePhase");
+	SteamTimeline()->OpenOverlayToGamePhase(phase_id.utf8().get_data());
+}
+
+// Opens the Steam overlay to a timeline event.
+void Steam::openOverlayToTimelineEvent(const uint64_t this_event){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: openOverlayToTimelineEvent");
+	SteamTimeline()->OpenOverlayToTimelineEvent(this_event);
+}
+
+// Delete the event from the timeline. This can be called on a timeline event from AddInstantaneousTimelineEvent,
+// AddRangeTimelineEvent, or StartRangeTimelineEvent/EndRangeTimelineEvent. The timeline event handle must be from the
+// current game process.
+void Steam::removeTimelineEvent(uint64_t this_event){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: removeTimelineEvent");
+	SteamTimeline()->RemoveTimelineEvent(this_event);
+}
+
+// Add a text attribute that applies to the entire phase.
+void Steam::setGamePhaseAttribute(const String &attribute_group, const String &attribute_value, uint32 priority){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setGamePhaseAttribute");
+	SteamTimeline()->SetGamePhaseAttribute(attribute_group.utf8().get_data(), attribute_value.utf8().get_data(), priority);
+}
+
+// Games can set a phase ID so they can refer back to a phase in OpenOverlayToPhase.
+void Steam::setGamePhaseID(const String &phase_id){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setGamePhaseID");
+	SteamTimeline()->SetGamePhaseID(phase_id.utf8().get_data());
+}
+
+// Changes the color of the timeline bar. See ETimelineGameMode comments for how to use each value
+void Steam::setTimelineGameMode(TimelineGameMode mode){
 	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineGameMode");
 	SteamTimeline()->SetTimelineGameMode((ETimelineGameMode)mode);
 }
 
-// Sets a description for the current game state in the timeline. These help the user to find specific moments in the timeline
-// when saving clips. Setting a new state description replaces any previous description.
-void Steam::setTimelineStateDescription(String description, float time_delta) {
-	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineStateDescription");
-	SteamTimeline()->SetTimelineStateDescription(description.utf8().get_data(), time_delta);
+// Sets a description for the current game state in the timeline. These help the user to find specific
+// moments in the timeline when saving clips. Setting a new state description replaces any previous description.
+void Steam::setTimelineTooltip(String description, float time_delta){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: setTimelineTooltip");
+	SteamTimeline()->SetTimelineTooltip(description.utf8().get_data(), time_delta);
+}
+
+// Use this to start a game phase. Game phases allow the user to navigate their background recordings and clips. Exactly what a game phase means will vary game to game, but the game phase
+// should be a section of gameplay that is usually between 10 minutes and a few hours in length, and should be the main way a user would think to divide up the game. These are presented to
+// the user in a UI that shows the date the game was played, with one row per game slice. Game phases should be used to mark sections of gameplay that the user might be interested in watching.
+void Steam::startGamePhase(){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: startGamePhase");
+	SteamTimeline()->StartGamePhase();
+}
+
+// Starts a timeline event at a the current time, plus an offset in seconds. This event must be ended with EndRangeTimelineEvent.
+// Any timeline events that have not been ended when the game exits will be discarded.
+uint64_t Steam::startRangeTimelineEvent(const String &title, const String &description, const String &icon, uint32 priority, float start_offset_seconds, TimelineEventClipPriority possible_clip){
+	ERR_FAIL_COND_V_MSG(SteamTimeline() == NULL, 0, "[STEAM] Timeline class not found when calling: startRangeTimelineEvent");
+	return (uint64_t)SteamTimeline()->StartRangeTimelineEvent(title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), priority, start_offset_seconds, (ETimelineEventClipPriority)possible_clip);
+}
+
+// Updates fields on a range timeline event that was started with StartRangeTimelineEvent, and which has not been ended.
+void Steam::updateRangeTimelineEvent(uint64_t this_event, const String &title, const String &description, const String &icon, uint32 priority, TimelineEventClipPriority possible_clip){
+	ERR_FAIL_COND_MSG(SteamTimeline() == NULL, "[STEAM] Timeline class not found when calling: updateRangeTimelineEvent");
+	SteamTimeline()->UpdateRangeTimelineEvent(this_event, title.utf8().get_data(), description.utf8().get_data(), icon.utf8().get_data(), priority, (ETimelineEventClipPriority)possible_clip);
 }
 
 
 ///// UGC
-/////////////////////////////////////////////////
-//
+
 // Adds a dependency between the given item and the appid. This list of dependencies can be retrieved by calling GetAppDependencies.
 // This is a soft-dependency that is displayed on the web. It is up to the application to determine whether the item can actually
 // be used or not.
@@ -6151,8 +6218,7 @@ bool Steam::updateItemPreviewVideo(uint64_t update_handle, uint32 index, const S
 
 
 ///// USERS
-/////////////////////////////////////////////////
-//
+
 // Set the rich presence data for an unsecured game server that the user is playing on. This allows friends to be able to view the
 // game info and join your game.
 void Steam::advertiseGame(const String &server_ip, int port) {
@@ -6162,7 +6228,7 @@ void Steam::advertiseGame(const String &server_ip, int port) {
 }
 
 // Authenticate the ticket from the entity Steam ID to be sure it is valid and isn't reused.
-Steam::BeginAuthSessionResult Steam::beginAuthSession(PoolByteArray ticket, int ticket_size, uint64_t steam_id) {
+BeginAuthSessionResult Steam::beginAuthSession(PoolByteArray ticket, int ticket_size, uint64_t steam_id) {
 	ERR_FAIL_COND_V_MSG(SteamUser() == NULL, BeginAuthSessionResult(-1), "[STEAM] User class not found when calling: beginAuthSession");
 	CSteamID auth_steam_id = createSteamID(steam_id);
 	return BeginAuthSessionResult(SteamUser()->BeginAuthSession(ticket.read().ptr(), ticket_size, auth_steam_id));
@@ -6451,8 +6517,7 @@ int Steam::userHasLicenseForApp(uint64_t steam_id, uint32_t app_id) {
 
 
 ///// USER STATS
-/////////////////////////////////////////////////
-//
+
 // Attaches a piece of user generated content the current user's entry on a leaderboard.
 void Steam::attachLeaderboardUGC(uint64_t ugc_handle, uint64_t this_leaderboard) {
 	ERR_FAIL_COND_MSG(SteamUserStats() == NULL, "[STEAM] User Stats class not found when calling: attachLeaderboardUGC");
@@ -6518,7 +6583,6 @@ Dictionary Steam::getAchievement(const String &name) {
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, achieve, "[STEAM] User Stats class not found when calling: getAchievement");
 	bool achieved = false;
 	bool achieve_exists = SteamUserStats()->GetAchievement(name.utf8().get_data(), &achieved);
-	// Testing assignment
 	achieve["ret"] = achieve_exists;
 	achieve["achieved"] = achieved;
 	return achieve;
@@ -6527,10 +6591,10 @@ Dictionary Steam::getAchievement(const String &name) {
 // Returns the percentage of users who have unlocked the specified achievement.
 Dictionary Steam::getAchievementAchievedPercent(const String &name) {
 	Dictionary achieve;
-	achieve["ret"] = false;
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, achieve, "[STEAM] User Stats class not found when calling: getAchievementAchievedPercent");
 	float percent = 0.f;
-	achieve["ret"] = SteamUserStats()->GetAchievementAchievedPercent(name.utf8().get_data(), &percent);
+	bool achieve_exists = SteamUserStats()->GetAchievementAchievedPercent(name.utf8().get_data(), &percent);
+	achieve["ret"] = achieve_exists;
 	achieve["percent"] = percent;
 	return achieve;
 }
@@ -6541,11 +6605,10 @@ Dictionary Steam::getAchievementAndUnlockTime(const String &name) {
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, achieve, "[STEAM] User Stats class not found when calling: getAchievementAndUnlockTime");
 	bool achieved = false;
 	uint32 unlock_time = 0;
-	achieve["retrieve"] = SteamUserStats()->GetAchievementAndUnlockTime(name.utf8().get_data(), &achieved, &unlock_time);
-	if (achieve["retrieve"]) {
-		achieve["achieved"] = achieved;
-		achieve["unlocked"] = unlock_time;
-	}
+	bool achieve_exists = SteamUserStats()->GetAchievementAndUnlockTime(name.utf8().get_data(), &achieved, &unlock_time);
+	achieve["ret"] = achieve_exists;
+	achieve["achieved"] = achieved;
+	achieve["unlocked"] = unlock_time;
 	return achieve;
 }
 
@@ -6619,7 +6682,7 @@ double Steam::getGlobalStatFloat(const String &name) {
 PoolIntArray Steam::getGlobalStatIntHistory(const String &name) {
 	PoolIntArray history_ints;
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, history_ints, "[STEAM] User Stats class not found when calling: getGlobalStatIntHistory");
-	uint32 history_size;
+	uint32 history_size = 0;
 	int64 *history;
 	int32 histories = SteamUserStats()->GetGlobalStatHistory(name.utf8().get_data(), history, history_size);
 	for (int32 i = 0; i < histories; i++) {
@@ -6632,7 +6695,7 @@ PoolIntArray Steam::getGlobalStatIntHistory(const String &name) {
 PoolRealArray Steam::getGlobalStatFloatHistory(const String &name) {
 	PoolRealArray history_floats;
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, history_floats, "[STEAM] User Stats class not found when calling: getGlobalStatFloatHistory");
-	uint32 history_size;
+	uint32 history_size = 0;
 	double *history;
 	int32 histories = SteamUserStats()->GetGlobalStatHistory(name.utf8().get_data(), history, history_size);
 	for (int32 i = 0; i < histories; i++) {
@@ -6837,13 +6900,6 @@ bool Steam::indicateAchievementProgress(const String &name, int current_progress
 	return SteamUserStats()->IndicateAchievementProgress(name.utf8().get_data(), current_progress, max_progress);
 }
 
-// Request all statistics and achievements from Steam servers.
-bool Steam::requestCurrentStats() {
-	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, false, "[STEAM] User Stats class not found when calling: requestCurrentStats");
-	ERR_FAIL_COND_V_MSG(!loggedOn(), false, "[STEAM] requestCurrentStats failed, user is not logged in");
-	return SteamUserStats()->RequestCurrentStats();
-}
-
 // Asynchronously fetch the data for the percentages.
 void Steam::requestGlobalAchievementPercentages() {
 	ERR_FAIL_COND_MSG(SteamUserStats() == NULL, "[STEAM] User Stats class not found when calling: requestGlobalAchievementPercentages");
@@ -6922,8 +6978,7 @@ void Steam::uploadLeaderboardScore(int score, bool keep_best, PoolIntArray detai
 
 
 ///// UTILS
-/////////////////////////////////////////////////
-//
+
 // Dismisses the floating keyboard.
 bool Steam::dismissFloatingGamepadTextInput() {
 	ERR_FAIL_COND_V_MSG(SteamUtils() == NULL, false, "[STEAM] Utils class not found when calling: dismissFloatingGamepadTextInput");
@@ -7155,8 +7210,7 @@ void Steam::startVRDashboard() {
 
 
 ///// VIDEO
-/////////////////////////////////////////////////
-//
+
 // Get the OPF details for 360 video playback.
 void Steam::getOPFSettings(uint32_t app_id) {
 	ERR_FAIL_COND_MSG(SteamVideo() == NULL, "[STEAM] Video class not found when calling: getOPFSettings");
@@ -7196,10 +7250,8 @@ Dictionary Steam::isBroadcasting() {
 
 
 ///// SIGNALS / CALLBACKS
-/////////////////////////////////////////////////
 
-
-///// APPS CALLBACKS
+///// APPS
 
 // Triggered after the current user gains ownership of DLC and that DLC is installed.
 void Steam::dlc_installed(DlcInstalled_t *call_data) {
@@ -7231,7 +7283,7 @@ void Steam::timed_trial_status(TimedTrialStatus_t *call_data) {
 }
 
 
-///// FRIENDS CALLBACKS
+///// FRIENDS
 
 // Called when a large avatar is loaded if you have tried requesting it when it was unavailable.
 void Steam::avatar_loaded(AvatarImageLoaded_t *avatar_data) {
@@ -7409,7 +7461,7 @@ void Steam::equipped_profile_items_changed(EquippedProfileItemsChanged_t *call_d
 }
 
 
-///// GAME SEARCH CALLBACKS
+///// GAME SEARCH
 
 // There are no notes about this in Valve's header files or documentation.
 void Steam::search_for_game_progress(SearchForGameProgressCallback_t *call_data) {
@@ -7492,7 +7544,7 @@ void Steam::end_game_result(EndGameResultCallback_t *call_data) {
 }
 
 
-///// HTML SURFACE CALLBACKS
+///// HTML SURFACE
 
 // Called when page history status has changed the ability to go backwards and forward.
 void Steam::html_can_go_backandforward(HTML_CanGoBackAndForward_t *call_data) {
@@ -7694,7 +7746,7 @@ void Steam::html_vertical_scroll(HTML_VerticalScroll_t *call_data) {
 }
 
 
-///// HTTP CALLBACKS
+///// HTTP
 
 // Result when an HTTP request completes. If you're using GetHTTPStreamingResponseBodyData then you should be using the HTTPRequestHeadersReceived_t or HTTPRequestDataReceived_t.
 void Steam::http_request_completed(HTTPRequestCompleted_t *call_data) {
@@ -7723,7 +7775,7 @@ void Steam::http_request_headers_received(HTTPRequestHeadersReceived_t *call_dat
 }
 
 
-///// INPUT CALLBACKS
+///// INPUT
 
 // Purpose: when callbacks are enabled this fires each time a controller action state changes
 void Steam::inputActionEventCallback(SteamInputActionEvent_t *call_data) {
@@ -7798,7 +7850,7 @@ void Steam::input_gamepad_slot_change(SteamInputGamepadSlotChange_t *call_data) 
 }
 
 
-///// INVENTORY CALLBACKS
+///// INVENTORY
 
 // This callback is triggered whenever item definitions have been updated, which could be in response to LoadItemDefinitions or any time new item definitions are available (eg, from the dynamic addition of new item types while players are still in-game).
 void Steam::inventory_definition_update(SteamInventoryDefinitionUpdate_t *call_data) {
@@ -7841,7 +7893,7 @@ void Steam::inventory_result_ready(SteamInventoryResultReady_t *call_data) {
 }
 
 
-///// MATCHMAKING CALLBACKS
+///// MATCHMAKING
 
 // Called when an account on your favorites list is updated
 void Steam::favorites_list_accounts_updated(FavoritesListAccountsUpdated_t *call_data) {
@@ -7935,7 +7987,7 @@ void Steam::lobby_invite(LobbyInvite_t *lobby_data) {
 }
 
 
-///// MATCHMAKING SERVER CALLBACKS
+///// MATCHMAKING SERVER
 
 // A server has responded to a list request.
 void Steam::ServerResponded(HServerListRequest list_request_handle, int server){
@@ -7988,7 +8040,7 @@ void Steam::RulesRefreshComplete(){
 }
 
 
-///// MUSIC CALLBACKS
+///// MUSIC
 
 // No notes about this in the Steam docs, but we can assume it just updates us about the plaback status
 void Steam::music_playback_status_has_changed(PlaybackStatusHasChanged_t *call_data) {
@@ -8002,7 +8054,7 @@ void Steam::music_volume_has_changed(VolumeHasChanged_t *call_data) {
 }
 
 
-///// MUSIC REMOTE CALLBACKS
+///// MUSIC REMOTE
 
 // The majority of callback for Music Remote have no fields and no descriptions. They seem to be primarily fired as responses to functions.
 void Steam::music_player_remote_to_front(MusicPlayerRemoteToFront_t *call_data) {
@@ -8055,7 +8107,7 @@ void Steam::music_player_will_quit(MusicPlayerWillQuit_t *call_data) {
 }
 
 
-///// NETWORKING CALLBACKS
+///// NETWORKING
 
 // Called when packets can't get through to the specified user. All queued packets unsent at this point will be dropped, further attempts to send will retry making the connection (but will be dropped if we fail again).
 void Steam::p2p_session_connect_fail(P2PSessionConnectFail_t *call_data) {
@@ -8071,7 +8123,7 @@ void Steam::p2p_session_request(P2PSessionRequest_t *call_data) {
 }
 
 
-///// NETWORKING MESSAGES CALLBACKS
+///// NETWORKING MESSAGES
 
 // Posted when a remote host is sending us a message, and we do not already have a session with them.
 void Steam::network_messages_session_request(SteamNetworkingMessagesSessionRequest_t *call_data) {
@@ -8089,7 +8141,32 @@ void Steam::network_messages_session_failed(SteamNetworkingMessagesSessionFailed
 }
 
 
-///// NETWORKING SOCKETS CALLBACKS
+///// NETWORKING SOCKETS
+
+// A struct used to describe a "fake IP" we have been assigned to use as an identifier.
+// This callback is posted when ISteamNetworkingSoockets::BeginAsyncRequestFakeIP completes.
+void Steam::fake_ip_result(SteamNetworkingFakeIPResult_t *call_data) {
+	int result = call_data->m_eResult;
+	uint32 fake_ip = call_data->m_unIP;
+	// Get the ports as an array
+	PoolIntArray port_list;
+	port_list.resize(SteamNetworkingFakeIPResult_t::k_nMaxReturnPorts);
+	for (uint16 i = 0; i < SteamNetworkingFakeIPResult_t::k_nMaxReturnPorts; i++) {
+		port_list.append(call_data->m_unPorts[i]);
+	}
+	emit_signal("fake_ip_result", result, getSteamIDFromIdentity(call_data->m_identity), getStringFromIP(fake_ip), port_list);
+}
+
+// This callback is posted whenever the state of our readiness changes.
+void Steam::network_authentication_status(SteamNetAuthenticationStatus_t *call_data) {
+	// Status.
+	int available = call_data->m_eAvail;
+	// Non-localized English language status. For diagnostic / debugging purposes only.
+	char debug_message[256 + 1]{};
+	snprintf(debug_message, 256, "%s", call_data->m_debugMsg);
+	// Send the data back via signal
+	emit_signal("network_authentication_status", available, debug_message);
+}
 
 // This callback is posted whenever a connection is created, destroyed, or changes state. The m_info field will contain a complete description of the connection at the time the change occurred and the callback was posted. In particular, m_info.m_eState will have the new connection state.
 void Steam::network_connection_status_changed(SteamNetConnectionStatusChangedCallback_t *call_data) {
@@ -8115,33 +8192,8 @@ void Steam::network_connection_status_changed(SteamNetConnectionStatusChangedCal
 	emit_signal("network_connection_status_changed", connect_handle, connection, old_state);
 }
 
-// This callback is posted whenever the state of our readiness changes.
-void Steam::network_authentication_status(SteamNetAuthenticationStatus_t *call_data) {
-	// Status.
-	int available = call_data->m_eAvail;
-	// Non-localized English language status. For diagnostic / debugging purposes only.
-	char debug_message[256 + 1]{};
-	snprintf(debug_message, 256, "%s", call_data->m_debugMsg);
-	// Send the data back via signal
-	emit_signal("network_authentication_status", available, debug_message);
-}
 
-// A struct used to describe a "fake IP" we have been assigned to use as an identifier.
-// This callback is posted when ISteamNetworkingSoockets::BeginAsyncRequestFakeIP completes.
-void Steam::fake_ip_result(SteamNetworkingFakeIPResult_t *call_data) {
-	int result = call_data->m_eResult;
-	uint32 fake_ip = call_data->m_unIP;
-	// Get the ports as an array
-	PoolIntArray port_list;
-	port_list.resize(SteamNetworkingFakeIPResult_t::k_nMaxReturnPorts);
-	for (uint16 i = 0; i < SteamNetworkingFakeIPResult_t::k_nMaxReturnPorts; i++) {
-		port_list.append(call_data->m_unPorts[i]);
-	}
-	emit_signal("fake_ip_result", result, getSteamIDFromIdentity(call_data->m_identity), getStringFromIP(fake_ip), port_list);
-}
-
-
-///// NETWORKING UTILS CALLBACKS
+///// NETWORKING UTILS
 
 // A struct used to describe our readiness to use the relay network.
 void Steam::relay_network_status(SteamRelayNetworkStatus_t *call_data) {
@@ -8155,7 +8207,7 @@ void Steam::relay_network_status(SteamRelayNetworkStatus_t *call_data) {
 }
 
 
-///// PARENTAL SETTINGS CALLBACKS
+///// PARENTAL SETTINGS
 
 // Purpose: Callback for querying UGC
 void Steam::parental_setting_changed(SteamParentalSettingsChanged_t *call_data) {
@@ -8163,7 +8215,7 @@ void Steam::parental_setting_changed(SteamParentalSettingsChanged_t *call_data) 
 }
 
 
-///// PARTIES CALLBACKS
+///// PARTIES
 
 // After creating a beacon, when a user "follows" that beacon Steam will send you this callback to know that you should be prepared for the user to join your game. When they do join, be sure to call ISteamParties::OnReservationCompleted to let Steam know.
 void Steam::reservation_notification(ReservationNotificationCallback_t *call_data) {
@@ -8183,7 +8235,7 @@ void Steam::active_beacons_updated(ActiveBeaconsUpdated_t *call_data) {
 }
 
 
-///// REMOTE PLAY CALLBACKS
+///// REMOTE PLAY
 
 // The session ID of the session that just connected.
 void Steam::remote_play_session_connected(SteamRemotePlaySessionConnected_t *call_data) {
@@ -8198,7 +8250,7 @@ void Steam::remote_play_session_disconnected(SteamRemotePlaySessionDisconnected_
 }
 
 
-///// REMOTE STORAGE CALLBACKS
+///// REMOTE STORAGE
 
 // Purpose: one or more files for this app have changed locally after syncing to remote session changes.
 // Note: only posted if this happens DURING the local app session.
@@ -8207,7 +8259,7 @@ void Steam::local_file_changed(RemoteStorageLocalFileChange_t *call_data) {
 }
 
 
-///// SCREENSHOT CALLBACKS
+///// SCREENSHOT
 
 // A screenshot successfully written or otherwise added to the library and can now be tagged.
 void Steam::screenshot_ready(ScreenshotReady_t *call_data) {
@@ -8222,7 +8274,7 @@ void Steam::screenshot_requested(ScreenshotRequested_t *call_data) {
 }
 
 
-///// UGC CALLBACKS
+///// UGC
 
 // Called when a workshop item has been downloaded.
 void Steam::item_downloaded(DownloadItemResult_t *call_data) {
@@ -8248,7 +8300,7 @@ void Steam::user_subscribed_items_list_changed(UserSubscribedItemsListChanged_t 
 }
 
 
-///// USER CALLBACKS
+///// USER
 
 // Sent by the Steam server to the client telling it to disconnect from the specified game server, which it may be in the process of or already connected to. The game client should immediately disconnect upon receiving this message. This can usually occur if the user doesn't have rights to play on the game server.
 void Steam::client_game_server_deny(ClientGameServerDeny_t *call_data) {
@@ -8330,17 +8382,7 @@ void Steam::validate_auth_ticket_response(ValidateAuthTicketResponse_t *call_dat
 }
 
 
-///// USER STATS CALLBACKS
-
-// Called when the latest stats and achievements for the local user have been received from the server.
-void Steam::current_stats_received(UserStatsReceived_t *call_data) {
-	CSteamID game_id = call_data->m_nGameID;
-	uint64_t game = game_id.ConvertToUint64();
-	uint32_t result = call_data->m_eResult;
-	CSteamID user_id = call_data->m_steamIDUser;
-	uint64_t user = user_id.ConvertToUint64();
-	emit_signal("current_stats_received", game, result, user);
-}
+///// USER STATS
 
 void Steam::user_achievement_icon_fetched(UserAchievementIconFetched_t *call_data) {
 	uint64_t app_id = call_data->m_nGameID.ToUint64();
@@ -8377,7 +8419,7 @@ void Steam::user_stats_unloaded(UserStatsUnloaded_t *call_data) {
 }
 
 
-///// UTILITY CALLBACKS
+///// UTILITY
 
 // Called when the big picture gamepad text input has been closed.
 void Steam::gamepad_text_input_dismissed(GamepadTextInputDismissed_t *call_data) {
@@ -8434,7 +8476,7 @@ void Steam::filter_text_dictionary_changed(FilterTextDictionaryChanged_t *call_d
 }
 
 
-///// VIDEO CALLBACKS
+///// VIDEO
 
 // Triggered when the OPF Details for 360 video playback are retrieved. After receiving this you can use GetOPFStringForApp to access the OPF details.
 void Steam::get_opf_settings_result(GetOPFSettingsResult_t *call_data) {
@@ -8453,10 +8495,8 @@ void Steam::get_video_result(GetVideoURLResult_t *call_data) {
 
 
 ///// SIGNALS / CALL RESULTS
-/////////////////////////////////////////////////
 
-
-///// FRIENDS CALL RESULTS
+///// FRIENDS
 
 // Marks the return of a request officer list call.
 void Steam::request_clan_officer_list(ClanOfficerListResponse_t *call_data, bool io_failure) {
@@ -8523,6 +8563,7 @@ void Steam::equipped_profile_items(EquippedProfileItems_t *call_data, bool io_fa
 	bool has_profile_modifier = call_data->m_bHasProfileModifier;
 	bool has_profile_background = call_data->m_bHasProfileBackground;
 	bool has_mini_profile_background = call_data->m_bHasMiniProfileBackground;
+	bool from_cache = call_data->m_bFromCache;
 	// Pass all profile data to a dictionary
 	Dictionary profile_data;
 	profile_data["avatar_animated"] = has_animated_avatar;
@@ -8530,6 +8571,7 @@ void Steam::equipped_profile_items(EquippedProfileItems_t *call_data, bool io_fa
 	profile_data["profile_modifier"] = has_profile_modifier;
 	profile_data["profile_background"] = has_profile_background;
 	profile_data["profile_mini_background"] = has_mini_profile_background;
+	profile_data["from_cache"] = from_cache;
 	emit_signal("equipped_profile_items", result, steam_id, profile_data);
 }
 
@@ -8552,7 +8594,7 @@ void Steam::is_following(FriendsIsFollowing_t *call_data, bool io_failure) {
 }
 
 
-///// HTML SURFACE CALL RESULTS
+///// HTML SURFACE
 
 // A new browser was created and is ready for use.
 void Steam::html_browser_ready(HTML_BrowserReady_t *call_data, bool io_failure) {
@@ -8562,7 +8604,7 @@ void Steam::html_browser_ready(HTML_BrowserReady_t *call_data, bool io_failure) 
 }
 
 
-///// INVENTORY CALL RESULTS
+///// INVENTORY
 
 // Returned when you have requested the list of "eligible" promo items that can be manually granted to the given user. These are
 // promo items of type "manual" that won't be granted automatically.
@@ -8607,7 +8649,7 @@ void Steam::inventory_request_prices_result(SteamInventoryRequestPricesResult_t 
 }
 
 
-///// MATCHMAKING CALL RESULTS
+///// MATCHMAKING
 
 // Signal the lobby has been created.
 void Steam::lobby_created(LobbyCreated_t *lobby_data, bool io_failure) {
@@ -8633,7 +8675,7 @@ void Steam::lobby_match_list(LobbyMatchList_t *call_data, bool io_failure) {
 }
 
 
-///// PARTIES CALL RESULTS
+///// PARTIES
 
 // This callback is used as a call response for ISteamParties::JoinParty. On success, you will have reserved a slot in the
 // beacon-owner's party, and should use m_rgchConnectString to connect to their game and complete the process.
@@ -8664,7 +8706,7 @@ void Steam::change_num_open_slots(ChangeNumOpenSlotsCallback_t *call_data, bool 
 }
 
 
-///// REMOTE STORAGE CALL RESULTS
+///// REMOTE STORAGE
 
 // Response when reading a file asyncrounously with FileReadAsync.
 void Steam::file_read_async_complete(RemoteStorageFileReadAsyncComplete_t *call_data, bool io_failure) {
@@ -8740,7 +8782,29 @@ void Steam::subscribe_item(RemoteStorageSubscribePublishedFileResult_t *call_dat
 }
 
 
-///// UGC CALL RESULTS
+///// TIMELINE
+
+// Called when asking if recordings exist for a game phase ID.
+void Steam::timeline_event_recording_exists(SteamTimelineEventRecordingExists_t *call_data, bool io_failure) {
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] timeline_event_recording_exists signal failed internally");
+	uint64_t event_id = call_data->m_ulEventID;
+	bool recording_exists = call_data->m_bRecordingExists;
+	emit_signal("timeline_event_recording_exists", event_id, recording_exists);
+}
+
+// Called when asking if recordings exist for an event handle.
+void Steam::timeline_game_phase_recording_exists(SteamTimelineGamePhaseRecordingExists_t *call_data, bool io_failure) {
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] timeline_game_phase_recording_exists signal failed internally");
+	String phase_id = call_data->m_rgchPhaseID;
+	uint64_t recording_ms = call_data->m_ulRecordingMS;
+	uint64_t longest_clips_ms = call_data->m_ulLongestClipMS;
+	uint32_t clip_count = call_data->m_unClipCount;
+	uint32_t screenshot_count = call_data->m_unScreenshotCount;
+	emit_signal("timeline_game_phase_recording_exists", phase_id, recording_ms, longest_clips_ms, clip_count, screenshot_count);
+}
+
+
+///// UGC
 
 // The result of a call to AddAppDependency.
 void Steam::add_app_dependency_result(AddAppDependencyResult_t *call_data, bool io_failure) {
@@ -8886,7 +8950,7 @@ void Steam::workshop_eula_status(WorkshopEULAStatus_t *call_data, bool io_failur
 }
 
 
-///// USERS CALL RESULTS
+///// USERS
 
 // Sent for games with enabled anti indulgence / duration control, for enabled users. Lets the game know whether persistent
 // rewards or XP should be granted at normal rate, half rate, or zero rate.
@@ -8962,7 +9026,7 @@ void Steam::store_auth_url_response(StoreAuthURLResponse_t *call_data, bool io_f
 }
 
 
-///// USER STATS CALL RESULTS
+///// USER STATS
 
 // Global achievements percentages are ready.
 void Steam::global_achievement_percentages_ready(GlobalAchievementPercentagesReady_t *call_data, bool io_failure) {
@@ -9097,21 +9161,20 @@ void Steam::user_stats_received(UserStatsReceived_t *call_data, bool io_failure)
 }
 
 
-///// UTILITY CALL RESULTS
+///// UTILITY
 
 // CallResult for checkFileSignature.
 void Steam::check_file_signature(CheckFileSignature_t *call_data, bool io_failure) {
 	ERR_FAIL_COND_MSG(io_failure, "[STEAM] check_file_signature signal failed internally");
-	emit_signal("check_file_signature", (Steam::CheckFileSignature)call_data->m_eCheckFileSignature);
+	emit_signal("check_file_signature", (CheckFileSignature)call_data->m_eCheckFileSignature);
 }
 
 
 ///// BIND METHODS
-/////////////////////////////////////////////////
-//
+
 void Steam::_bind_methods() {
 
-	// STEAM MAIN BIND METHODS //////////////////
+	// STEAM MAIN
 	ClassDB::bind_method("get_godotsteam_version", &Steam::get_godotsteam_version);
 	ClassDB::bind_method(D_METHOD("getSteamID32", "steam_id"), &Steam::getSteamID32);
 	ClassDB::bind_method(D_METHOD("isAnonAccount", "steam_id"), &Steam::isAnonAccount);
@@ -9124,8 +9187,8 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method("isSteamRunning", &Steam::isSteamRunning);
 	ClassDB::bind_method("run_callbacks", &Steam::run_callbacks);
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
-	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(true), DEFVAL(0), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(true), DEFVAL(0), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(false), DEFVAL(0), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0), DEFVAL(false));
 	ClassDB::bind_method("steamShutdown", &Steam::steamShutdown);
 
 	ClassDB::bind_method("get_browser_handle", &Steam::get_browser_handle);
@@ -9149,7 +9212,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_leaderboard_handle", "new_leaderboard_handle"), &Steam::set_leaderboard_handle);
 	ClassDB::bind_method(D_METHOD("set_server_list_request", "new_server_list_request"), &Steam::set_server_list_request);
 
-	// APPS BIND METHODS ////////////////////////
+	// APPS
 	ClassDB::bind_method("getAppBuildId", &Steam::getAppBuildId);
 	ClassDB::bind_method(D_METHOD("getAppInstallDir", "app_id"), &Steam::getAppInstallDir);
 	ClassDB::bind_method("getAppOwner", &Steam::getAppOwner);
@@ -9183,7 +9246,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setDLCContext", "app_id"), &Steam::setDLCContext);
 	ClassDB::bind_method(D_METHOD("uninstallDLC", "dlc_id"), &Steam::uninstallDLC);
 
-	// FRIENDS BIND METHODS /////////////////////
+	// FRIENDS
 	ClassDB::bind_method(D_METHOD("activateGameOverlay", "type"), &Steam::activateGameOverlay, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("activateGameOverlayInviteDialog", "steam_id"), &Steam::activateGameOverlayInviteDialog);
 	ClassDB::bind_method(D_METHOD("activateGameOverlayInviteDialogConnectString", "connect_string"), &Steam::activateGameOverlayInviteDialogConnectString);
@@ -9268,7 +9331,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setPlayedWith", "steam_id"), &Steam::setPlayedWith);
 	ClassDB::bind_method(D_METHOD("setRichPresence", "key", "value"), &Steam::setRichPresence);
 
-	// GAME SEARCH BIND METHODS /////////////////
+	// GAME SEARCH
 	ClassDB::bind_method(D_METHOD("addGameSearchParams", "key", "values"), &Steam::addGameSearchParams);
 	ClassDB::bind_method(D_METHOD("searchForGameWithLobby", "lobby_id", "player_min", "player_max"), &Steam::searchForGameWithLobby);
 	ClassDB::bind_method(D_METHOD("searchForGameSolo", "player_min", "player_max"), &Steam::searchForGameSolo);
@@ -9284,7 +9347,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("submitPlayerResult", "game_id", "player_id", "player_result"), &Steam::submitPlayerResult);
 	ClassDB::bind_method(D_METHOD("endGame", "game_id"), &Steam::endGame);
 
-	// HTML SURFACE BIND METHODS ////////////////
+	// HTML SURFACE
 	ClassDB::bind_method(D_METHOD("addHeader", "key", "value", "this_handle"), &Steam::addHeader, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("allowStartRequest", "allowed", "this_handle"), &Steam::allowStartRequest, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("copyToClipboard", "this_handle"), &Steam::copyToClipboard, DEFVAL(0));
@@ -9320,7 +9383,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("stopLoad", "this_handle"), &Steam::stopLoad, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("viewSource", "this_handle"), &Steam::viewSource, DEFVAL(0));
 
-	// HTTP BIND METHODS ////////////////////////
+	// HTTP
 	ClassDB::bind_method(D_METHOD("createCookieContainer", "allow_response_to_modify"), &Steam::createCookieContainer);
 	ClassDB::bind_method(D_METHOD("createHTTPRequest", "request_method", "absolute_url"), &Steam::createHTTPRequest);
 	ClassDB::bind_method(D_METHOD("deferHTTPRequest", "request_handle"), &Steam::deferHTTPRequest);
@@ -9330,7 +9393,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getHTTPResponseBodySize", "request_handle"), &Steam::getHTTPResponseBodySize);
 	ClassDB::bind_method(D_METHOD("getHTTPResponseHeaderSize", "request_handle", "header_name"), &Steam::getHTTPResponseHeaderSize);
 	ClassDB::bind_method(D_METHOD("getHTTPResponseHeaderValue", "request_handle", "header_name", "buffer_size"), &Steam::getHTTPResponseHeaderValue);
-	ClassDB::bind_method(D_METHOD("getHTTPStreamingResponseBodyData", "request_handle", "offset", "buffer_size"), &Steam::getHTTPStreamingResponseBodyData);
+//	ClassDB::bind_method(D_METHOD("getHTTPStreamingResponseBodyData", "request_handle", "offset", "buffer_size"), &Steam::getHTTPStreamingResponseBodyData);
 	ClassDB::bind_method(D_METHOD("prioritizeHTTPRequest", "request_handle"), &Steam::prioritizeHTTPRequest);
 	ClassDB::bind_method(D_METHOD("releaseCookieContainer", "cookie_handle"), &Steam::releaseCookieContainer);
 	ClassDB::bind_method(D_METHOD("releaseHTTPRequest", "request_handle"), &Steam::releaseHTTPRequest);
@@ -9347,7 +9410,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setHTTPRequestRequiresVerifiedCertificate", "request_handle", "require_verified_certificate"), &Steam::setHTTPRequestRequiresVerifiedCertificate);
 	ClassDB::bind_method(D_METHOD("setHTTPRequestUserAgentInfo", "request_handle", "user_agent_info"), &Steam::setHTTPRequestUserAgentInfo);
 
-	// INPUT BIND METHODS /////////////////
+	// INPUT
 	ClassDB::bind_method(D_METHOD("activateActionSet", "input_handle", "action_set_handle"), &Steam::activateActionSet);
 	ClassDB::bind_method(D_METHOD("activateActionSetLayer", "input_handle", "action_set_layer_handle"), &Steam::activateActionSetLayer);
 	ClassDB::bind_method(D_METHOD("deactivateActionSetLayer", "input_handle", "action_set_handle"), &Steam::deactivateActionSetLayer);
@@ -9397,7 +9460,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getStringForDigitalActionName", "action_handle"), &Steam::getStringForDigitalActionName);
 	ClassDB::bind_method(D_METHOD("getStringForAnalogActionName", "action_handle"), &Steam::getStringForAnalogActionName);
 
-	// INVENTORY BIND METHODS ///////////////////
+	// INVENTORY
 	ClassDB::bind_method(D_METHOD("addPromoItem", "item"), &Steam::addPromoItem);
 	ClassDB::bind_method(D_METHOD("addPromoItems", "items"), &Steam::addPromoItems);
 	ClassDB::bind_method(D_METHOD("checkResultSteamID", "steam_id_expected", "this_inventory_handle"), &Steam::checkResultSteamID, DEFVAL(0));
@@ -9431,7 +9494,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setPropertyInt", "item_id", "name", "value", "this_inventory_update_handle"), &Steam::setPropertyInt, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("setPropertyFloat", "item_id", "name", "value", "this_inventory_update_handle"), &Steam::setPropertyFloat, DEFVAL(0));
 
-	// MATCHMAKING BIND METHODS /////////////////
+	// MATCHMAKING
 	ClassDB::bind_method("getFavoriteGames", &Steam::getFavoriteGames);
 	ClassDB::bind_method(D_METHOD("addFavoriteGame", "ip", "port", "query_port", "flags", "last_played"), &Steam::addFavoriteGame);
 	ClassDB::bind_method(D_METHOD("removeFavoriteGame", "app_id", "ip", "port", "query_port", "flags"), &Steam::removeFavoriteGame);
@@ -9465,7 +9528,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getLobbyOwner", "steam_lobby_id"), &Steam::getLobbyOwner);
 	ClassDB::bind_method(D_METHOD("setLobbyOwner", "steam_lobby_id", "steam_id_new_owner"), &Steam::setLobbyOwner);
 
-	// MATCHMAKING SERVERS BIND METHODS /////////
+	// MATCHMAKING SERVERS
 	ClassDB::bind_method(D_METHOD("cancelQuery", "server_list_request"), &Steam::cancelQuery);
 	ClassDB::bind_method(D_METHOD("cancelServerQuery", "server_query"), &Steam::cancelServerQuery);
 	ClassDB::bind_method(D_METHOD("getServerCount", "server_list_request"), &Steam::getServerCount);
@@ -9484,7 +9547,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("requestSpectatorServerList", "app_id", "filters"), &Steam::requestSpectatorServerList);
 	ClassDB::bind_method(D_METHOD("serverRules", "ip", "port"), &Steam::serverRules);
 
-	// MUSIC BIND METHODS ///////////////////////
+	// MUSIC
 	ClassDB::bind_method("musicIsEnabled", &Steam::musicIsEnabled);
 	ClassDB::bind_method("musicIsPlaying", &Steam::musicIsPlaying);
 	ClassDB::bind_method("getPlaybackStatus", &Steam::getPlaybackStatus);
@@ -9495,7 +9558,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method("musicPlayPrev", &Steam::musicPlayPrev);
 	ClassDB::bind_method(D_METHOD("musicSetVolume", "volume"), &Steam::musicSetVolume);
 
-	// MUSIC REMOTE BIND METHODS ////////////////
+	// MUSIC REMOTE
 	ClassDB::bind_method(D_METHOD("activationSuccess", "activate"), &Steam::activationSuccess);
 	ClassDB::bind_method("isCurrentMusicRemote", &Steam::isCurrentMusicRemote);
 	ClassDB::bind_method("currentEntryDidChange", &Steam::currentEntryDidChange);
@@ -9529,7 +9592,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("updateShuffled", "shuffle"), &Steam::updateShuffled);
 	ClassDB::bind_method(D_METHOD("updateVolume", "volume"), &Steam::updateVolume);
 
-	// NETWORKING BIND METHODS //////////////////
+	// NETWORKING
 	ClassDB::bind_method(D_METHOD("acceptP2PSessionWithUser", "remote_steam_id"), &Steam::acceptP2PSessionWithUser);
 	ClassDB::bind_method(D_METHOD("allowP2PPacketRelay", "allow"), &Steam::allowP2PPacketRelay);
 	ClassDB::bind_method(D_METHOD("closeP2PChannelWithUser", "remote_steam_id", "channel"), &Steam::closeP2PChannelWithUser);
@@ -9539,7 +9602,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("readP2PPacket", "packet", "channel"), &Steam::readP2PPacket, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("sendP2PPacket", "remote_steam_id", "data", "send_type", "channel"), &Steam::sendP2PPacket, DEFVAL(0));
 
-	// NETWORKING MESSAGES BIND METHODS /////////
+	// NETWORKING MESSAGES
 	ClassDB::bind_method(D_METHOD("acceptSessionWithUser", "remote_steam_id"), &Steam::acceptSessionWithUser);
 	ClassDB::bind_method(D_METHOD("closeChannelWithUser", "remote_steam_id", "channel"), &Steam::closeChannelWithUser);
 	ClassDB::bind_method(D_METHOD("closeSessionWithUser", "remote_steam_id"), &Steam::closeSessionWithUser);
@@ -9547,7 +9610,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("receiveMessagesOnChannel", "channel", "max_messages"), &Steam::receiveMessagesOnChannel);
 	ClassDB::bind_method(D_METHOD("sendMessageToUser", "remote_steam_id", "data", "flags", "channel"), &Steam::sendMessageToUser);
 
-	// NETWORKING SOCKETS BIND METHODS //////////
+	// NETWORKING SOCKETS
 	ClassDB::bind_method(D_METHOD("acceptConnection", "connection_handle"), &Steam::acceptConnection);
 	ClassDB::bind_method(D_METHOD("beginAsyncRequestFakeIP", "num_ports"), &Steam::beginAsyncRequestFakeIP);
 	ClassDB::bind_method(D_METHOD("closeConnection", "peer", "reason", "debug_message", "linger"), &Steam::closeConnection);
@@ -9586,13 +9649,13 @@ void Steam::_bind_methods() {
 //	ClassDB::bind_method("receivedRelayAuthTicket", &Steam::receivedRelayAuthTicket);	<------ Uses datagram relay structs which were removed from base SDK
 	ClassDB::bind_method(D_METHOD("resetIdentity", "remote_steam_id"), &Steam::resetIdentity);
 	ClassDB::bind_method("runNetworkingCallbacks", &Steam::runNetworkingCallbacks);
-	ClassDB::bind_method(D_METHOD("sendMessages", "data", "connection_handle", "flags"), &Steam::sendMessages);
+//	ClassDB::bind_method(D_METHOD("sendMessages", "data", "connection_handle", "flags"), &Steam::sendMessages);		<------ Currently does not compile on Windows but does on Linux
 	ClassDB::bind_method(D_METHOD("sendMessageToConnection", "connection_handle", "data", "flags"), &Steam::sendMessageToConnection);
 	ClassDB::bind_method(D_METHOD("setCertificate", "certificate"), &Steam::setCertificate);
 	ClassDB::bind_method(D_METHOD("setConnectionPollGroup", "connection_handle", "poll_group"), &Steam::setConnectionPollGroup);
 	ClassDB::bind_method(D_METHOD("setConnectionName", "peer", "name"), &Steam::setConnectionName);
 
-	// NETWORKING UTILS BIND METHODS ////////////
+	// NETWORKING UTILS
 	ClassDB::bind_method(D_METHOD("checkPingDataUpToDate", "max_age_in_seconds"), &Steam::checkPingDataUpToDate);
 	ClassDB::bind_method(D_METHOD("convertPingLocationToString", "location"), &Steam::convertPingLocationToString);
 	ClassDB::bind_method(D_METHOD("estimatePingTimeBetweenTwoLocations", "location1", "location2"), &Steam::estimatePingTimeBetweenTwoLocations);
@@ -9616,7 +9679,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setGlobalConfigValueInt32", "config", "value"), &Steam::setGlobalConfigValueInt32);
 	ClassDB::bind_method(D_METHOD("setGlobalConfigValueString", "config", "value"), &Steam::setGlobalConfigValueString);
 
-	// PARENTAL SETTINGS BIND METHODS ///////////
+	// PARENTAL SETTINGS
 	ClassDB::bind_method("isParentalLockEnabled", &Steam::isParentalLockEnabled);
 	ClassDB::bind_method("isParentalLockLocked", &Steam::isParentalLockLocked);
 	ClassDB::bind_method(D_METHOD("isAppBlocked", "app_id"), &Steam::isAppBlocked);
@@ -9624,7 +9687,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("isFeatureBlocked", "feature"), &Steam::isFeatureBlocked);
 	ClassDB::bind_method(D_METHOD("isFeatureInBlockList", "feature"), &Steam::isFeatureInBlockList);
 
-	// PARTIES BIND METHODS /////////////////////
+	// PARTIES
 	ClassDB::bind_method(D_METHOD("cancelReservation", "beacon_id", "steam_id"), &Steam::cancelReservation);
 	ClassDB::bind_method(D_METHOD("changeNumOpenSlots", "beacon_id", "open_slots"), &Steam::changeNumOpenSlots);
 	ClassDB::bind_method(D_METHOD("createBeacon", "open_slots", "location_id", "type", "connect_string", "beacon_metadata"), &Steam::createBeacon);
@@ -9637,7 +9700,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("joinParty", "beacon_id"), &Steam::joinParty);
 	ClassDB::bind_method(D_METHOD("onReservationCompleted", "beacon_id", "steam_id"), &Steam::onReservationCompleted);
 
-	// REMOTE PLAY BIND METHODS /////////////////
+	// REMOTE PLAY
 	ClassDB::bind_method("getSessionCount", &Steam::getSessionCount);
 	ClassDB::bind_method(D_METHOD("getSessionID", "index"), &Steam::getSessionID);
 	ClassDB::bind_method(D_METHOD("getSessionSteamID", "session_id"), &Steam::getSessionSteamID);
@@ -9647,7 +9710,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("sendRemotePlayTogetherInvite", "friend_id"), &Steam::sendRemotePlayTogetherInvite);
 	ClassDB::bind_method(D_METHOD("startRemotePlayTogether", "show_overlay"), &Steam::startRemotePlayTogether, DEFVAL(true));
 
-	// REMOTE STORAGE BIND METHODS //////////////
+	// REMOTE STORAGE
 	ClassDB::bind_method("beginFileWriteBatch", &Steam::beginFileWriteBatch);
 	ClassDB::bind_method("endFileWriteBatch", &Steam::endFileWriteBatch);
 	ClassDB::bind_method(D_METHOD("fileDelete", "file"), &Steam::fileDelete);
@@ -9683,7 +9746,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("ugcDownloadToLocation", "content", "location", "priority"), &Steam::ugcDownloadToLocation);
 	ClassDB::bind_method(D_METHOD("ugcRead", "content", "data_size", "offset", "action"), &Steam::ugcRead);
 
-	// SCREENSHOT BIND METHODS //////////////////
+	// SCREENSHOT
 	ClassDB::bind_method(D_METHOD("addScreenshotToLibrary", "filename", "thumbnail_filename", "width", "height"), &Steam::addScreenshotToLibrary);
 	ClassDB::bind_method(D_METHOD("addVRScreenshotToLibrary", "type", "filename", "vr_filename"), &Steam::addVRScreenshotToLibrary);
 	ClassDB::bind_method(D_METHOD("hookScreenshots", "hook"), &Steam::hookScreenshots);
@@ -9694,13 +9757,27 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method("triggerScreenshot", &Steam::triggerScreenshot);
 	ClassDB::bind_method(D_METHOD("writeScreenshot", "rgb", "width", "height"), &Steam::writeScreenshot);
 
-	// TIMELINE BIND METHODS ////////////////////
-	ClassDB::bind_method(D_METHOD("addTimelineEvent", "icon", "title", "description", "priority", "start_offet", "duration", "possible_clip"), &Steam::addTimelineEvent);
-	ClassDB::bind_method(D_METHOD("clearTimelineStateDescription", "time_delta"), &Steam::clearTimelineStateDescription);
+	// TIMELINE
+	ClassDB::bind_method(D_METHOD("addGamePhaseTag", "tag_name", "tag_icon", "tag_group", "priority"), &Steam::addGamePhaseTag);
+	ClassDB::bind_method(D_METHOD("addInstantaneousTimelineEvent", "title", "description", "icon", "icon_priority", "start_offset_seconds", "possible_clip"), &Steam::addInstantaneousTimelineEvent, DEFVAL(TIMELINE_EVENT_CLIP_PRIORITY_NONE));
+	ClassDB::bind_method(D_METHOD("addRangeTimelineEvent", "title", "description", "icon", "icon_priority", "start_offset_seconds", "duration", "possible_clip"), &Steam::addRangeTimelineEvent, DEFVAL(TIMELINE_EVENT_CLIP_PRIORITY_NONE));
+	ClassDB::bind_method(D_METHOD("clearTimelineTooltip", "time_delta"), &Steam::clearTimelineTooltip);
+	ClassDB::bind_method(D_METHOD("doesEventRecordingExist", "this_event"), &Steam::doesEventRecordingExist);
+	ClassDB::bind_method(D_METHOD("doesGamePhaseRecordingExist", "phase_id"), &Steam::doesGamePhaseRecordingExist);
+	ClassDB::bind_method(D_METHOD("endGamePhase"), &Steam::endGamePhase);
+	ClassDB::bind_method(D_METHOD("endRangeTimelineEvent", "this_event", "end_offset_seconds"), &Steam::endRangeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("openOverlayToGamePhase", "phase_id"), &Steam::openOverlayToGamePhase);
+	ClassDB::bind_method(D_METHOD("openOverlayToTimelineEvent", "this_event"), &Steam::openOverlayToTimelineEvent);
+	ClassDB::bind_method(D_METHOD("removeTimelineEvent", "this_event"), &Steam::removeTimelineEvent);
+	ClassDB::bind_method(D_METHOD("setGamePhaseAttribute", "attribute_group", "attribute_value", "priority"), &Steam::setGamePhaseAttribute);
+	ClassDB::bind_method(D_METHOD("setGamePhaseID", "phase_id"), &Steam::setGamePhaseID);
 	ClassDB::bind_method(D_METHOD("setTimelineGameMode", "mode"), &Steam::setTimelineGameMode);
-	ClassDB::bind_method(D_METHOD("setTimelineStateDescription", "description", "time_delta"), &Steam::setTimelineStateDescription);
+	ClassDB::bind_method(D_METHOD("setTimelineTooltip", "description", "time_delta"), &Steam::setTimelineTooltip);
+	ClassDB::bind_method(D_METHOD("startGamePhase"), &Steam::startGamePhase);
+	ClassDB::bind_method(D_METHOD("startRangeTimelineEvent", "title", "description", "icon", "priority", "start_offset_seconds", "possible_clip"), &Steam::startRangeTimelineEvent, DEFVAL(TIMELINE_EVENT_CLIP_PRIORITY_NONE));
+	ClassDB::bind_method(D_METHOD("updateRangeTimelineEvent", "this_event", "title", "description", "icon", "priority", "possible_clip"), &Steam::updateRangeTimelineEvent, DEFVAL(TIMELINE_EVENT_CLIP_PRIORITY_NONE));
 
-	// UGC BIND METHODS ////////////////////
+	// UGC
 	ClassDB::bind_method(D_METHOD("addAppDependency", "published_file_id", "app_id"), &Steam::addAppDependency);
 	ClassDB::bind_method(D_METHOD("addContentDescriptor", "update_handle", "descriptor_id"), &Steam::addContentDescriptor);
 	ClassDB::bind_method(D_METHOD("addDependency", "published_file_id", "child_published_file_id"), &Steam::addDependency);
@@ -9791,7 +9868,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setTimeCreatedDateRange", "update_handle", "start", "end"), &Steam::setTimeCreatedDateRange);
 	ClassDB::bind_method(D_METHOD("setTimeUpdatedDateRange", "update_handle", "start", "end"), &Steam::setTimeUpdatedDateRange);
 
-	// USER BIND METHODS ////////////////////////
+	// USER
 	ClassDB::bind_method(D_METHOD("advertiseGame", "server_ip", "port"), &Steam::advertiseGame);
 	ClassDB::bind_method(D_METHOD("beginAuthSession", "ticket", "ticket_size", "steam_id"), &Steam::beginAuthSession);
 	ClassDB::bind_method(D_METHOD("cancelAuthTicket", "auth_ticket"), &Steam::cancelAuthTicket);
@@ -9823,7 +9900,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("terminateGameConnection", "server_ip", "server_port"), &Steam::terminateGameConnection);
 	ClassDB::bind_method(D_METHOD("userHasLicenseForApp", "steam_id", "app_id"), &Steam::userHasLicenseForApp);
 
-	// USER STATS BIND METHODS //////////////////
+	// USER STATS
 	ClassDB::bind_method(D_METHOD("attachLeaderboardUGC", "ugc_handle", "this_leaderboard"), &Steam::attachLeaderboardUGC, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("clearAchievement", "achievement_name"), &Steam::clearAchievement);
 	ClassDB::bind_method(D_METHOD("downloadLeaderboardEntries", "start", "end", "type", "this_leaderboard"), &Steam::downloadLeaderboardEntries, DEFVAL(0), DEFVAL(0));
@@ -9857,7 +9934,6 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getUserStatFloat", "steam_id", "name"), &Steam::getUserStatFloat);
 	ClassDB::bind_method(D_METHOD("getUserStatInt", "steam_id", "name"), &Steam::getUserStatInt);
 	ClassDB::bind_method(D_METHOD("indicateAchievementProgress", "name", "current_progress", "max_progress"), &Steam::indicateAchievementProgress);
-	ClassDB::bind_method("requestCurrentStats", &Steam::requestCurrentStats);
 	ClassDB::bind_method("requestGlobalAchievementPercentages", &Steam::requestGlobalAchievementPercentages);
 	ClassDB::bind_method(D_METHOD("requestGlobalStats", "history_days"), &Steam::requestGlobalStats);
 	ClassDB::bind_method(D_METHOD("requestUserStats", "steam_id"), &Steam::requestUserStats);
@@ -9869,7 +9945,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("updateAvgRateStat", "name", "this_session", "session_length"), &Steam::updateAvgRateStat);
 	ClassDB::bind_method(D_METHOD("uploadLeaderboardScore", "score", "keep_best", "details", "this_leaderboard"), &Steam::uploadLeaderboardScore, DEFVAL(true), DEFVAL(PoolIntArray()), DEFVAL(0));
 
-	// UTILS BIND METHODS ///////////////////////
+	// UTILS
 	ClassDB::bind_method("dismissFloatingGamepadTextInput", &Steam::dismissFloatingGamepadTextInput);
 	ClassDB::bind_method("dismissGamepadTextInput", &Steam::dismissGamepadTextInput);
 	ClassDB::bind_method(D_METHOD("filterText", "context", "steam_id", "message"), &Steam::filterText);
@@ -9901,7 +9977,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("showFloatingGamepadTextInput", "input_mode", "text_field_x_position", "text_field_y_position", "text_field_width", "text_field_height"), &Steam::showFloatingGamepadTextInput);
 	ClassDB::bind_method("startVRDashboard", &Steam::startVRDashboard);	
 
-	// VIDEO BIND METHODS ///////////////////////
+	// VIDEO
 	ClassDB::bind_method(D_METHOD("getOPFSettings", "app_id"), &Steam::getOPFSettings);
 	ClassDB::bind_method(D_METHOD("getOPFStringForApp", "app_id"), &Steam::getOPFStringForApp);
 	ClassDB::bind_method(D_METHOD("getVideoURL", "app_id"), &Steam::getVideoURL);
@@ -9909,18 +9985,14 @@ void Steam::_bind_methods() {
 
 
 	// CALLBACK SIGNAL BINDS
-	/////////////////////////////////////////////
-	//
-	// STEAMWORKS SIGNALS ///////////////////////
-	ADD_SIGNAL(MethodInfo("steamworks_error", PropertyInfo(Variant::STRING, "failed_signal"), PropertyInfo(Variant::STRING, "io_failure")));
 
-	// APPS SIGNALS /////////////////////////////
+	// APPS
 	ADD_SIGNAL(MethodInfo("file_details_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "file_size"), PropertyInfo(Variant::INT, "file_hash"), PropertyInfo(Variant::INT, "flags")));
 	ADD_SIGNAL(MethodInfo("dlc_installed", PropertyInfo(Variant::INT, "app")));
 	ADD_SIGNAL(MethodInfo("new_launch_url_parameters"));
 	ADD_SIGNAL(MethodInfo("timed_trial_status", PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::BOOL, "is_offline"), PropertyInfo(Variant::INT, "seconds_allowed"), PropertyInfo(Variant::INT, "seconds_played")));
 
-	// FRIENDS SIGNALS //////////////////////////
+	// FRIENDS
 	ADD_SIGNAL(MethodInfo("avatar_loaded", PropertyInfo(Variant::INT, "avatar_id"), PropertyInfo(Variant::INT, "size"), PropertyInfo(Variant::ARRAY, "data")));
 	ADD_SIGNAL(MethodInfo("avatar_image_loaded", PropertyInfo(Variant::INT, "avatar_id"), PropertyInfo(Variant::INT, "avatar_index"), PropertyInfo(Variant::INT, "width"), PropertyInfo(Variant::INT, "height")));
 	ADD_SIGNAL(MethodInfo("request_clan_officer_list", PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::ARRAY, "officer_list")));
@@ -9945,7 +10017,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("equipped_profile_items_changed", PropertyInfo(Variant::INT, "steam_id")));
 	ADD_SIGNAL(MethodInfo("equipped_profile_items", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::DICTIONARY, "profile_data")));
 
-	// GAME SEARCH SIGNALS //////////////////////
+	// GAME SEARCH
 	ADD_SIGNAL(MethodInfo("search_for_game_progress", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "search_id"), PropertyInfo(Variant::DICTIONARY, "search_progress")));
 	ADD_SIGNAL(MethodInfo("search_for_game_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "search_id"), PropertyInfo(Variant::DICTIONARY, "search_result")));
 	ADD_SIGNAL(MethodInfo("request_players_for_game_progress", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "search_id")));
@@ -9954,7 +10026,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("submit_player_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "game_id"), PropertyInfo(Variant::INT, "player_id")));
 	ADD_SIGNAL(MethodInfo("end_game_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "game_id")));
 
-	// HTML SURFACE SIGNALS /////////////////////
+	// HTML SURFACE
 	ADD_SIGNAL(MethodInfo("html_browser_ready", PropertyInfo(Variant::INT, "browser_handle")));
 	ADD_SIGNAL(MethodInfo("html_can_go_backandforward", PropertyInfo(Variant::INT, "browser_handle"), PropertyInfo(Variant::BOOL, "go_back"), PropertyInfo(Variant::BOOL, "go_forward")));
 	ADD_SIGNAL(MethodInfo("html_changed_title", PropertyInfo(Variant::INT, "browser_handle"), PropertyInfo(Variant::STRING, "title")));
@@ -9978,19 +10050,19 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("html_url_changed", PropertyInfo(Variant::INT, "browser_handle"), PropertyInfo(Variant::DICTIONARY, "url_data")));
 	ADD_SIGNAL(MethodInfo("html_vertical_scroll", PropertyInfo(Variant::INT, "browser_handle"), PropertyInfo(Variant::DICTIONARY, "scroll_data")));
 
-	// HTTP SIGNALS /////////////////////////////
+	// HTTP
 	ADD_SIGNAL(MethodInfo("http_request_completed", PropertyInfo(Variant::INT, "cookie_handle"), PropertyInfo(Variant::INT, "context_value"), PropertyInfo(Variant::BOOL, "request_success"), PropertyInfo(Variant::INT, "status_code"), PropertyInfo(Variant::INT, "body_size")));
 	ADD_SIGNAL(MethodInfo("http_request_data_received", PropertyInfo(Variant::INT, "cookie_handle"), PropertyInfo(Variant::INT, "context_value"), PropertyInfo(Variant::INT, "offset"), PropertyInfo(Variant::INT, "bytes_received")));
 	ADD_SIGNAL(MethodInfo("http_request_headers_received", PropertyInfo(Variant::INT, "cookie_handle"), PropertyInfo(Variant::INT, "context_value")));
 
-	// INPUT SIGNALS ////////////////////////////
+	// INPUT
 	ADD_SIGNAL(MethodInfo("input_action_event", PropertyInfo(Variant::INT, "input_handle"), PropertyInfo(Variant::INT, "event_type"), PropertyInfo(Variant::INT, "action_handle"), PropertyInfo(Variant::BOOL, "is_active"), PropertyInfo(Variant::DICTIONARY, "action_data")));
 	ADD_SIGNAL(MethodInfo("input_device_connected", PropertyInfo(Variant::INT, "input_handle")));
 	ADD_SIGNAL(MethodInfo("input_device_disconnected", PropertyInfo(Variant::INT, "input_handle")));
 	ADD_SIGNAL(MethodInfo("input_configuration_loaded", PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::INT, "device_handle"), PropertyInfo(Variant::DICTIONARY, "config_data")));
 	ADD_SIGNAL(MethodInfo("input_gamepad_slot_change", PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::INT, "device_handle"), PropertyInfo(Variant::INT, "device_type"), PropertyInfo(Variant::INT, "old_gamepad_slot"), PropertyInfo(Variant::INT, "new_gamepad_slot")));
 
-	// INVENTORY SIGNALS ////////////////////////
+	// INVENTORY
 	ADD_SIGNAL(MethodInfo("inventory_definition_update", PropertyInfo(Variant::ARRAY, "definitions")));
 	ADD_SIGNAL(MethodInfo("inventory_eligible_promo_item", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::BOOL, "cached"), PropertyInfo(Variant::ARRAY, "definitions")));
 	ADD_SIGNAL(MethodInfo("inventory_full_update", PropertyInfo(Variant::INT, "inventory_handle")));
@@ -9998,7 +10070,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("inventory_start_purchase_result", PropertyInfo(Variant::STRING, "result"), PropertyInfo(Variant::INT, "order_id"), PropertyInfo(Variant::INT, "transaction_id")));
 	ADD_SIGNAL(MethodInfo("inventory_request_prices_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::STRING, "currency")));
 
-	// MATCHMAKING SIGNALS //////////////////////
+	// MATCHMAKING
 	ADD_SIGNAL(MethodInfo("favorites_list_accounts_updated", PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("favorites_list_changed", PropertyInfo(Variant::DICTIONARY, "favorite")));
 	ADD_SIGNAL(MethodInfo("lobby_message", PropertyInfo(Variant::INT, "lobby_id"), PropertyInfo(Variant::INT, "user"), PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::INT, "chat_type")));
@@ -10011,7 +10083,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("lobby_match_list", PropertyInfo(Variant::ARRAY, "lobbies")));
 	ADD_SIGNAL(MethodInfo("lobby_kicked", PropertyInfo(Variant::INT, "lobby_id"), PropertyInfo(Variant::INT, "admin_id"), PropertyInfo(Variant::INT, "due_to_disconnect")));
 
-	// MATCHMAKING SERVER SIGNALS ///////////////
+	// MATCHMAKING SERVER
 	ADD_SIGNAL(MethodInfo("request_server_list_server_responded", PropertyInfo(Variant::INT, "request_handle"), PropertyInfo(Variant::INT, "server")));
 	ADD_SIGNAL(MethodInfo("request_server_list_server_failed_to_respond", PropertyInfo(Variant::INT, "request_handle"), PropertyInfo(Variant::INT, "server")));
 	ADD_SIGNAL(MethodInfo("request_server_list_refresh_complete", PropertyInfo(Variant::INT, "request_handle"), PropertyInfo(Variant::INT, "response")));
@@ -10024,11 +10096,11 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("server_rules_failed_to_respond"));
 	ADD_SIGNAL(MethodInfo("server_rules_refresh_complete"));
 
-	// MUSIC SIGNALS ////////////////////////////
+	// MUSIC
 	ADD_SIGNAL(MethodInfo("music_playback_status_has_changed"));
 	ADD_SIGNAL(MethodInfo("music_volume_has_changed", PropertyInfo(Variant::REAL, "new_volume")));
 
-	// MUSIC REMOTE SIGNALS /////////////////////
+	// MUSIC REMOTE
 	ADD_SIGNAL(MethodInfo("music_player_remote_to_front"));
 	ADD_SIGNAL(MethodInfo("music_player_remote_will_activate"));
 	ADD_SIGNAL(MethodInfo("music_player_remote_will_deactivate"));
@@ -10044,26 +10116,26 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("music_player_wants_volume", PropertyInfo(Variant::REAL, "volume")));
 	ADD_SIGNAL(MethodInfo("music_player_will_quit"));
 
-	// NETWORKING SIGNALS ///////////////////////
+	// NETWORKING
 	ADD_SIGNAL(MethodInfo("p2p_session_request", PropertyInfo(Variant::INT, "remote_steam_id")));
 	ADD_SIGNAL(MethodInfo("p2p_session_connect_fail", PropertyInfo(Variant::INT, "remote_steam_id"), PropertyInfo(Variant::INT, "session_error")));
 
-	// NETWORKING MESSAGES //////////////////////
+	// NETWORKING MESSAGES
 	ADD_SIGNAL(MethodInfo("network_messages_session_request", PropertyInfo(Variant::INT, "remote_steam_id")));
 	ADD_SIGNAL(MethodInfo("network_messages_session_failed", PropertyInfo(Variant::INT, "reason")));
 
-	// NETWORKING SOCKETS SIGNALS ///////////////
+	// NETWORKING SOCKETS
 	ADD_SIGNAL(MethodInfo("network_connection_status_changed", PropertyInfo(Variant::INT, "connect_handle"), PropertyInfo(Variant::DICTIONARY, "connection"), PropertyInfo(Variant::INT, "old_state")));
 	ADD_SIGNAL(MethodInfo("network_authentication_status", PropertyInfo(Variant::INT, "available"), PropertyInfo(Variant::STRING, "debug_message")));
 	ADD_SIGNAL(MethodInfo("fake_ip_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "remote_fake_steam_id"), PropertyInfo(Variant::STRING, "fake_ip"), PropertyInfo(Variant::ARRAY, "port_list")));
 
-	// NETWORKING UTILS SIGNALS /////////////////
+	// NETWORKING UTILS
 	ADD_SIGNAL(MethodInfo("relay_network_status", PropertyInfo(Variant::INT, "available"), PropertyInfo(Variant::INT, "ping_measurement"), PropertyInfo(Variant::INT, "available_config"), PropertyInfo(Variant::INT, "available_relay"), PropertyInfo(Variant::STRING, "debug_message")));
 
-	// PARENTAL SETTINGS SIGNALS ////////////////
+	// PARENTAL SETTINGS
 	ADD_SIGNAL(MethodInfo("parental_setting_changed"));
 
-	// PARTIES SIGANLS //////////////////////////
+	// PARTIES
 	ADD_SIGNAL(MethodInfo("join_party", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "beacon_id"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::STRING, "connect_string")));
 	ADD_SIGNAL(MethodInfo("create_beacon", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "beacon_id")));
 	ADD_SIGNAL(MethodInfo("reservation_notification", PropertyInfo(Variant::INT, "beacon_id"), PropertyInfo(Variant::INT, "steam_id")));
@@ -10071,11 +10143,11 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("available_beacon_locations_updated"));
 	ADD_SIGNAL(MethodInfo("active_beacons_updated"));
 
-	// REMOTE PLAY SIGNALS //////////////////////
+	// REMOTE PLAY
 	ADD_SIGNAL(MethodInfo("remote_play_session_connected", PropertyInfo(Variant::INT, "session_id")));
 	ADD_SIGNAL(MethodInfo("remote_play_session_disconnected", PropertyInfo(Variant::INT, "session_id")));
 
-	// REMOTE STORAGE SIGNALS ///////////////////
+	// REMOTE STORAGE
 	ADD_SIGNAL(MethodInfo("file_read_async_complete", PropertyInfo(Variant::DICTIONARY, "file_read")));
 	ADD_SIGNAL(MethodInfo("file_share_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "handle"), PropertyInfo(Variant::STRING, "name")));
 	ADD_SIGNAL(MethodInfo("file_write_async_complete", PropertyInfo(Variant::INT, "result")));
@@ -10084,11 +10156,15 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("subscribe_item", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "file_id")));
 	ADD_SIGNAL(MethodInfo("local_file_changed"));
 
-	// SCREENSHOT SIGNALS ///////////////////////
+	// SCREENSHOT
 	ADD_SIGNAL(MethodInfo("screenshot_ready", PropertyInfo(Variant::INT, "handle"), PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("screenshot_requested"));
 
-	// UGC SIGNALS //////////////////////////////
+	// TIMELINE
+	ADD_SIGNAL(MethodInfo("timeline_event_recording_exists", PropertyInfo(Variant::INT, "event_id"), PropertyInfo(Variant::BOOL, "recording_exists")));
+	ADD_SIGNAL(MethodInfo("timeline_game_phase_recording_exists", PropertyInfo(Variant::STRING, "phase_id"), PropertyInfo(Variant::INT, "recording_ms"), PropertyInfo(Variant::INT, "longest_clip_ms"), PropertyInfo(Variant::INT, "clip_count"), PropertyInfo(Variant::INT, "screenshot_count")));
+
+	// UGC
 	ADD_SIGNAL(MethodInfo("add_app_dependency_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "file_id"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("add_ugc_dependency_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "file_id"), PropertyInfo(Variant::INT, "child_id")));
 	ADD_SIGNAL(MethodInfo("item_created", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "file_id"), PropertyInfo(Variant::BOOL, "accept_tos")));
@@ -10108,7 +10184,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("workshop_eula_status", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::DICTIONARY, "eula_data")));
 	ADD_SIGNAL(MethodInfo("user_subscribed_items_list_changed", PropertyInfo(Variant::INT, "app_id")));
 
-	// USER SIGNALS /////////////////////////////
+	// USER
 	ADD_SIGNAL(MethodInfo("client_game_server_deny", PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::STRING, "ip"), PropertyInfo(Variant::INT, "server_port"), PropertyInfo(Variant::INT, "secure"), PropertyInfo(Variant::INT, "reason")));
 	ADD_SIGNAL(MethodInfo("duration_control", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::DICTIONARY, "duration")));
 	ADD_SIGNAL(MethodInfo("encrypted_app_ticket_response", PropertyInfo(Variant::STRING, "result")));
@@ -10124,7 +10200,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("store_auth_url_response", PropertyInfo(Variant::STRING, "url")));
 	ADD_SIGNAL(MethodInfo("validate_auth_ticket_response", PropertyInfo(Variant::INT, "auth_id"), PropertyInfo(Variant::INT, "reponse"), PropertyInfo(Variant::INT, "owner_id")));
 
-	// USER STATS SIGNALS ///////////////////////
+	// USER STATS
 	ADD_SIGNAL(MethodInfo("current_stats_received", PropertyInfo(Variant::INT, "game_id"), PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "user_id")));
 	ADD_SIGNAL(MethodInfo("global_achievement_percentages_ready", PropertyInfo(Variant::INT, "game_id"), PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("global_stats_received", PropertyInfo(Variant::INT, "game_id"), PropertyInfo(Variant::STRING, "result")));
@@ -10139,7 +10215,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("user_stats_stored", PropertyInfo(Variant::INT, "game_id"), PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("user_stats_unloaded", PropertyInfo(Variant::INT, "user_id")));
 
-	// UTILITY SIGNALS //////////////////////////
+	// UTILITY
 	ADD_SIGNAL(MethodInfo("check_file_signature", PropertyInfo(Variant::STRING, "signature")));
 	ADD_SIGNAL(MethodInfo("gamepad_text_input_dismissed", PropertyInfo(Variant::BOOL, "submitted"), PropertyInfo(Variant::STRING, "entered_text"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("ip_country"));
@@ -10150,14 +10226,13 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("floating_gamepad_text_input_dismissed"));
 	ADD_SIGNAL(MethodInfo("filter_text_dictionary_changed", PropertyInfo(Variant::INT, "language")));
 
-	// VIDEO SIGNALS ////////////////////////////
+	// VIDEO
 	ADD_SIGNAL(MethodInfo("get_opf_settings_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("get_video_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::STRING, "url")));
 
 
 	///// PROPERTIES
-	/////////////////////////////////////////////
-	//
+
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "browser_handle"), "set_browser_handle", "get_browser_handle");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "current_clan_id"), "set_current_clan_id", "get_current_clan_id");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "inventory_handle"), "set_inventory_handle", "get_inventory_handle");
@@ -10170,9 +10245,8 @@ void Steam::_bind_methods() {
 
 
 	///// CONSTANT BINDS
-	/////////////////////////////////////////////
-	//
-	// STEAM API CONSTANTS //////////////////////
+
+	// STEAM API
 	BIND_CONSTANT(ACCOUNT_ID_INVALID);
 	BIND_CONSTANT(API_CALL_INVALID);
 	BIND_CONSTANT(APP_ID_INVALID);
@@ -10191,7 +10265,7 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(STEAM_USER_DESKTOP_INSTANCE);
 	BIND_CONSTANT(STEAM_USER_WEB_INSTANCE);
 
-	// FRIENDS CONSTANTS/////////////////////////
+	// FRIENDS
 	BIND_CONSTANT(CHAT_METADATA_MAX);
 	BIND_CONSTANT(ENUMERATED_FOLLOWERS_MAX);
 	BIND_CONSTANT(FRIEND_GAME_INFO_QUERY_PORT_ERROR);
@@ -10205,14 +10279,14 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(PERSONA_NAME_MAX_UTF8);
 	BIND_CONSTANT(PERSONA_NAME_MAX_UTF16);
 
-	// HTML SURFACE CONSTANTS ///////////////////
+	// HTML SURFACE
 	BIND_CONSTANT(INVALID_HTMLBROWSER);
 
-	// HTTP CONSTANTS ///////////////////////////
+	// HTTP
 	BIND_CONSTANT(HTTPCOOKIE_INVALID_HANDLE);
 	BIND_CONSTANT(HTTPREQUEST_INVALID_HANDLE);
 
-	// INPUT CONSTANTS //////////////////////////
+	// INPUT
 	BIND_CONSTANT(INPUT_HANDLE_ALL_CONTROLLERS);
 	BIND_CONSTANT(INPUT_MAX_ACTIVE_LAYERS);
 	BIND_CONSTANT(INPUT_MAX_ANALOG_ACTIONS);
@@ -10222,18 +10296,18 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(INPUT_MAX_ORIGINS);
 	BIND_CONSTANT(INPUT_MIN_ANALOG_ACTION_DATA);
 
-	// INVENTORY CONSTANTS //////////////////////
+	// INVENTORY
 	BIND_CONSTANT(INVENTORY_RESULT_INVALID);
 	BIND_CONSTANT(ITEM_INSTANCE_ID_INVALID);
 
-	// MATCHMAKING CONSTANTS ////////////////////
+	// MATCHMAKING
 	BIND_CONSTANT(FAVORITE_FLAG_FAVORITE);
 	BIND_CONSTANT(FAVORITE_FLAG_HISTORY);
 	BIND_CONSTANT(FAVORITE_FLAG_NONE);
 	BIND_CONSTANT(MAX_LOBBY_KEY_LENGTH);
 	BIND_CONSTANT(SERVER_QUERY_INVALID);
 
-	// MATCHMAKING SERVERS CONSTANTS ////////////
+	// MATCHMAKING SERVERS
 	BIND_CONSTANT(MAX_GAME_SERVER_GAME_DATA);
 	BIND_CONSTANT(MAX_GAME_SERVER_GAME_DESCRIPTION);
 	BIND_CONSTANT(MAX_GAME_SERVER_GAME_DIR);
@@ -10241,14 +10315,14 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(MAX_GAME_SERVER_NAME);
 	BIND_CONSTANT(MAX_GAME_SERVER_TAGS);
 
-	// MUSIC REMOTE CONSTANTS ///////////////////
+	// MUSIC REMOTE
 	BIND_CONSTANT(MUSIC_NAME_MAX_LENGTH);
 	BIND_CONSTANT(MUSIC_PNG_MAX_LENGTH);
 
-	// NETWORKING SOCKET CONSTANTS //////////////
+	// NETWORKING SOCKET
 	BIND_CONSTANT(MAX_STEAM_PACKET_SIZE);
 
-	// NETWORKING TYPES CONSTANT ////////////////
+	// NETWORKING TYPES
 	BIND_CONSTANT(LISTEN_SOCKET_INVALID);
 	BIND_CONSTANT(MAX_NETWORKING_ERROR_MESSAGE);
 	BIND_CONSTANT(MAX_NETWORKING_PING_LOCATION_STRING);
@@ -10280,7 +10354,7 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(NETWORKING_SEND_USE_CURRENT_THREAD);
 	BIND_CONSTANT(NETWORKING_SEND_AUTORESTART_BROKEN_SESSION);
 
-	// REMOTE STORAGE CONSTANTS /////////////////
+	// REMOTE STORAGE
 	BIND_CONSTANT(ENUMERATE_PUBLISHED_FILES_MAX_RESULTS);
 	BIND_CONSTANT(FILE_NAME_MAX);
 	BIND_CONSTANT(MAX_CLOUD_FILE_CHUNK_SIZE);
@@ -10294,7 +10368,7 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(UGC_FILE_STREAM_HANDLE_INVALID);
 	BIND_CONSTANT(UGC_HANDLE_INVALID);
 
-	// SCREENSHOT CONSTANTS /////////////////////
+	// SCREENSHOT
 	BIND_CONSTANT(MAX_TAGGED_PUBLISHED_FILES);
 	BIND_CONSTANT(MAX_TAGGED_USERS);
 	BIND_CONSTANT(SCREENSHOT_INVALID_HANDLE);
@@ -10302,21 +10376,20 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(UFS_TAG_TYPE_MAX);
 	BIND_CONSTANT(UFS_TAG_VALUE_MAX);
 	
-	// UGC CONSTANTS ////////////////////////////
+	// UGC
 	BIND_CONSTANT(DEVELOPER_METADATA_MAX);
 	BIND_CONSTANT(NUM_UGC_RESULTS_PER_PAGE);
 	BIND_CONSTANT(UGC_QUERY_HANDLE_INVALID);
 	BIND_CONSTANT(UGC_UPDATE_HANDLE_INVALID);
 
-	// USER STATS CONSTANTS /////////////////////
+	// USER STATS
 	BIND_CONSTANT(LEADERBOARD_DETAIL_MAX);
 	BIND_CONSTANT(LEADERBOARD_NAME_MAX);
 	BIND_CONSTANT(STAT_NAME_MAX);
 
 
 	///// ENUM CONSTANT BINDS
-	/////////////////////////////////////////////
-	//
+
 	// AccountType Enums
 	BIND_ENUM_CONSTANT(ACCOUNT_TYPE_INVALID);
 	BIND_ENUM_CONSTANT(ACCOUNT_TYPE_INDIVIDUAL);
@@ -11082,6 +11155,10 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_STEAMDECK_RESERVED18);
 	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_STEAMDECK_RESERVED19);
 	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_STEAMDECK_RESERVED20);
+	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_HORIPAD_M1);
+	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_HORIPAD_M2);
+	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_HORIPAD_L4);
+	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_HORIPAD_R4);
 	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_COUNT);
 	BIND_ENUM_CONSTANT(INPUT_ACTION_ORIGIN_MAXIMUM_POSSIBLE_VALUE);
 
@@ -11389,6 +11466,7 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_LOCAL_VIRTUAL_PORT);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_DUAL_WIFI_ENABLE);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_ENABLE_DIAGNOSTICS_UI);
+	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SEND_TIME_SINCE_PREVIOUS_PACKET);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SDR_CLIENT_CONSEC_PING_TIMEOUT_FAIL_INITIAL);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SDR_CLIENT_CONSEC_PING_TIMEOUT_FAIL);
 	BIND_ENUM_CONSTANT(NETWORKING_CONFIG_SDR_CLIENT_MIN_PINGS_BEFORE_PING_ACCURATE);
@@ -11494,10 +11572,6 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_UNKNOWN_TYPE);
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_XBOX_PAIRWISE);
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_SONY_PSN);
-	BIND_ENUM_CONSTANT(IDENTITY_TYPE_GOOGLE_STADIA);
-	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_NINTENDO);
-	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_EPIC_GS);
-	//	BIND_ENUM_CONSTANT(IDENTITY_TYPE_WEGAME);
 	BIND_ENUM_CONSTANT(IDENTITY_TYPE_FORCE_32BIT);
 
 	// NetworkingSocketsDebugOutputType Enums
@@ -11755,6 +11829,7 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(RESULT_PHONE_NUMBER_IS_VOIP);
 	BIND_ENUM_CONSTANT(RESULT_NOT_SUPPORTED);
 	BIND_ENUM_CONSTANT(RESULT_FAMILY_SIZE_LIMIT_EXCEEDED);
+	BIND_ENUM_CONSTANT(RESULT_OFFLINE_APP_CACHE_INVALID);
 
 	// SCEPadTriggerEffectMode Enums
 	BIND_ENUM_CONSTANT(PAD_TRIGGER_EFFECT_MODE_OFF);
@@ -12005,7 +12080,6 @@ Steam::~Steam() {
 		steamShutdown();
 	}
 
-	// Do we really need to unset these?
 	current_clan_id = 0;
 	browser_handle = 0;
 	inventory_handle = 0;

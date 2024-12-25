@@ -1,14 +1,14 @@
-# GodotSteam for Godot Engine 3.x
+# GodotSteam for Godot Engine 3.x | Community Edition
 An ecosystem of tools for [Godot Engine](https://godotengine.org) and [Valve's Steam](https://store.steampowered.com). For the Windows, Linux, and Mac platforms.
 
 Additional Flavors
 ---
-Pre-Compiles | Plug-ins | Server | Examples/Demos
+Pre-Compiles | Plug-ins | Server | Examples
 --- | --- | --- | ---
-[Godot 2.x](https://github.com/GodotSteam/GodotSteam/tree/godot2)| [GDNative](https://github.com/GodotSteam/GodotSteam/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot3) | [Godot 3.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/godot3)
-[Godot 3.x](https://github.com/GodotSteam/GodotSteam/tree/godot3) | [GDExtension](https://github.com/GodotSteam/GodotSteam/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot4) |  [Godot 4.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/godot4)
-[Godot 4.x](https://github.com/GodotSteam/GodotSteam/tree/godot4) | --- | [GDNative](https://github.com/GodotSteam/GodotSteam-Server/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/server3)
-[MultiplayerPeer](https://github.com/GodotSteam/MultiplayerPeer)| --- | [GDExtension](https://github.com/GodotSteam/GodotSteam-Server/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Example-Project/tree/server4)
+[Godot 2.x](https://github.com/GodotSteam/GodotSteam/tree/godot2) | [GDNative](https://github.com/GodotSteam/GodotSteam/tree/gdnative) | [Server 3.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot3) | [Skillet](https://github.com/GodotSteam/Skillet)
+[Godot 3.x](https://github.com/GodotSteam/GodotSteam/tree/godot3) | [GDExtension](https://github.com/GodotSteam/GodotSteam/tree/gdextension) | [Server 4.x](https://github.com/GodotSteam/GodotSteam-Server/tree/godot4) | ---
+[Godot 4.x](https://github.com/GodotSteam/GodotSteam/tree/godot4) | --- | [GDNative](https://github.com/GodotSteam/GodotSteam-Server/tree/gdnative) | ---
+[MultiplayerPeer](https://github.com/GodotSteam/MultiplayerPeer)| --- | [GDExtension](https://github.com/GodotSteam/GodotSteam-Server/tree/gdextension) | ---
 
 Documentation
 ---
@@ -18,27 +18,28 @@ Feel free to chat with us about GodotSteam or ask for assistance on the [Discord
 
 Donate
 ---
-Pull-requests are the best way to help the project out but you can also donate through [Github Sponsors](https://github.com/sponsors/Gramps) or [Patreon](https://patreon.com/godotsteam).
+Pull-requests are the best way to help the project out but you can also donate through [Github Sponsors](https://github.com/sponsors/Gramps)!
 
 Current Build
 ---
 You can [download pre-compiled versions of this repo here](https://github.com/GodotSteam/GodotSteam/releases).
 
-**Version 3.27**
-- Added: buffer_size argument to `decompressVoice` with default of original value
-- Added: missing `user_achievement_icon_fetched` signal bind
-- Changed: now using Steam Flat API, should allow compiling with MinGW
-- Changed: updated in-editor docs
-- Changed: `steamworksError` to `steamworks_signal_error` internally, now prints to editor
-- Changed: deprecated `getAvailableVoice`, merged functionality into `getVoice`
-- Fixed: proper type for `network_connection_status_changed`, thanks to ***stickyShift***
-- Fixed: `getResultItemProperty` now takes empty string to send all property list, thanks to ***Stralor***
-- Fixed: missing return value hints from `lobby_data_update`
-- Fixed: fixed typo in RESULT_ADMINISTRATOR_OK, ***thanks to sepTN***
-- Fixed: fixed a variety of types and code corrections, ***thanks to bobsayhilol***
-- Fixed: issue with `setItemTags`
-- Fixed: `get_app_dependencies_result` now passed back app_ids array
-- Fixed: both global stat history functions - `getGlobalStatIntHistory` and `getGlobalStatFloatHistory`
+**Version 3.28**
+- Added: new Timeline functions, call results, and enums
+- Added: new Inputs enums for Horipad; `INPUT_ACTION_ORIGIN`
+- Added: new Networking config enum `NETWORKING_CONFIG_SEND_TIME_SINCE_PREVIOUS_PACKET`
+- Added: new Networking config enums for fake packet jitter; `NETWORKING_CONFIG_FAKE_JITTER_`
+- Changed: `equipped_profile_items` callback now sends `from_cache` bool
+- Changed: first argument for `steamInit` and `steamInitEx` no longer calls for stats as they are synced by client; left to prevent compatibility breakage
+- Changed: various small bits to match Godot 4 branch
+- Fixed: getAchievement and related achievement functions breaking under rare conditions
+- Fixed: `getAchievement` and related achievement functions breaking under rare conditions
+- Fixed: incorrect type for `set_inventory_update_handle`
+- Removed: `setTimelineGameMode` function which was removed in 1.61
+- Removed: `current_stats_received` callback removed for redundancy
+- Removed: Google Stadia, Nintendo, Epic Games, and WeGame Networking identity types fully removed, from 1.61
+- Removed: unncessary commenting
+- Removed: `sendMessages` until it can be fixed in Windows
 
 [You can read more change-logs here](https://godotsteam.com/changelog/godot3/).
 
@@ -62,9 +63,9 @@ GodotSteam Version | Broken Compatibility
 
 Known Issues
 ---
-- When self-compiling, using MinGW will cause crashes unless you are using GodotSteam 3.26 or newer.
+- When self-compiling, **do not** use MinGW as it will cause crashes.
 
-"Quick" How-To
+Quick How-To
 ---
 For complete instructions on how to build the Godot 4.x version of GodotSteam from scratch, [please refer to our documentation's 'How-To Modules' section.](https://godotsteam.com/howto/modules/) It will have the most up-to-date information.
 
