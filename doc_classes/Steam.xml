@@ -4721,7 +4721,7 @@
 				The returned array contains a list of:
 				[codeblock]
 				┖╴messages (dictionary)
-					┠╴payload (string)
+					┠╴payload (PackedByteArray)
 					┠╴size (int)
 					┠╴connection (int)
 					┠╴identity (string)
@@ -7542,7 +7542,7 @@
 		<signal name="input_device_disconnected">
 			<param index="0" name="input_handle" type="int" />
 			<description>
-				Called when a new controller has been connected, will fire once per controller if multiple new controllers connect in the same frame.
+				Called when a new controller has been disconnected, will fire once per controller if multiple new controllers disconnect in the same frame.
 			</description>
 		</signal>
 		<signal name="input_gamepad_slot_change">
