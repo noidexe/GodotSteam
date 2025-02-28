@@ -2689,14 +2689,14 @@ int32 Steam::getAllItems() {
 Dictionary Steam::getItemDefinitionProperty(uint32 definition, const String& name) {
 	Dictionary item_definition;
 	item_definition["property"] = "";
-	item_definition["result"] = false;
+	item_definition["success"] = false;
 	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, item_definition, "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
 	char buffer[STEAM_BUFFER_SIZE];
 	uint32 buffer_size = std::size(buffer);
-	bool steam_result = SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
+	bool steam_success = SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
 	String property = String::utf8(buffer, buffer_size);
 	item_definition["property"] = property;
-	item_definition["result"] = steam_result;
+	item_definition["success"] = steam_success;
 	return item_definition;
 }
 

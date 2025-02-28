@@ -2572,9 +2572,9 @@
 				The returned dictionary contains the following keys:
 				[codeblock]
 				┠╴property (string)
-				┠╴result (bool)
+				┠╴success (bool)
 				[/codeblock]
-				The "result" flag is true on success; false indicating that the item definitions have not been loaded from the server, or no item definitions exist for the current application, or the property name was not found in the item definition.
+				The "success" flag is true on success; false indicating that the item definitions have not been loaded from the server, or no item definitions exist for the current application, or the property name was not found in the item definition.
 			</description>
 		</method>
 		<method name="getItemDownloadInfo">
