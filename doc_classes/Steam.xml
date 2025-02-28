@@ -7368,7 +7368,7 @@
 				Called when a browser surface has a pending paint. This is where you get the actual image data to render to the screen.
 				The returned dictionary contains the following keys:
 				[codeblock]
-				┠╴bgra (string)
+				┠╴rgba (string)
 				┠╴wide (int)
 				┠╴tall (int)
 				┠╴update_x (int)

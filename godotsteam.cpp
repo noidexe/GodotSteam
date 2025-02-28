@@ -7657,7 +7657,24 @@ void Steam::html_needs_paint(HTML_NeedsPaint_t *call_data) {
 	browser_handle = call_data->unBrowserHandle;
 	// Create dictionary to bypass Godot argument limit
 	Dictionary page_data;
-	page_data["bgra"] = call_data->pBGRA;
+
+	// Get image dimensions and size
+	unsigned int pixel_count = call_data->unWide * call_data->unTall;
+	// Create RGBA buffer
+	PackedByteArray rgba_data;
+	rgba_data.resize(pixel_count * 4);
+	const uint8_t *bgra = (const uint8_t *)call_data->pBGRA;
+	uint8_t *rgba = rgba_data.ptrw();
+	
+	// Loop to swap B and R channels for the image
+	for (unsigned int i = 0; i < pixel_count; i++) {
+		rgba[i * 4 + 0] = bgra[i * 4 + 2]; // R = B
+		rgba[i * 4 + 1] = bgra[i * 4 + 1]; // G = G
+		rgba[i * 4 + 2] = bgra[i * 4 + 0]; // B = R
+		rgba[i * 4 + 3] = bgra[i * 4 + 3]; // A = A
+	}
+	
+	page_data["rgba"] = rgba_data;
 	page_data["wide"] = call_data->unWide;
 	page_data["tall"] = call_data->unTall;
 	page_data["update_x"] = call_data->unUpdateX;
