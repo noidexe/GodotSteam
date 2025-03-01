@@ -351,7 +351,7 @@ public:
 	int32 exchangeItems(const PackedInt64Array output_items, const PackedInt32Array output_quantity, const PackedInt64Array input_items, const PackedInt32Array input_quantity);
 	int32 generateItems(const PackedInt64Array items, const PackedInt32Array quantity);
 	int32 getAllItems();
-	String getItemDefinitionProperty(uint32 definition, const String &name);
+	Dictionary getItemDefinitionProperty(uint32 definition, const String &name);
 	int32 getItemsByID(const PackedInt64Array id_array);
 	Dictionary getItemPrice(uint32 definition);
 	Array getItemsWithPrices();

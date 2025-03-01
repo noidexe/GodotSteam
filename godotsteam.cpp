@@ -2686,13 +2686,18 @@ int32 Steam::getAllItems() {
 }
 
 // Gets a string property from the specified item definition.  Gets a property value for a specific item definition.
-String Steam::getItemDefinitionProperty(uint32 definition, const String &name) {
-	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, "", "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
+Dictionary Steam::getItemDefinitionProperty(uint32 definition, const String& name) {
+	Dictionary item_definition;
+	item_definition["property"] = "";
+	item_definition["success"] = false;
+	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, item_definition, "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
 	char buffer[STEAM_BUFFER_SIZE];
 	uint32 buffer_size = std::size(buffer);
-	SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
+	bool steam_success = SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
 	String property = String::utf8(buffer, buffer_size);
-	return property;
+	item_definition["property"] = property;
+	item_definition["success"] = steam_success;
+	return item_definition;
 }
 
 // After a successful call to RequestPrices, you can call this method to get the pricing for a specific item definition.
