@@ -1537,8 +1537,7 @@ bool Steam::setRichPresence(const String &key, const String &value) {
 
 
 ///// GAME SEARCH
-/////////////////////////////////////////////////
-//
+
 // A keyname and a list of comma separated values: one of which is must be found in order for the match to qualify; fails if a
 // search is currently in progress.
 int Steam::addGameSearchParams(const String &key, const String &values) {
