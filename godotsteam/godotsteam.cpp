@@ -195,11 +195,14 @@ Steam::Steam() :
 	callbackFilterTextDictionaryChanged(this, &Steam::filter_text_dictionary_changed),
 
 	// Video
+	callbackBroadcastUploadStart(this, &Steam::broadcast_upload_start),
+	callbackBroadcastUploadStop(this, &Steam::broadcast_upload_stop),
 	callbackGetOPFSettingsResult(this, &Steam::get_opf_settings_result),
 	callbackGetVideoResult(this, &Steam::get_video_result)
 {
 	is_init_success = false;
 	singleton = this;
+	were_callbacks_embedded = false;
 }
 
 
@@ -426,7 +429,6 @@ bool Steam::restartAppIfNecessary(uint32 app_id) {
 
 // Initialize the SDK, without worrying about the cause of failure.
 Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id) {
-	// Set the app ID
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
 		OS::get_singleton()->set_environment("SteamGameId", itos(app_id));
@@ -779,8 +781,7 @@ void Steam::uninstallDLC(uint32_t dlc_id) {
 
 
 ///// FRIENDS
-/////////////////////////////////////////////////
-//
+
 // Activates the overlay with optional dialog to open the following: "Friends", "Community", "Players", "Settings",
 // "OfficialGameGroup", "Stats", "Achievements", "LobbyInvite".
 void Steam::activateGameOverlay(const String &url) {
@@ -816,9 +817,9 @@ void Steam::activateGameOverlayToUser(const String &url, uint64_t steam_id) {
 }
 
 // Activates the overlay with specified web address.
-void Steam::activateGameOverlayToWebPage(const String &url) {
+void Steam::activateGameOverlayToWebPage(const String &url, OverlayToWebPageMode webpage_mode) {
 	ERR_FAIL_COND_MSG(SteamFriends() == NULL, "[STEAM] Friends class not found when calling: activateGameOverlayToWebPage");
-	SteamFriends()->ActivateGameOverlayToWebPage(url.utf8().get_data());
+	SteamFriends()->ActivateGameOverlayToWebPage(url.utf8().get_data(), (EActivateGameOverlayToWebPageMode)webpage_mode);
 }
 
 // Clear the game information in Steam; used in 'View Game Info'.
@@ -1736,12 +1737,12 @@ void Steam::keyChar(uint32 unicode_char, BitField<HTMLKeyModifiers> key_modifier
 }
 
 // Keyboard interactions, native keycode is the virtual key code value from your OS.
-void Steam::keyDown(uint32 native_key_code, BitField<HTMLKeyModifiers> key_modifiers, uint32 this_handle) {
+void Steam::keyDown(uint32 native_key_code, BitField<HTMLKeyModifiers> key_modifiers, uint32 this_handle, bool is_system_key) {
 	ERR_FAIL_COND_MSG(SteamHTMLSurface() == NULL, "[STEAM] HTML Surface class not found when calling: keyDown");
 	if (this_handle == 0) {
 		this_handle = browser_handle;
 	}
-	SteamHTMLSurface()->KeyDown(this_handle, native_key_code, (ISteamHTMLSurface::EHTMLKeyModifiers)(int64_t)key_modifiers);
+	SteamHTMLSurface()->KeyDown(this_handle, native_key_code, (ISteamHTMLSurface::EHTMLKeyModifiers)(int64_t)key_modifiers, is_system_key);
 }
 
 // Keyboard interactions, native keycode is the virtual key code value from your OS.
@@ -1812,6 +1813,15 @@ void Steam::mouseWheel(int32 delta, uint32 this_handle) {
 	SteamHTMLSurface()->MouseWheel(this_handle, delta);
 }
 
+// Open HTML/JS developer tools
+void Steam::openDeveloperTools(uint32 this_handle){
+	ERR_FAIL_COND_MSG(SteamHTMLSurface() == NULL, "[STEAM] HTML Surface class not found when calling: openDeveloperTools");
+	if (this_handle == 0) {
+		this_handle = browser_handle;
+	}
+	SteamHTMLSurface()->OpenDeveloperTools(this_handle);
+}
+
 // Paste from the local clipboard to the current page in an HTML surface.
 void Steam::pasteFromClipboard(uint32 this_handle) {
 	ERR_FAIL_COND_MSG(SteamHTMLSurface() == NULL, "[STEAM] HTML Surface class not found when calling: pasteFromClipboard");
@@ -1857,6 +1867,16 @@ void Steam::setBackgroundMode(bool background_mode, uint32 this_handle) {
 void Steam::setCookie(const String &hostname, const String &key, const String &value, const String &path, uint32 expires, bool secure, bool http_only) {
 	ERR_FAIL_COND_MSG(SteamHTMLSurface() == NULL, "[STEAM] HTML Surface class not found when calling: setCookie");
 	SteamHTMLSurface()->SetCookie(hostname.utf8().get_data(), key.utf8().get_data(), value.utf8().get_data(), path.utf8().get_data(), expires, secure, http_only);
+}
+
+// Scale the output display space by this factor, this is useful when displaying content on high dpi devices.
+// Specifies the ratio between physical and logical pixels.
+void Steam::setDPIScalingFactor(float dpi_scaling, uint32 this_handle) {
+	ERR_FAIL_COND_MSG(SteamHTMLSurface() == NULL, "[STEAM] HTML Surface class not found when calling: setDPIScalingFactor");
+	if (this_handle == 0) {
+		this_handle = browser_handle;
+	}
+	SteamHTMLSurface()->SetDPIScalingFactor(this_handle, dpi_scaling);
 }
 
 // Scroll the current page horizontally.
@@ -2533,7 +2553,7 @@ bool Steam::waitForData(bool wait_forever, uint32 timeout) {
 
 
 ///// INVENTORY
-/////
+
 ///// When dealing with any inventory handles, you should call CheckResultSteamID on the result handle when it completes to verify
 ///// that a remote player is not pretending to have a different user's inventory.
 ///// Also, you must call DestroyResult on the provided inventory result when you are done with it.
@@ -2665,13 +2685,18 @@ int32 Steam::getAllItems() {
 }
 
 // Gets a string property from the specified item definition.  Gets a property value for a specific item definition.
-String Steam::getItemDefinitionProperty(uint32 definition, const String &name) {
-	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, "", "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
+Dictionary Steam::getItemDefinitionProperty(uint32 definition, const String& name) {
+	Dictionary item_definition;
+	item_definition["property"] = "";
+	item_definition["success"] = false;
+	ERR_FAIL_COND_V_MSG(SteamInventory() == NULL, item_definition, "[STEAM] Inventory class not found when calling: getItemDefinitionProperty");
 	char buffer[STEAM_BUFFER_SIZE];
 	uint32 buffer_size = std::size(buffer);
-	SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
+	bool steam_success = SteamInventory()->GetItemDefinitionProperty(definition, name.utf8().get_data(), buffer, &buffer_size);
 	String property = String::utf8(buffer, buffer_size);
-	return property;
+	item_definition["property"] = property;
+	item_definition["success"] = steam_success;
+	return item_definition;
 }
 
 // After a successful call to RequestPrices, you can call this method to get the pricing for a specific item definition.
@@ -6666,7 +6691,7 @@ PackedInt64Array Steam::getGlobalStatIntHistory(const String &name) {
 	PackedInt64Array history_ints;
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, history_ints, "[STEAM] User Stats class not found when calling: getGlobalStatIntHistory");
 	uint32 history_size = 0;
-	int64 *history;
+	int64 *history = nullptr;
 	int32 histories = SteamUserStats()->GetGlobalStatHistory(name.utf8().get_data(), history, history_size);
 	for (int32 i = 0; i < histories; i++) {
 		history_ints.append(history[i]);
@@ -6679,7 +6704,7 @@ PackedFloat64Array Steam::getGlobalStatFloatHistory(const String &name) {
 	PackedFloat64Array history_floats;
 	ERR_FAIL_COND_V_MSG(SteamUserStats() == NULL, history_floats, "[STEAM] User Stats class not found when calling: getGlobalStatFloatHistory");
 	uint32 history_size = 0;
-	double *history;
+	double *history = nullptr;
 	int32 histories = SteamUserStats()->GetGlobalStatHistory(name.utf8().get_data(), history, history_size);
 	for (int32 i = 0; i < histories; i++) {
 		history_floats.append(history[i]);
@@ -7633,9 +7658,23 @@ void Steam::html_link_at_position(HTML_LinkAtPosition_t *call_data) {
 // Called when a browser surface has a pending paint. This is where you get the actual image data to render to the screen.
 void Steam::html_needs_paint(HTML_NeedsPaint_t *call_data) {
 	browser_handle = call_data->unBrowserHandle;
-	// Create dictionary to bypass Godot argument limit
 	Dictionary page_data;
-	page_data["bgra"] = call_data->pBGRA;
+
+	unsigned int pixel_count = call_data->unWide * call_data->unTall;
+	PackedByteArray rgba_data;
+	rgba_data.resize(pixel_count * 4);
+	const uint8_t *bgra = (const uint8_t *)call_data->pBGRA;
+	uint8_t *rgba = rgba_data.ptrw();
+	
+	// Loop to swap B and R channels for the image
+	for (unsigned int i = 0; i < pixel_count; i++) {
+		rgba[i * 4 + 0] = bgra[i * 4 + 2]; // R = B
+		rgba[i * 4 + 1] = bgra[i * 4 + 1]; // G = G
+		rgba[i * 4 + 2] = bgra[i * 4 + 0]; // B = R
+		rgba[i * 4 + 3] = bgra[i * 4 + 3]; // A = A
+	}
+	
+	page_data["rgba"] = rgba_data;
 	page_data["wide"] = call_data->unWide;
 	page_data["tall"] = call_data->unTall;
 	page_data["update_x"] = call_data->unUpdateX;
@@ -7855,23 +7894,18 @@ void Steam::input_gamepad_slot_change(SteamInputGamepadSlotChange_t *call_data) 
 // This callback is triggered whenever item definitions have been updated, which could be in response to LoadItemDefinitions or
 // any time new item definitions are available (eg, from the dynamic addition of new item types while players are still in-game).
 void Steam::inventory_definition_update(SteamInventoryDefinitionUpdate_t *call_data) {
-	// Create the return array
 	Array definitions;
-	// Set the array size variable
 	uint32 size = 0;
-	// Get the item defition IDs
+
 	if (SteamInventory()->GetItemDefinitionIDs(NULL, &size)) {
 		SteamItemDef_t *id_array = new SteamItemDef_t[size];
 		if (SteamInventory()->GetItemDefinitionIDs(id_array, &size)) {
-			// Loop through the temporary array and populate the return array
 			for (uint32 i = 0; i < size; i++) {
 				definitions.append(id_array[i]);
 			}
 		}
-		// Delete the temporary array
 		delete[] id_array;
 	}
-	// Return the item array as a signal
 	emit_signal("inventory_definition_update", definitions);
 }
 
@@ -7881,18 +7915,14 @@ void Steam::inventory_definition_update(SteamInventoryDefinitionUpdate_t *call_d
 // The regular SteamInventoryResultReady_t callback will still be triggered immediately afterwards; this is an additional
 // notification for your convenience.
 void Steam::inventory_full_update(SteamInventoryFullUpdate_t *call_data) {
-	// Set the handle
 	inventory_handle = call_data->m_handle;
-	// Send the handle back to the user
 	emit_signal("inventory_full_update", call_data->m_handle);
 }
 
 // This is fired whenever an inventory result transitions from k_EResultPending to any other completed state, see GetResultStatus
 // for the complete list of states. There will always be exactly one callback per handle.
 void Steam::inventory_result_ready(SteamInventoryResultReady_t *call_data) {
-	// Get the result
 	int result = call_data->m_result;
-	// Get the handle and pass it over
 	inventory_handle = call_data->m_handle;
 	emit_signal("inventory_result_ready", result, inventory_handle);
 }
@@ -8502,12 +8532,22 @@ void Steam::filter_text_dictionary_changed(FilterTextDictionaryChanged_t *call_d
 
 ///// VIDEO
 
+void Steam::broadcast_upload_start(BroadcastUploadStart_t *call_data){
+	bool is_rtmp = call_data->m_bIsRTMP;
+	emit_signal("broadcast_upload_start", is_rtmp);
+}
+
+void Steam::broadcast_upload_stop(BroadcastUploadStop_t *call_data){
+	EBroadcastUploadResult result = call_data->m_eResult;
+	emit_signal("broadcast_upload_stop", result);
+}
+
 // Triggered when the OPF Details for 360 video playback are retrieved. After receiving this you can use GetOPFStringForApp to
 // access the OPF details.
 void Steam::get_opf_settings_result(GetOPFSettingsResult_t *call_data) {
 	int result = call_data->m_eResult;
 	uint32 app_id = call_data->m_unVideoAppID;
-	emit_signal("broadcast_upload_stop", result, app_id);
+	emit_signal("get_opf_settings_result", result, app_id);
 }
 
 // Provides the result of a call to GetVideoURL.
@@ -8885,7 +8925,7 @@ void Steam::item_created(CreateItemResult_t *call_data, bool io_failure) {
 
 // Called when an attempt at deleting an item completes.
 void Steam::item_deleted(DeleteItemResult_t *call_data, bool io_failure) {
-	ERR_FAIL_COND_MSG(io_failure, "[STEAM] add_ugc_dependency_result signal failed internally");
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] item_deleted signal failed internally");
 	EResult result = call_data->m_eResult;
 	PublishedFileId_t file_id = call_data->m_nPublishedFileId;
 	emit_signal("item_deleted", result, (uint64_t)file_id);
@@ -8893,7 +8933,7 @@ void Steam::item_deleted(DeleteItemResult_t *call_data, bool io_failure) {
 
 // Result of a workshop item being updated.
 void Steam::item_updated(SubmitItemUpdateResult_t *call_data, bool io_failure) {
-	ERR_FAIL_COND_MSG(io_failure, "[STEAM] get_item_vote_result signal failed internally");
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] item_updated signal failed internally");
 	EResult result = call_data->m_eResult;
 	bool need_to_accept_tos = call_data->m_bUserNeedsToAcceptWorkshopLegalAgreement;
 	emit_signal("item_updated", result, need_to_accept_tos);
@@ -8935,7 +8975,7 @@ void Steam::start_playtime_tracking(StartPlaytimeTrackingResult_t *call_data, bo
 
 // Called when workshop item playtime tracking has stopped.
 void Steam::stop_playtime_tracking(StopPlaytimeTrackingResult_t *call_data, bool io_failure) {
-	ERR_FAIL_COND_MSG(io_failure, "[STEAM] get_item_vote_result signal failed internally");
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] stop_playtime_tracking signal failed internally");
 	EResult result = call_data->m_eResult;
 	emit_signal("stop_playtime_tracking", result);
 }
@@ -8953,7 +8993,7 @@ void Steam::ugc_query_completed(SteamUGCQueryCompleted_t *call_data, bool io_fai
 
 // Called when the user has added or removed an item to/from their favorites.
 void Steam::user_favorite_items_list_changed(UserFavoriteItemsListChanged_t *call_data, bool io_failure) {
-	ERR_FAIL_COND_MSG(io_failure, "[STEAM] get_item_vote_result signal failed internally");
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] user_favorite_items_list_changed signal failed internally");
 	EResult result = call_data->m_eResult;
 	PublishedFileId_t file_id = call_data->m_nPublishedFileId;
 	bool was_add_request = call_data->m_bWasAddRequest;
@@ -8962,7 +9002,7 @@ void Steam::user_favorite_items_list_changed(UserFavoriteItemsListChanged_t *cal
 
 // Purpose: Status of the user's acceptable/rejection of the app's specific Workshop EULA.
 void Steam::workshop_eula_status(WorkshopEULAStatus_t *call_data, bool io_failure) {
-	ERR_FAIL_COND_MSG(io_failure, "[STEAM] get_item_vote_result signal failed internally");
+	ERR_FAIL_COND_MSG(io_failure, "[STEAM] workshop_eula_status signal failed internally");
 	int result = call_data->m_eResult;
 	uint32 app_id = call_data->m_nAppID;
 
@@ -8975,7 +9015,7 @@ void Steam::workshop_eula_status(WorkshopEULAStatus_t *call_data, bool io_failur
 }
 
 
-///// USERS
+///// USER
 
 // Sent for games with enabled anti indulgence / duration control, for enabled users. Lets the game know whether persistent
 // rewards or XP should be granted at normal rate, half rate, or zero rate.
@@ -9186,7 +9226,7 @@ void Steam::user_stats_received(UserStatsReceived_t *call_data, bool io_failure)
 }
 
 
-///// UTILITY
+///// UTILS
 
 // CallResult for checkFileSignature.
 void Steam::check_file_signature(CheckFileSignature_t *call_data, bool io_failure) {
@@ -9212,8 +9252,8 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("isSteamRunning"), &Steam::isSteamRunning);
 	ClassDB::bind_method(D_METHOD("run_callbacks"), &Steam::run_callbacks);
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
-	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id"), &Steam::steamInit, DEFVAL(false), DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(false), DEFVAL(0), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("steamShutdown"), &Steam::steamShutdown);
 
 	ClassDB::bind_method(D_METHOD("get_browser_handle"), &Steam::get_browser_handle);
@@ -9277,7 +9317,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("activateGameOverlayInviteDialogConnectString", "connect_string"), &Steam::activateGameOverlayInviteDialogConnectString);
 	ClassDB::bind_method(D_METHOD("activateGameOverlayToStore", "app_id"), &Steam::activateGameOverlayToStore, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("activateGameOverlayToUser", "type", "steam_id"), &Steam::activateGameOverlayToUser, DEFVAL(""), DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("activateGameOverlayToWebPage", "url"), &Steam::activateGameOverlayToWebPage);
+	ClassDB::bind_method(D_METHOD("activateGameOverlayToWebPage", "url", "webpage_mode"), &Steam::activateGameOverlayToWebPage);
 	ClassDB::bind_method(D_METHOD("clearRichPresence"), &Steam::clearRichPresence);
 	ClassDB::bind_method(D_METHOD("closeClanChatWindowInSteam", "chat_id"), &Steam::closeClanChatWindowInSteam);
 	ClassDB::bind_method(D_METHOD("downloadClanActivityCounts", "chat_id", "clans_to_request"), &Steam::downloadClanActivityCounts);
@@ -9385,7 +9425,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("htmlInit"), &Steam::htmlInit);
 	ClassDB::bind_method(D_METHOD("jsDialogResponse", "result", "this_handle"), &Steam::jsDialogResponse, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("keyChar", "unicode_char", "key_modifiers", "this_handle"), &Steam::keyChar, DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("keyDown", "native_key_code", "key_modifiers", "this_handle"), &Steam::keyDown, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("keyDown", "native_key_code", "key_modifiers", "this_handle", "is_system_key"), &Steam::keyDown, DEFVAL(0), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("keyUp", "native_key_code", "key_modifiers", "this_handle"), &Steam::keyUp, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("loadURL", "url", "post_data", "this_handle"), &Steam::loadURL, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("mouseDoubleClick", "mouse_button", "this_handle"), &Steam::mouseDoubleClick, DEFVAL(0));
@@ -9393,11 +9433,13 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("mouseMove", "x", "y", "this_handle"), &Steam::mouseMove, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("mouseUp", "mouse_button", "this_handle"), &Steam::mouseUp, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("mouseWheel", "delta", "this_handle"), &Steam::mouseWheel, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("openDeveloperTools", "this_handle"), &Steam::openDeveloperTools, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("pasteFromClipboard", "this_handle"), &Steam::pasteFromClipboard, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("reload", "this_handle"), &Steam::reload, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("removeBrowser", "this_handle"), &Steam::removeBrowser, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("setBackgroundMode", "background_mode", "this_handle"), &Steam::setBackgroundMode, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("setCookie", "hostname", "key", "value", "path", "expires", "secure", "http_only"), &Steam::setCookie);
+	ClassDB::bind_method(D_METHOD("setDPIScalingFactor", "dpi_scaling", "this_handle"), &Steam::setDPIScalingFactor);
 	ClassDB::bind_method(D_METHOD("setHorizontalScroll", "absolute_pixel_scroll", "this_handle"), &Steam::setHorizontalScroll, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("setKeyFocus", "has_key_focus", "this_handle"), &Steam::setKeyFocus, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("setPageScaleFactor", "zoom", "point_x", "point_y", "this_handle"), &Steam::setPageScaleFactor, DEFVAL(0));
@@ -10018,29 +10060,29 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("timed_trial_status", PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::BOOL, "is_offline"), PropertyInfo(Variant::INT, "seconds_allowed"), PropertyInfo(Variant::INT, "seconds_played")));
 
 	// FRIENDS
-	ADD_SIGNAL(MethodInfo("avatar_loaded", PropertyInfo(Variant::INT, "avatar_id"), PropertyInfo(Variant::INT, "size"), PropertyInfo(Variant::ARRAY, "data")));
 	ADD_SIGNAL(MethodInfo("avatar_image_loaded", PropertyInfo(Variant::INT, "avatar_id"), PropertyInfo(Variant::INT, "avatar_index"), PropertyInfo(Variant::INT, "width"), PropertyInfo(Variant::INT, "height")));
-	ADD_SIGNAL(MethodInfo("request_clan_officer_list", PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::ARRAY, "officer_list")));
+	ADD_SIGNAL(MethodInfo("avatar_loaded", PropertyInfo(Variant::INT, "avatar_id"), PropertyInfo(Variant::INT, "size"), PropertyInfo(Variant::ARRAY, "data")));
+	ADD_SIGNAL(MethodInfo("change_server_requested", PropertyInfo(Variant::STRING, "server"), PropertyInfo(Variant::STRING, "password")));
 	ADD_SIGNAL(MethodInfo("clan_activity_downloaded", PropertyInfo(Variant::DICTIONARY, "activity")));
-	ADD_SIGNAL(MethodInfo("friend_rich_presence_update", PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "app_id")));
-	ADD_SIGNAL(MethodInfo("enumerate_following_list", PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::ARRAY, "following")));
-	ADD_SIGNAL(MethodInfo("get_follower_count", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "count")));
-	ADD_SIGNAL(MethodInfo("is_following", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::BOOL, "following")));
 	ADD_SIGNAL(MethodInfo("connected_chat_join", PropertyInfo(Variant::INT, "chat_id"), PropertyInfo(Variant::INT, "steam_id")));
 	ADD_SIGNAL(MethodInfo("connected_chat_leave", PropertyInfo(Variant::INT, "chat_id"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::BOOL, "kicked"), PropertyInfo(Variant::BOOL, "dropped")));
 	ADD_SIGNAL(MethodInfo("connected_clan_chat_message", PropertyInfo(Variant::DICTIONARY, "chat")));
 	ADD_SIGNAL(MethodInfo("connected_friend_chat_message", PropertyInfo(Variant::DICTIONARY, "chat")));
-	ADD_SIGNAL(MethodInfo("join_requested", PropertyInfo(Variant::INT, "lobby_id"), PropertyInfo(Variant::INT, "steam_id")));
-	ADD_SIGNAL(MethodInfo("overlay_toggled", PropertyInfo(Variant::BOOL, "active"), PropertyInfo(Variant::BOOL, "user_initiated"), PropertyInfo(Variant::INT, "app_id")));
-	ADD_SIGNAL(MethodInfo("join_game_requested", PropertyInfo(Variant::INT, "user"), PropertyInfo(Variant::STRING, "connect")));
-	ADD_SIGNAL(MethodInfo("change_server_requested", PropertyInfo(Variant::STRING, "server"), PropertyInfo(Variant::STRING, "password")));
+	ADD_SIGNAL(MethodInfo("enumerate_following_list", PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::ARRAY, "following")));
+	ADD_SIGNAL(MethodInfo("equipped_profile_items", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::DICTIONARY, "profile_data")));
+	ADD_SIGNAL(MethodInfo("equipped_profile_items_changed", PropertyInfo(Variant::INT, "steam_id")));
+	ADD_SIGNAL(MethodInfo("friend_rich_presence_update", PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "app_id")));
+	ADD_SIGNAL(MethodInfo("get_follower_count", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "count")));
+	ADD_SIGNAL(MethodInfo("is_following", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::BOOL, "following")));
 	ADD_SIGNAL(MethodInfo("join_clan_chat_complete", PropertyInfo(Variant::INT, "chat_id"), PropertyInfo(Variant::INT, "response")));
-	ADD_SIGNAL(MethodInfo("persona_state_change", PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "flags")));
+	ADD_SIGNAL(MethodInfo("join_game_requested", PropertyInfo(Variant::INT, "user"), PropertyInfo(Variant::STRING, "connect")));
+	ADD_SIGNAL(MethodInfo("join_requested", PropertyInfo(Variant::INT, "lobby_id"), PropertyInfo(Variant::INT, "steam_id")));
 	ADD_SIGNAL(MethodInfo("name_changed", PropertyInfo(Variant::BOOL, "success"), PropertyInfo(Variant::BOOL, "local_success"), PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("overlay_browser_protocol", PropertyInfo(Variant::STRING, "uri")));
+	ADD_SIGNAL(MethodInfo("overlay_toggled", PropertyInfo(Variant::BOOL, "active"), PropertyInfo(Variant::BOOL, "user_initiated"), PropertyInfo(Variant::INT, "app_id")));
+	ADD_SIGNAL(MethodInfo("persona_state_change", PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "flags")));
+	ADD_SIGNAL(MethodInfo("request_clan_officer_list", PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::ARRAY, "officer_list")));
 	ADD_SIGNAL(MethodInfo("unread_chat_messages_changed"));
-	ADD_SIGNAL(MethodInfo("equipped_profile_items_changed", PropertyInfo(Variant::INT, "steam_id")));
-	ADD_SIGNAL(MethodInfo("equipped_profile_items", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::DICTIONARY, "profile_data")));
 
 	// GAME SEARCH
 	ADD_SIGNAL(MethodInfo("search_for_game_progress", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "search_id"), PropertyInfo(Variant::DICTIONARY, "search_progress")));
@@ -10240,7 +10282,7 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("user_stats_stored", PropertyInfo(Variant::INT, "game_id"), PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("user_stats_unloaded", PropertyInfo(Variant::INT, "user_id")));
 
-	// UTILITY
+	// UTILS
 	ADD_SIGNAL(MethodInfo("check_file_signature", PropertyInfo(Variant::STRING, "signature")));
 	ADD_SIGNAL(MethodInfo("gamepad_text_input_dismissed", PropertyInfo(Variant::BOOL, "submitted"), PropertyInfo(Variant::STRING, "entered_text"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("ip_country"));
@@ -10252,6 +10294,8 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("filter_text_dictionary_changed", PropertyInfo(Variant::INT, "language")));
 
 	// VIDEO
+	ADD_SIGNAL(MethodInfo("broadcast_upload_start", PropertyInfo(Variant::BOOL, "is_rtmp")));
+	ADD_SIGNAL(MethodInfo("broadcast_upload_stop", PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("get_opf_settings_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("get_video_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "app_id"), PropertyInfo(Variant::STRING, "url")));
 
@@ -12105,7 +12149,6 @@ Steam::~Steam() {
 		steamShutdown();
 	}
 
-	// Do we really need to unset these?
 	current_clan_id = 0;
 	browser_handle = 0;
 	inventory_handle = 0;
