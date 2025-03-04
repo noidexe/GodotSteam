@@ -7713,7 +7713,7 @@ void Steam::html_needs_paint(HTML_NeedsPaint_t *call_data) {
 // A browser has created a new HTML window.
 void Steam::html_new_window(HTML_NewWindow_t *call_data) {
 	browser_handle = call_data->unBrowserHandle;
-	// Create a dictionary to bypass Godot argument limit
+
 	Dictionary window_data;
 	window_data["url"] = call_data->pchURL;
 	window_data["x"] = call_data->unX;
