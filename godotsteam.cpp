@@ -7682,7 +7682,7 @@ void Steam::html_needs_paint(HTML_NeedsPaint_t *call_data) {
 	browser_handle = call_data->unBrowserHandle;
 	Dictionary page_data;
 
-	unsigned int pixel_count = call_data->unWide * call_data->unTall;
+	unsigned int pixel_count = call_data->unWide * call_data->unTall
 	PackedByteArray rgba_data;
 	rgba_data.resize(pixel_count * 4);
 	const uint8_t *bgra = (const uint8_t *)call_data->pBGRA;

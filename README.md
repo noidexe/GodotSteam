@@ -44,7 +44,9 @@ While rare, sometimes Steamworks SDK updates will break compatilibity with older
 
 Steamworks SDK Version | GodotSteam Version
 ---|---
-1.59 or newer | 4.6 or newer
+1.61 or newer | 4.12 or newer
+1.60 | 4.6 to 4.11
+1.59 | 4.6 to 4.8
 1.58a or older | 4.5.4 or older
 
 Versions of GodotSteam that have compatibility breaks introduced.
