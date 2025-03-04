@@ -132,7 +132,7 @@ public:
 	void activateGameOverlayInviteDialogConnectString(const String &connect_string);
 	void activateGameOverlayToStore(uint32_t app_id = 0);
 	void activateGameOverlayToUser(const String &type, uint64_t steam_id);
-	void activateGameOverlayToWebPage(const String &url);
+	void activateGameOverlayToWebPage(const String &url, OverlayToWebPageMode webpage_mode);
 	void clearRichPresence();
 	bool closeClanChatWindowInSteam(uint64_t chat_id);
 	void downloadClanActivityCounts(uint64_t clan_id, int clans_to_request);
@@ -240,7 +240,7 @@ public:
 	bool htmlInit();
 	void jsDialogResponse(bool result, uint32 this_handle = 0);
 	void keyChar(uint32 unicode_char, BitField<HTMLKeyModifiers> key_modifiers, uint32 this_handle = 0);
-	void keyDown(uint32 native_key_code, BitField<HTMLKeyModifiers> key_modifiers, uint32 this_handle = 0);
+	void keyDown(uint32 native_key_code, BitField<HTMLKeyModifiers> key_modifiers, uint32 this_handle = 0, bool is_system_key = false);
 	void keyUp(uint32 native_key_code, BitField<HTMLKeyModifiers> key_modifiers, uint32 this_handle = 0);
 	void loadURL(const String &url, const String &post_data, uint32 this_handle = 0);
 	void mouseDoubleClick(HTMLMouseButton mouse_button, uint32 this_handle = 0);
@@ -248,11 +248,13 @@ public:
 	void mouseMove(int x, int y, uint32 this_handle = 0);
 	void mouseUp(HTMLMouseButton mouse_button, uint32 this_handle = 0);
 	void mouseWheel(int32 delta, uint32 this_handle = 0);
+	void openDeveloperTools(uint32 this_handle);
 	void pasteFromClipboard(uint32 this_handle = 0);
 	void reload(uint32 this_handle = 0);
 	void removeBrowser(uint32 this_handle = 0);
 	void setBackgroundMode(bool background_mode, uint32 this_handle = 0);
 	void setCookie(const String &hostname, const String &key, const String &value, const String &path, uint32 expires, bool secure, bool http_only);
+	void setDPIScalingFactor(float dpi_scaling, uint32 this_handle);
 	void setHorizontalScroll(uint32 absolute_pixel_scroll, uint32 this_handle = 0);
 	void setKeyFocus(bool has_key_focus, uint32 this_handle = 0);
 	void setPageScaleFactor(float zoom, int point_x, int point_y, uint32 this_handle = 0);
@@ -1115,7 +1117,7 @@ private:
 	STEAM_CALLBACK(Steam, user_stats_stored, UserStatsStored_t, callbackUserStatsStored);
 	STEAM_CALLBACK(Steam, user_stats_unloaded, UserStatsUnloaded_t, callbackUserStatsUnloaded);
 
-	// Utility
+	// Utils
 	STEAM_CALLBACK(Steam, gamepad_text_input_dismissed, GamepadTextInputDismissed_t, callbackGamepadTextInputDismissed);
 	STEAM_CALLBACK(Steam, ip_country, IPCountry_t, callbackIPCountry);
 	STEAM_CALLBACK(Steam, low_power, LowBatteryPower_t, callbackLowPower);
@@ -1126,6 +1128,8 @@ private:
 	STEAM_CALLBACK(Steam, filter_text_dictionary_changed, FilterTextDictionaryChanged_t, callbackFilterTextDictionaryChanged);
 
 	// Video
+	STEAM_CALLBACK(Steam, broadcast_upload_start, BroadcastUploadStart_t, callbackBroadcastUploadStart);
+	STEAM_CALLBACK(Steam, broadcast_upload_stop, BroadcastUploadStop_t, callbackBroadcastUploadStop);
 	STEAM_CALLBACK(Steam, get_opf_settings_result, GetOPFSettingsResult_t, callbackGetOPFSettingsResult);
 	STEAM_CALLBACK(Steam, get_video_result, GetVideoURLResult_t, callbackGetVideoResult);
 
@@ -1249,7 +1253,7 @@ private:
 	CCallResult<Steam, UserStatsReceived_t> callResultUserStatsReceived;
 	void user_stats_received(UserStatsReceived_t *call_data, bool io_failure);
 
-	// Utility
+	// Utils
 	CCallResult<Steam, CheckFileSignature_t> callResultCheckFileSignature;
 	void check_file_signature(CheckFileSignature_t *call_data, bool io_failure);
 };
