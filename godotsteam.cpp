@@ -3311,7 +3311,7 @@ static std::vector<MatchMakingKeyValuePair_t> filters_array_to_vector(const Arra
 		// Get the value from the filter pair
 		String value = pair[1];
 		// Create a new filter pair to populate
-		filters_array[i] = MatchMakingKeyValuePair_t(key.utf8(), value.utf8());
+		filters_array[i] = MatchMakingKeyValuePair_t(key.utf8().get_data(), value.utf8().get_data());
 	}
 	return filters_array;
 }
@@ -5504,7 +5504,7 @@ bool Steam::initWorkshopForGameServer(uint32_t workshop_depot_id, String folder)
 	bool initialized_workshop = false;
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, initialized_workshop, "[STEAM] UGC class not found when calling: initWorkshopForGameServer");
 	DepotId_t workshop = (uint32_t)workshop_depot_id;
-	initialized_workshop = SteamUGC()->BInitWorkshopForGameServer(workshop, folder.utf8());
+	initialized_workshop = SteamUGC()->BInitWorkshopForGameServer(workshop, folder.utf8().get_data());
 	return initialized_workshop;
 }
 
