@@ -19,7 +19,7 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
 
 
     name: Linux ${{ matrix.name }}
@@ -64,6 +64,12 @@ jobs:
           repository: ${{ secrets.steamworks_sdk_repo }}
           token: ${{ secrets.steamworks_sdk_repo_token }}
           ref: ${{ inputs.steamworks_sdk_tag }}
+
+      # Install Godot requirements
+      - name: Install Godot requirements
+        shell: sh
+        run: |
+          sudo apt-get install -y build-essential pkg-config libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev libglu1-mesa-dev libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev libwayland-dev
 
       - name: Install gcc-multilib
         if: ${{ startsWith(matrix.arch, 'x86_32') }}
