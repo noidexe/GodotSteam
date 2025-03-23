@@ -7,7 +7,7 @@ description: Download and extract the Godot-CPP source code for use in compiling
 inputs:
   version:
     description: Version of Godot-CPP source code to download
-    default: "4.4"
+    default: 4.4
 
 
 runs:
