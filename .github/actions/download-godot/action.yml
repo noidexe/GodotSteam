@@ -20,7 +20,7 @@ runs:
           git -C godot-cpp config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
           git submodule sync --recursive godot-cpp
           git submodule
-          git submodule update --init --recursive --remote gdoot-cpp
+          git submodule update --init --recursive --remote godot-cpp
           cd godot-cpp/
           ls -l
           git checkout ${{ inputs.version }}
