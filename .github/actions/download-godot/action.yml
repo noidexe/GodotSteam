@@ -14,26 +14,32 @@ runs:
   using: "composite"
 
   steps:
-      - name: Get Godot-CPP 4.4
-        if: ${{ inputs.version == '4.4' }}
+      - name: Get Godot-CPP
         shell: sh
         run: |
-          git submodule update --init --recursive
+          cd godot-cpp/
+          git checkout ${{ inputs.version }}
 
-      - name: Get Godot-CPP 4.3
-        if: ${{ inputs.version == '4.3' }}
-        shell: sh
-        run: |
-          rm .gitmodules
-          mv .gitmodules43 .gitmodules
-          git submodule sync
-          git submodule update --init --recursive
+      # - name: Get Godot-CPP 4.4
+      #   if: ${{ inputs.version == '4.4' }}
+      #   shell: sh
+      #   run: |
+      #     git submodule update --init --recursive
 
-      - name: Get Godot-CPP 4.1 (For Godot 4.1-4.2)
-        if: ${{ inputs.version == '4.1' }}
-        shell: sh
-        run: |
-          rm .gitmodules
-          mv .gitmodules41 .gitmodules
-          git submodule sync
-          git submodule update --init --recursive
+      # - name: Get Godot-CPP 4.3
+      #   if: ${{ inputs.version == '4.3' }}
+      #   shell: sh
+      #   run: |
+      #     rm .gitmodules
+      #     mv .gitmodules43 .gitmodules
+      #     git submodule sync
+      #     git submodule update --init --recursive
+
+      # - name: Get Godot-CPP 4.1 (For Godot 4.1-4.2)
+      #   if: ${{ inputs.version == '4.1' }}
+      #   shell: sh
+      #   run: |
+      #     rm .gitmodules
+      #     mv .gitmodules41 .gitmodules
+      #     git submodule sync
+      #     git submodule update --init --recursive
