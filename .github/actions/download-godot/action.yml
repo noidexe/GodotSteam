@@ -17,7 +17,7 @@ runs:
       - name: Get Godot-CPP
         shell: sh
         run: |
-          git submodule set-branch ${{ inputs.version }} gdoot-cpp
+          git submodule set-branch ${{ inputs.version }} godot-cpp
           git submodule sync
           git submodule
           git submodule update --init --remote
