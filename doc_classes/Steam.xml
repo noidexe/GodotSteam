@@ -8586,7 +8586,7 @@
 		</constant>
 		<constant name="NETWORKING_SEND_NO_NAGLE" value="1">
 		</constant>
-		<constant name="NETWORKING_SEND_URELIABLE_NO_NAGLE" value="1">
+		<constant name="NETWORKING_SEND_UNRELIABLE_NO_NAGLE" value="1">
 		</constant>
 		<constant name="NETWORKING_SEND_NO_DELAY" value="4">
 		</constant>
