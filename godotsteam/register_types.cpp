@@ -22,19 +22,8 @@ void initialize_godotsteam(ModuleInitializationLevel level){
 
 		// Setup Project Settings
 		// GDExtension does not have GLOBAL_DEF or GLOBAL_GET, so we gotta do this manually here
-		String auto_init_setting = "godot_steam/steam_init/auto_init_steam_on_startup";
-		Variant initial_auto_init = false;
-		if (!ProjectSettings::get_singleton()->has_setting(auto_init_setting)) {
-			ProjectSettings::get_singleton()->set(auto_init_setting, initial_auto_init);
-		}
-		// Fetching the value right away seems required, otherwise set_initial_value and set_as_basic don't work
-		bool auto_init = ProjectSettings::get_singleton()->get_setting_with_override(auto_init_setting);
-		ProjectSettings::get_singleton()->set_initial_value(auto_init_setting, initial_auto_init);
-		ProjectSettings::get_singleton()->set_as_basic(auto_init_setting, true);
-
-
-		String app_id_setting = "godot_steam/steam_init/app_id";
-		Variant initial_app_id = 480;
+		const String app_id_setting = "godot_steam/steam/app_id";
+		const Variant initial_app_id = 0;
 		if (!ProjectSettings::get_singleton()->has_setting(app_id_setting)) {
 			ProjectSettings::get_singleton()->set(app_id_setting, initial_app_id);
 		}
@@ -43,8 +32,19 @@ void initialize_godotsteam(ModuleInitializationLevel level){
 		ProjectSettings::get_singleton()->set_initial_value(app_id_setting, initial_app_id);
 		ProjectSettings::get_singleton()->set_as_basic(app_id_setting, true);
 
+
+		const String auto_init_setting = "godot_steam/steam/auto_init_steam_on_startup";
+		const Variant initial_auto_init = false;
+		if (!ProjectSettings::get_singleton()->has_setting(auto_init_setting)) {
+			ProjectSettings::get_singleton()->set(auto_init_setting, initial_auto_init);
+		}
+		// Fetching the value right away seems required, otherwise set_initial_value and set_as_basic don't work
+		bool auto_init = ProjectSettings::get_singleton()->get_setting_with_override(auto_init_setting);
+		ProjectSettings::get_singleton()->set_initial_value(auto_init_setting, initial_auto_init);
+		ProjectSettings::get_singleton()->set_as_basic(auto_init_setting, true);
 		
-		// Prevent steamInit from the editor itself
+
+		// Prevent auto steamInit from the editor itself
 		if (Engine::get_singleton()->is_editor_hint()) {
 			return;
 		}

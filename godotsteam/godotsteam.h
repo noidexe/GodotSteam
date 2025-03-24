@@ -26,6 +26,7 @@
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 
 // Include GodotSteam headers
 #include "godotsteam_constants.h"
