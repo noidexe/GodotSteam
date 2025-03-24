@@ -20,6 +20,8 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-20.04
+    compiler: gcc
+    gcc: 8
 
 
     name: Linux ${{ matrix.name }}
