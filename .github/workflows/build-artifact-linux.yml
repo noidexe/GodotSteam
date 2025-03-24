@@ -80,9 +80,16 @@ jobs:
 
       # Testing set GCC version
       - name: Setup GCC
-        uses: Dup4/actions-setup-gcc@v1
-        with:
-          version: 8
+        shell: sh
+        run: |
+          sudo apt -y install gcc-8 g++-8 gcc-9 g++-9
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10
+          sudo update-alternatives --set gcc /usr/bin/gcc-8
+          sudo update-alternatives --set g++ /usr/bin/g++-8
+
+          gcc --version
+          g++ --version
 
       # Setting up the Linux buildroot for older versions
       - name: Setup Linux Buildroot
