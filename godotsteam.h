@@ -24,6 +24,7 @@
 #include "core/variant/dictionary.h"
 #include "scene/main/scene_tree.h"
 #include "scene/resources/texture.h"
+#include "core/config/project_settings.h"
 
 // Include GodotSteam headers
 #include "godotsteam_constants.h"

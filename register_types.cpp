@@ -13,8 +13,8 @@ void initialize_godotsteam_module(ModuleInitializationLevel level){
 		Engine::get_singleton()->add_singleton(Engine::Singleton("Steam", Steam::get_singleton()));
 
 		// Setup Project Settings
-		bool auto_init = GLOBAL_DEF_BASIC("godot_steam/steam_init/auto_init_steam_on_startup", false);
-		int app_id = GLOBAL_DEF_BASIC("godot_steam/steam_init/app_id", 480);
+		int app_id = GLOBAL_DEF_BASIC("godot_steam/steam/app_id", 0);
+		bool auto_init = GLOBAL_DEF_BASIC("godot_steam/steam/auto_init_steam_on_startup", false);
 
 		// Prevent steamInit from the editor itself
 		if (Engine::get_singleton()->is_editor_hint()) {
@@ -25,7 +25,7 @@ void initialize_godotsteam_module(ModuleInitializationLevel level){
 			return;
 		}
 
-		Steam::get_singleton()->steamInitEx(false, 480, false);
+		Steam::get_singleton()->steamInitEx(false, app_id, false);
 	}
 }
 
