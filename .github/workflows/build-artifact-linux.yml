@@ -65,6 +65,18 @@ jobs:
           token: ${{ secrets.steamworks_sdk_repo_token }}
           ref: ${{ inputs.steamworks_sdk_tag }}
 
+      # Testing set GCC version
+      - name: Setup GCC
+        shell: sh
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10
+          sudo update-alternatives --set gcc /usr/bin/gcc-9
+          sudo update-alternatives --set g++ /usr/bin/g++-9
+
+          gcc --version
+          g++ --version
+
       # Install Godot requirements
       - name: Install Godot requirements
         shell: sh
@@ -77,19 +89,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install gcc-multilib g++-multilib
-
-      # Testing set GCC version
-      - name: Setup GCC
-        shell: sh
-        run: |
-          sudo apt -y install gcc-8 g++-8 gcc-9 g++-9
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10
-          sudo update-alternatives --set gcc /usr/bin/gcc-8
-          sudo update-alternatives --set g++ /usr/bin/g++-8
-
-          gcc --version
-          g++ --version
 
       # Setting up the Linux buildroot for older versions
       - name: Setup Linux Buildroot
