@@ -20,8 +20,6 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-20.04
-    compiler: gcc
-    gcc: 8
 
 
     name: Linux ${{ matrix.name }}
@@ -79,6 +77,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt install gcc-multilib g++-multilib
+
+      # Testing set GCC version
+      - name: Setup GCC
+        uses: Dup4/actions-setup-gcc@v1
+        with:
+          version: 8
 
       # Setting up the Linux buildroot for older versions
       - name: Setup Linux Buildroot
