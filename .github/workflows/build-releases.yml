@@ -14,7 +14,7 @@ on:
         description: 'Godot CPP Tag:'
         required: true
         type: string
-        default: '4.4'
+        default: "4.4"
 
       godotsteam_version:
         description: 'GodotSteam GDExtension Tag:'

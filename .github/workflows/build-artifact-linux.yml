@@ -65,6 +65,18 @@ jobs:
           token: ${{ secrets.steamworks_sdk_repo_token }}
           ref: ${{ inputs.steamworks_sdk_tag }}
 
+      # Testing set GCC version
+      - name: Setup GCC
+        shell: sh
+        run: |
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10
+          sudo update-alternatives --set gcc /usr/bin/gcc-9
+          sudo update-alternatives --set g++ /usr/bin/g++-9
+
+          gcc --version
+          g++ --version
+
       # Install Godot requirements
       - name: Install Godot requirements
         shell: sh

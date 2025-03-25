@@ -14,26 +14,13 @@ runs:
   using: "composite"
 
   steps:
-      - name: Get Godot-CPP 4.4
-        if: ${{ inputs.version == '4.4' }}
+      - name: Get Godot-CPP
         shell: sh
         run: |
-          git submodule update --init --recursive
-
-      - name: Get Godot-CPP 4.3
-        if: ${{ inputs.version == '4.3' }}
-        shell: sh
-        run: |
-          rm .gitmodules
-          mv .gitmodules43 .gitmodules
-          git submodule sync
-          git submodule update --init --recursive
-
-      - name: Get Godot-CPP 4.1 (For Godot 4.1-4.2)
-        if: ${{ inputs.version == '4.1' }}
-        shell: sh
-        run: |
-          rm .gitmodules
-          mv .gitmodules41 .gitmodules
-          git submodule sync
-          git submodule update --init --recursive
+          git -C godot-cpp config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
+          git submodule sync --recursive godot-cpp
+          git submodule
+          git submodule update --init --recursive --remote godot-cpp
+          cd godot-cpp/
+          ls -l
+          git checkout ${{ inputs.version }}
