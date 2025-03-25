@@ -65,6 +65,7 @@ public:
 	bool restartAppIfNecessary(uint32 app_id);
 	Dictionary steamInit(bool retrieve_stats = false, uint32_t app_id = 0, bool embed_callbacks = false);
 	Dictionary steamInitEx(bool retrieve_stats = false, uint32_t app_id = 0, bool embed_callbacks = false);
+	Dictionary getSteamInitResult();
 	void steamShutdown();
 
 	uint32 get_browser_handle() const { return browser_handle; }
@@ -900,6 +901,7 @@ private:
 	// Main
 	String godotsteam_version = "4.12";
 	bool is_init_success;
+	Dictionary init_result;
 	bool were_callbacks_embedded;
 
 	const SteamNetworkingConfigValue_t *convert_config_options(Dictionary config_options);

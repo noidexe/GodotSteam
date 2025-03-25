@@ -474,6 +474,8 @@ Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id, bool embed_cal
 	initialize["status"] = status;
 	initialize["verbal"] = verbal;
 
+	init_result = initialize;
+
 	return initialize;
 }
 
@@ -512,9 +514,17 @@ Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id, bool embed_c
 	}
 	initialize["status"] = initialize_result;
 	initialize["verbal"] = error_message;
+	
+	init_result = initialize;
 
 	return initialize;
 }
+
+
+Dictionary Steam::getSteamInitResult() {
+	return init_result;
+}
+
 
 // Shuts down the Steamworks API, releases pointers and frees memory.
 void Steam::steamShutdown() {
@@ -9284,6 +9294,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
 	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(false), DEFVAL(0), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("getSteamInitResult"), &Steam::getSteamInitResult);
 	ClassDB::bind_method("steamShutdown", &Steam::steamShutdown);
 
 	ClassDB::bind_method("get_browser_handle", &Steam::get_browser_handle);
