@@ -429,6 +429,11 @@ bool Steam::restartAppIfNecessary(uint32 app_id) {
 
 // Initialize the SDK, without worrying about the cause of failure.
 Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id) {
+	// Use Project Setting as default (default for setting is 0)
+	if (app_id == 0) {
+		app_id = ProjectSettings::get_singleton()->get_setting_with_override("godot_steam/steam/app_id");
+	}
+	// Set the app ID
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
 		OS::get_singleton()->set_environment("SteamGameId", itos(app_id));
@@ -464,12 +469,18 @@ Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id) {
 	initialize["status"] = status;
 	initialize["verbal"] = verbal;
 
+	init_result = initialize;
+
 	return initialize;
 }
 
 // Initialize the Steamworks SDK. On success STEAM_API_INIT_RESULT_OK is returned.
 // Otherwise, if error_message is non-NULL, it will receive a non-localized message that explains the reason for the failure.
 Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id) {
+	// Use Project Setting as default (default for setting is 0)
+	if (app_id == 0) {
+		app_id = ProjectSettings::get_singleton()->get_setting_with_override("godot_steam/steam/app_id");
+	}
 	// Set the app ID
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
@@ -491,8 +502,16 @@ Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id) {
 	initialize["status"] = initialize_result;
 	initialize["verbal"] = error_message;
 
+	init_result = initialize;
+
 	return initialize;
 }
+
+
+Dictionary Steam::getSteamInitResult() {
+	return init_result;
+}
+
 
 // Shuts down the Steamworks API, releases pointers and frees memory.
 void Steam::steamShutdown() {
@@ -9254,6 +9273,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
 	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id"), &Steam::steamInit, DEFVAL(false), DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("getSteamInitResult"), &Steam::getSteamInitResult);
 	ClassDB::bind_method(D_METHOD("steamShutdown"), &Steam::steamShutdown);
 
 	ClassDB::bind_method(D_METHOD("get_browser_handle"), &Steam::get_browser_handle);
