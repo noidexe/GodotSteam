@@ -1,3 +1,29 @@
+//===========================================================================//
+// GodotSteam - godotsteam.h
+//===========================================================================//
+//
+// Copyright (c) 2015-Current | GP Garcia and Contributors (view contributors.md)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//===========================================================================//
+
 #ifndef GODOTSTEAM_H
 #define GODOTSTEAM_H
 
@@ -23,6 +49,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/os.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
@@ -66,9 +93,8 @@ public:
 	bool isLobby(uint64_t steam_id);
 	bool isSteamRunning();
 	bool restartAppIfNecessary(uint32 app_id);
-	Dictionary steamInit(bool retrieve_stats = false, uint32_t app_id = 0);
-	Dictionary steamInitEx(bool retrieve_stats = false, uint32_t app_id = 0);
-	Dictionary getSteamInitResult();
+	bool steamInit(uint32_t app_id = 0, bool embed_callbacks = false);
+	Dictionary steamInitEx(uint32_t app_id = 0, bool embed_callbacks = false);
 	void steamShutdown();
 
 	uint32 get_browser_handle() const { return browser_handle; }
@@ -81,6 +107,7 @@ public:
 	int get_leaderboard_details_max() const { return leaderboard_details_max; }
 	Array get_leaderboard_entries() const { return leaderboard_entries_array; }
 	uint64_t get_server_list_request() const { return (uint64)server_list_request; }
+	Dictionary get_steam_init_result() { return init_result; }
 	void set_browser_handle(uint32 new_browser_handle){ browser_handle = new_browser_handle; }
 	void set_current_app_id(uint32_t new_current_app_id){ current_app_id = new_current_app_id; }
 	void set_current_clan_id(uint64_t new_current_clan_id){ current_clan_id = new_current_clan_id; }
@@ -188,7 +215,6 @@ public:
 	Array getRecentPlayers();
 	int getSmallFriendAvatar(uint64_t steam_id);
 	Array getUserFriendsGroups();
-	uint32 getUserRestrictions();
 	Array getUserSteamFriends();
 	Array getUserSteamGroups();
 	bool hasEquippedProfileItem(uint64_t steam_id, CommunityProfileItemType item_type);
@@ -212,7 +238,6 @@ public:
 	bool sendClanChatMessage(uint64_t chat_id, const String &text);
 	void setInGameVoiceSpeaking(uint64_t steam_id, bool speaking);
 	bool setListenForFriendsMessages(bool intercept);
-	void setPersonaName(const String &name);
 	void setPlayedWith(uint64_t steam_id);
 	bool setRichPresence(const String &key, const String &value);
 
@@ -589,6 +614,10 @@ public:
 	void onReservationCompleted(uint64_t beacon_id, uint64_t steam_id);
 
 	// Remote Play
+	Dictionary createMouseCursor(int width, int height, int hot_x, int hot_y, int pitch);
+	bool enableRemotePlayTogetherDirectInput();
+	void disableRemotePlayTogetherDirectInput();
+	Array getInput(uint32_t max_events);
 	uint32 getSessionCount();
 	uint32 getSessionID(uint32 index);
 	uint64_t getSessionSteamID(uint32 session_id);
@@ -596,7 +625,10 @@ public:
 	int getSessionClientFormFactor(uint32 session_id);
 	Dictionary getSessionClientResolution(uint32 session_id);
 	bool sendRemotePlayTogetherInvite(uint64_t friend_id);
-	bool startRemotePlayTogether(bool show_overlay = true);
+	void setMouseCursor(uint32 session_id, uint32 cursor_id);
+	void setMousePosition(uint32 session_id, float normalized_x, float normalized_y);
+	void setMouseVisibility(uint32 session_id, bool visible);
+	bool showRemotePlayTogetherUI();
 
 	// Remote Storage
 	bool beginFileWriteBatch();
@@ -688,7 +720,7 @@ public:
 	Dictionary getItemInstallInfo(uint64_t published_file_id);
 	uint32 getItemState(uint64_t published_file_id);
 	Dictionary getItemUpdateProgress(uint64_t update_handle);
-	uint32 getNumSubscribedItems();
+	uint32 getNumSubscribedItems(bool include_locally_disabled = false);
 	uint32 getNumSupportedGameVersions(uint64_t query_handle, uint32 index);
 	Dictionary getQueryUGCAdditionalPreview(uint64_t query_handle, uint32 index, uint32 preview_index);
 	Dictionary getQueryUGCChildren(uint64_t query_handle, uint32 index, uint32_t child_count);
@@ -703,7 +735,7 @@ public:
 	Dictionary getQueryUGCStatistic(uint64_t query_handle, uint32 index, ItemStatistic stat_type);
 	String getQueryUGCTag(uint64_t query_handle, uint32 index, uint32 tag_index);
 	String getQueryUGCTagDisplayName(uint64_t query_handle, uint32 index, uint32 tag_index);
-	Array getSubscribedItems();
+	Array getSubscribedItems(bool include_locally_disabled = false);
 	Dictionary getSupportedGameVersionData(uint64_t query_handle, uint32 index, uint32 version_index);
 	Array getUserContentDescriptorPreferences(uint32 max_entries);
 	void getUserItemVote(uint64_t published_file_id);
@@ -726,6 +758,7 @@ public:
 	bool setItemTitle(uint64_t update_handle, const String &title);
 	bool setItemUpdateLanguage(uint64_t update_handle, const String &language);
 	bool setItemVisibility(uint64_t update_handle, RemoteStoragePublishedFileVisibility visibility);
+	bool setItemsDisabledLocally(PackedInt64Array published_file_ids, bool disabled_locally);
 	bool setLanguage(uint64_t query_handle, const String &language);
 	bool setMatchAnyTag(uint64_t query_handle, bool match_any_tag);
 	bool setRankedByTrendDays(uint64_t query_handle, uint32 days);
@@ -897,12 +930,14 @@ public:
 
 protected:
 	static void _bind_methods();
+	void _process(double_t delta);
 	static Steam *singleton;
 
 
 private:
 	// Main
-	String godotsteam_version = "4.12";
+	String godotsteam_version = "4.14";
+	Dictionary init_result;
 	bool is_init_success;
 	Dictionary init_result;
 	bool were_callbacks_embedded;
@@ -964,7 +999,6 @@ private:
 	STEAM_CALLBACK(Steam, change_server_requested, GameServerChangeRequested_t, callbackChangeServerRequested);
 	STEAM_CALLBACK(Steam, join_clan_chat_complete, JoinClanChatRoomCompletionResult_t, callbackJoinClanChatComplete);
 	STEAM_CALLBACK(Steam, persona_state_change, PersonaStateChange_t, callbackPersonaStateChange);
-	STEAM_CALLBACK(Steam, name_changed, SetPersonaNameResponse_t, callbackNameChanged);
 	STEAM_CALLBACK(Steam, overlay_browser_protocol, OverlayBrowserProtocolNavigation_t, callbackOverlayBrowserProtocol);
 	STEAM_CALLBACK(Steam, unread_chat_messages_changed, UnreadChatMessagesChanged_t, callbackUnreadChatMessagesChanged);
 	STEAM_CALLBACK(Steam, equipped_profile_items_changed, EquippedProfileItemsChanged_t, callbackEquippedProfileItemsChanged);
@@ -1306,6 +1340,7 @@ VARIANT_ENUM_CAST(GameSearchErrorCode);
 
 VARIANT_BITFIELD_CAST(HTMLKeyModifiers);
 VARIANT_ENUM_CAST(HTMLMouseButton);
+VARIANT_ENUM_CAST(HTMLMouseCursor);
 VARIANT_ENUM_CAST(HTTPMethod);
 VARIANT_ENUM_CAST(HTTPStatusCode);
 
@@ -1337,7 +1372,6 @@ VARIANT_ENUM_CAST(LocalFileChange);
 
 VARIANT_ENUM_CAST(MarketNotAllowedReasonFlags);
 VARIANT_ENUM_CAST(MatchMakingServerResponse);
-VARIANT_ENUM_CAST(MouseCursor);
 
 VARIANT_ENUM_CAST(NetworkingAvailability);
 VARIANT_ENUM_CAST(NetworkingConfigDataType);
@@ -1363,6 +1397,11 @@ VARIANT_BITFIELD_CAST(PersonaChange);
 VARIANT_ENUM_CAST(PersonaState);
 VARIANT_ENUM_CAST(PlayerResult);
 
+VARIANT_ENUM_CAST(RemotePlayInputType);
+VARIANT_BITFIELD_CAST(RemotePlayKeyModifier);
+VARIANT_BITFIELD_CAST(RemotePlayMouseButton);
+VARIANT_ENUM_CAST(RemotePlayMouseWheelDirection);
+VARIANT_ENUM_CAST(RemotePlayScancode);
 VARIANT_BITFIELD_CAST(RemoteStoragePlatform);
 VARIANT_ENUM_CAST(RemoteStoragePublishedFileVisibility);
 VARIANT_ENUM_CAST(Result);
@@ -1382,7 +1421,6 @@ VARIANT_ENUM_CAST(UGCMatchingUGCType);
 VARIANT_ENUM_CAST(UGCQuery);
 VARIANT_ENUM_CAST(UGCReadAction);
 VARIANT_ENUM_CAST(UserHasLicenseForAppResult);
-VARIANT_BITFIELD_CAST(UserRestriction);
 VARIANT_ENUM_CAST(UserUGCList);
 VARIANT_ENUM_CAST(UserUGCListSortOrder);
 

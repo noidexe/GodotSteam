@@ -24,17 +24,20 @@ Current Build
 ---
 You can [download pre-compiled versions of this repo here](https://github.com/GodotSteam/GodotSteam/releases).
 
-**Version 4.13 Changes**
-- Added: missing functions `openDeveloperTools` and `setDPIScalingFactor`
-- Added: two missing Video class callbacks: `broadcast_upload_start` and `broadcast_upload_stop`
-- Changed: minor housekeeping
+**Version 4.14 Changes**
+- Added: new functions and enums to SteamRemotePlay
+- Added: Steam icon to the class
+- Added: Project Settings for Steam, optional app ID, can set auto-initialization, can set embedded callbacks, thanks to ***TriMay***
+- Changed: replaced previous `MouseCursor` enum with new `HTMLMouseCursor` enum
 - Changed: updated docs
-- Changed: `getItemDefinitionProperty` now returns dictionary, thanks to ***gkwaerp***
-- Changed: returned dictionary of `html_needs_paint` signal key 'bgra' renamed to 'rbga', thanks to ***obscurelyme***
-- Fixed: history variables not initialized in `getGlobalStatIntHistory` and `getGlobalStatFloatHistory`
-- Fixed: missing argument in `activateGameOverlayToWebPage`
-- Fixed: missing argument in `keyDown`
-- Fixed: incorrect callback signal for `get_opf_settings_result`
+- Changed: updated to Steamworks SDK 1.62
+- Changed: `getNumSubscribedItems` and `getSubscribedItems` now take include_locally_disabled argument
+- Changed: `steamInit` now return intended boolean and first argument removed since client syncs stats/achieves at boot
+- Fixed: various bits in the in-editor docs
+- Fixed: `network_messages_session_failed` missing returned properties in bind
+- Removed: `UserRestrictions` enum
+- Removed: `SetPersonaName` function and related callback `name_changed`
+- Removed: `GetUserRestrictions` function
 
 [You can read more change-logs here](https://godotsteam.com/changelog/gdextension/).
 
@@ -44,7 +47,8 @@ While rare, sometimes Steamworks SDK updates will break compatilibity with older
 
 Steamworks SDK Version | GodotSteam Version
 ---|---
-1.61 or newer | 4.12 or newer
+1.62 or newer | 4.14 or newer
+1.61 | 4.12 to 4.13
 1.60 | 4.6 to 4.11
 1.59 | 4.6 to 4.8
 1.58a or older | 4.5.4 or older
@@ -57,6 +61,7 @@ GodotSteam Version | Broken Compatibility
 4.9 | sendMessages returns an Array
 4.11 | setLeaderboardDetailsMax removed
 4.13 | getItemDefinitionProperty return a dictionary, html_needs_paint key 'bgra' changed to 'rbga'
+4.14 | Removed first argument for stat request in steamInit and steamInitEx, steamInit returns intended bool value
 
 Known Issues
 ---
