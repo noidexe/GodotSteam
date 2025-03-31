@@ -517,6 +517,12 @@ Dictionary Steam::steamInitEx(uint32_t app_id, bool embed_callbacks) {
 	return init_result;
 }
 
+
+Dictionary Steam::getSteamInitResult() {
+	return init_result;
+}
+
+
 // Shuts down the Steamworks API, releases pointers and frees memory.
 void Steam::steamShutdown() {
 	// If callbacks were connected internally

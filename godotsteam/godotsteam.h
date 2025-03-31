@@ -53,6 +53,7 @@
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/variant/string.hpp>
 #include <godot_cpp/variant/dictionary.hpp>
+#include <godot_cpp/classes/project_settings.hpp>
 
 // Include GodotSteam headers
 #include "godotsteam_constants.h"
@@ -938,6 +939,7 @@ private:
 	String godotsteam_version = "4.14";
 	Dictionary init_result;
 	bool is_init_success;
+	Dictionary init_result;
 	bool were_callbacks_embedded;
 
 	const SteamNetworkingConfigValue_t *convert_config_options(Dictionary config_options);
