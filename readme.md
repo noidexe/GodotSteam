@@ -24,22 +24,25 @@ Current Build
 ---
 You can [download pre-compiled versions of this repo here](https://github.com/GodotSteam/GodotSteam/releases).
 
-**Version 3.28**
-- Added: new Timeline functions, call results, and enums
-- Added: new Inputs enums for Horipad; `INPUT_ACTION_ORIGIN`
-- Added: new Networking config enum `NETWORKING_CONFIG_SEND_TIME_SINCE_PREVIOUS_PACKET`
-- Added: new Networking config enums for fake packet jitter; `NETWORKING_CONFIG_FAKE_JITTER_`
-- Changed: `equipped_profile_items` callback now sends `from_cache` bool
-- Changed: first argument for `steamInit` and `steamInitEx` no longer calls for stats as they are synced by client; left to prevent compatibility breakage
-- Changed: various small bits to match Godot 4 branch
-- Fixed: getAchievement and related achievement functions breaking under rare conditions
-- Fixed: `getAchievement` and related achievement functions breaking under rare conditions
-- Fixed: incorrect type for `set_inventory_update_handle`
-- Removed: `setTimelineGameMode` function which was removed in 1.61
-- Removed: `current_stats_received` callback removed for redundancy
-- Removed: Google Stadia, Nintendo, Epic Games, and WeGame Networking identity types fully removed, from 1.61
-- Removed: unncessary commenting
-- Removed: `sendMessages` until it can be fixed in Windows
+**Version 3.29**
+- Added: new functions and enums to SteamRemotePlay
+- Added: Steam icon to the class
+- Added: Project Settings for Steam, optional app ID, can set embedded callbacks, thanks to ***TriMay***
+- Added: missing HTML Surface functions `openDeveloperTools` and `setDPIScalingFactor`
+- Added: missing Video class callbacks `broadcast_upload_start` and`broadcast_upload_stop`
+- Changed: replaced previous `MouseCursor` enum with new `HTMLMouseCursor` enum
+- Changed: updated docs
+- Changed: updated to Steamworks SDK 1.62
+- Changed: `getNumSubscribedItems` and `getSubscribedItems` now take include_locally_disabled argument
+- Changed: `steamInit` now return intended boolean and first argument removed since client syncs stats/achieves at boot
+- Changed: added missing is_system_key argument to `key_down` function
+- Fixed: various bits in the in-editor docs
+- Fixed: `network_messages_session_failed` missing returned properties in bind
+- Fixed: `connected_friend_chat_message` having the wrong signal name
+- Fixed: wrong signal name for `get_opf_settings_result`
+- Removed: `UserRestrictions` enum
+- Removed: `SetPersonaName` function and related callback `name_changed`
+- Removed: `GetUserRestrictions` function
 
 [You can read more change-logs here](https://godotsteam.com/changelog/godot3/).
 
@@ -49,6 +52,8 @@ While rare, sometimes Steamworks SDK updates will break compatilibity with older
 
 Steamworks SDK Version | GodotSteam Version
 ---|---
+1.62 or newer | 4.14 or newer
+1.61 | 4.12 to 4.13
 1.59 or newer | 3.23 or newer
 1.53 to 1.58a | 3.12 to 3.22.4
 1.52 or older | 3.11.1 or older
@@ -60,6 +65,8 @@ GodotSteam Version | Broken Compatibility
 3.25 | Networking identity system removed, replaced with Steam IDs
 3.26 | sendMessages returns an Array
 3.27 | setLeaderboardDetailsMax removed
+3.29 | getItemDefinitionProperty return a dictionary, html_needs_paint key 'bgra' changed to 'rbga', removed first argument for stat request in steamInit and steamInitEx, steamInit returns intended bool value
+
 
 Known Issues
 ---
