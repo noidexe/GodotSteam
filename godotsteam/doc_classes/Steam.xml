@@ -6250,6 +6250,13 @@
 				If this is returning false and everything appears correct, then check to ensure that your changes in the App Admin panel of the Steamworks website are published.
 			</description>
 		</method>
+		<method name="setSubscriptionsLoadOrder">
+			<return type="bool" />
+			<param index="0" name="published_file_ids" type="PackedInt64Array" />
+			<description>
+				Set the local load order for these items. If there are any items not in the given list, they will sort by the time subscribed.
+			</description>
+		</method>
 		<method name="setSyncPlatforms">
 			<return type="bool" />
 			<param index="0" name="file" type="String" />
@@ -6432,6 +6439,14 @@
 			<description>
 				Starts voice recording.
 				Once started, use [method Steam.getAvailableVoice] and [method Steam.getVoice] to get the data, and then call [method Steam.stopVoiceRecording] when the user has released their push-to-talk hotkey or the game session has completed.
+			</description>
+		</method>
+		<method name="steamInit">
+			<return type="bool" />
+			<param index="0" name="app_id" type="int" default="0" />
+			<param index="1" name="embed_callbacks" type="bool" default="false" />
+			<description>
+				Initialize the SDK, without worrying about the cause of failure.
 			</description>
 		</method>
 		<method name="steamInitEx">

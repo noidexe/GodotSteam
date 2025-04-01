@@ -517,12 +517,6 @@ Dictionary Steam::steamInitEx(uint32_t app_id, bool embed_callbacks) {
 	return init_result;
 }
 
-
-Dictionary Steam::getSteamInitResult() {
-	return init_result;
-}
-
-
 // Shuts down the Steamworks API, releases pointers and frees memory.
 void Steam::steamShutdown() {
 	// If callbacks were connected internally
@@ -6250,6 +6244,17 @@ bool Steam::setSearchText(uint64_t query_handle, const String &search_text) {
 	return SteamUGC()->SetSearchText((UGCQueryHandle_t)query_handle, search_text.utf8().get_data());
 }
 
+// Set the local load order for these items. If there are any items not in the given list, they will sort by the time subscribed.
+bool Steam::setSubscriptionsLoadOrder(PackedInt64Array published_file_ids) {
+	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: setSubscriptionsLoadOrder");
+	uint32 file_count = published_file_ids.size();
+	PublishedFileId_t *file_ids = new PublishedFileId_t[file_count];
+	for (uint32_t i = 0; i < file_count; i++) {
+		file_ids[i] = (uint64_t)published_file_ids[i];
+	}
+	return SteamUGC()->SetSubscriptionsLoadOrder(file_ids, file_count);
+}
+
 // Set the time range this item was created.
 bool Steam::setTimeCreatedDateRange(uint64_t update_handle, uint32 start, uint32 end) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: setTimeCreatedDateRange");
@@ -9392,7 +9397,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("run_callbacks"), &Steam::run_callbacks);
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
 	ClassDB::bind_method(D_METHOD("steamInit", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(0), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("steamInitEx", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("steamInitEx", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(0), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("steamShutdown"), &Steam::steamShutdown);
 
 	ClassDB::bind_method(D_METHOD("get_browser_handle"), &Steam::get_browser_handle);
@@ -10063,6 +10068,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setReturnPlaytimeStats", "query_handle", "days"), &Steam::setReturnPlaytimeStats);
 	ClassDB::bind_method(D_METHOD("setReturnTotalOnly", "query_handle", "return_total_only"), &Steam::setReturnTotalOnly);
 	ClassDB::bind_method(D_METHOD("setSearchText", "query_handle", "search_text"), &Steam::setSearchText);
+	ClassDB::bind_method(D_METHOD("setSubscriptionsLoadOrder", "published_file_ids"), &Steam::setSubscriptionsLoadOrder);
 	ClassDB::bind_method(D_METHOD("setUserItemVote", "published_file_id", "vote_up"), &Steam::setUserItemVote);
 	ClassDB::bind_method(D_METHOD("startItemUpdate", "app_id", "file_id"), &Steam::startItemUpdate);
 	ClassDB::bind_method(D_METHOD("startPlaytimeTracking", "published_file_ids"), &Steam::startPlaytimeTracking);

@@ -772,6 +772,7 @@ public:
 	bool setReturnPlaytimeStats(uint64_t query_handle, uint32 days);
 	bool setReturnTotalOnly(uint64_t query_handle, bool return_total_only);
 	bool setSearchText(uint64_t query_handle, const String &search_text);
+	bool setSubscriptionsLoadOrder(PackedInt64Array published_file_ids);
 	void setUserItemVote(uint64_t published_file_id, bool vote_up);
 	uint64_t startItemUpdate(uint32_t app_id, uint64_t file_id);
 	void startPlaytimeTracking(Array published_file_ids);
@@ -939,7 +940,6 @@ private:
 	String godotsteam_version = "4.14";
 	Dictionary init_result;
 	bool is_init_success;
-	Dictionary init_result;
 	bool were_callbacks_embedded;
 
 	const SteamNetworkingConfigValue_t *convert_config_options(Dictionary config_options);
