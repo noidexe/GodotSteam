@@ -17,10 +17,7 @@ runs:
       - name: Get Godot-CPP
         shell: sh
         run: |
-          git -C godot-cpp config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
-          git submodule sync --recursive godot-cpp
-          git submodule
+          git submodule status
+          git config -f .gitmodules submodule.godot-cpp.branch ${{ inputs.version }}
           git submodule update --init --recursive --remote godot-cpp
-          cd godot-cpp/
-          ls -l
-          git checkout ${{ inputs.version }}
+          git submodule status

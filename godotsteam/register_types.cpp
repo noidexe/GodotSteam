@@ -43,7 +43,7 @@ static Steam *SteamPtr = nullptr;
 
 
 void initialize_godotsteam(ModuleInitializationLevel level){
-	if(level == MODULE_INITIALIZATION_LEVEL_SERVERS){
+	if(level == MODULE_INITIALIZATION_LEVEL_SCENE){
 		ClassDB::register_class<Steam>();
 		SteamPtr = memnew(Steam);
 		Engine::get_singleton()->register_singleton("Steam", Steam::get_singleton());
@@ -91,7 +91,7 @@ void initialize_godotsteam(ModuleInitializationLevel level){
 }
 
 void uninitialize_godotsteam(ModuleInitializationLevel level){
-	if(level == MODULE_INITIALIZATION_LEVEL_SERVERS){
+	if(level == MODULE_INITIALIZATION_LEVEL_SCENE){
 		Engine::get_singleton()->unregister_singleton("Steam");
 		memdelete(SteamPtr);
 	}

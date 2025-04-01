@@ -51,7 +51,7 @@ jobs:
       - name: Checkout GodotSteam
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: false
 
       # Download Godot-CPP to start
       - name: Download Godot-CPP
