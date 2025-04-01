@@ -1,3 +1,29 @@
+//===========================================================================//
+// GodotSteam - godotsteam.cpp
+//===========================================================================//
+//
+// Copyright (c) 2015-Current | GP Garcia and Contributors (view contributors.md)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+//===========================================================================//
+
 // Turn off MSVC-only warning about strcpy
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS 1
@@ -14,7 +40,7 @@
 #include "vector"
 
 
-Steam *Steam::singleton = NULL;
+Steam *Steam::singleton = nullptr;
 
 
 Steam::Steam() :
@@ -39,7 +65,6 @@ Steam::Steam() :
 	callbackChangeServerRequested(this, &Steam::change_server_requested),
 	callbackJoinClanChatComplete(this, &Steam::join_clan_chat_complete),
 	callbackPersonaStateChange(this, &Steam::persona_state_change),
-	callbackNameChanged(this, &Steam::name_changed),
 	callbackOverlayBrowserProtocol(this, &Steam::overlay_browser_protocol),
 	callbackUnreadChatMessagesChanged(this, &Steam::unread_chat_messages_changed),
 	callbackEquippedProfileItemsChanged(this, &Steam::equipped_profile_items_changed),
@@ -363,6 +388,12 @@ String Steam::getStringFromSteamIP(SteamNetworkingIPAddr this_address) {
 	return String(this_ip);
 }
 
+void Steam::_process(double_t delta) {
+	if (were_callbacks_embedded) {
+		Steam::run_callbacks();
+	}
+}
+
 
 ///// MAIN FUNCTIONS
 
@@ -425,75 +456,42 @@ bool Steam::restartAppIfNecessary(uint32 app_id) {
 }
 
 // Initialize the SDK, without worrying about the cause of failure.
-Dictionary Steam::steamInit(bool retrieve_stats, uint32_t app_id, bool embed_callbacks) {
-	// Use Project Setting as default (default for setting is 0)
+bool Steam::steamInit(uint32_t app_id, bool embed_callbacks) {
 	if (app_id == 0) {
-		app_id = GLOBAL_GET("godot_steam/steam/app_id");
+		app_id = GLOBAL_GET("steam/initialization/app_id");
 	}
-	// Set the app ID
+
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
 		OS::get_singleton()->set_environment("SteamGameId", itos(app_id));
 	}
 
-	Dictionary initialize;
-	is_init_success = SteamAPI_Init();
-
-	int status = RESULT_FAIL;
-	String verbal = "Steamworks failed to initialize.";
-
-	if (is_init_success) {
-		status = RESULT_OK;
-		verbal = "Steamworks active.";
-
+	if (SteamAPI_Init()){
+		is_init_success = true;
 		current_app_id = app_id;
 		current_steam_id = SteamUser()->GetSteamID().ConvertToUint64();
 
 		// Attach the callbacks, if set
-		if (embed_callbacks) {
+		if (embed_callbacks || GLOBAL_GET("steam/initialization/embed_callbacks")) {
 			were_callbacks_embedded = true;
-
-			auto callbacks = callable_mp(Steam::singleton, &Steam::run_callbacks);
-			SceneTree::get_singleton()->connect("process_frame", callbacks);
 		}
+		return true;
 	}
-	else {
-		// The Steam client is not running
-		if (!isSteamRunning()) {
-			status = RESULT_SERVICE_UNAVAILABLE;
-			verbal = "Steam not running";
-		}
-		// I'm not totally sure how this actually means the app ID isn't installed?  This basically says that
-		// Steamworks isn't present or that specific class.
-		else if (SteamUser() == NULL) {
-			status = RESULT_UNEXPECTED_ERROR;
-			verbal = "Invalid app ID or app not installed";
-		}
-	}
-
-	initialize["status"] = status;
-	initialize["verbal"] = verbal;
-
-	init_result = initialize;
-
-	return initialize;
+	return false;
 }
 
 // Initialize the Steamworks SDK. On success STEAM_API_INIT_RESULT_OK is returned.
 // Otherwise, if error_message is non-NULL, it will receive a non-localized message that explains the reason for the failure.
-Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id, bool embed_callbacks) {
-	// Use Project Setting as default (default for setting is 0)
+Dictionary Steam::steamInitEx(uint32_t app_id, bool embed_callbacks) {
 	if (app_id == 0) {
-		app_id = GLOBAL_GET("godot_steam/steam/app_id");
+		app_id = GLOBAL_GET("steam/initialization/app_id");
 	}
-	// Set the app ID
+
 	if (app_id != 0) {
 		OS::get_singleton()->set_environment("SteamAppId", itos(app_id));
 		OS::get_singleton()->set_environment("SteamGameId", itos(app_id));
 	}
-	
-	// Start the initialization process
-	Dictionary initialize;
+
 	char error_message[STEAM_MAX_ERROR_MESSAGE];
 	ESteamAPIInitResult initialize_result;
 
@@ -505,38 +503,23 @@ Dictionary Steam::steamInitEx(bool retrieve_stats, uint32_t app_id, bool embed_c
 		current_steam_id = SteamUser()->GetSteamID().ConvertToUint64();
 
 		// Attach the callbacks, if set
-		if (embed_callbacks) {
+		if (embed_callbacks || GLOBAL_GET("steam/initialization/embed_callbacks")) {
 			were_callbacks_embedded = true;
-
-			auto callbacks = callable_mp(Steam::singleton, &Steam::run_callbacks);
-			SceneTree::get_singleton()->connect("process_frame", callbacks);
 		}
 	}
-	initialize["status"] = initialize_result;
-	initialize["verbal"] = error_message;
-	
-	init_result = initialize;
+	init_result["status"] = initialize_result;
+	init_result["verbal"] = error_message;
 
-	return initialize;
-}
-
-
-Dictionary Steam::getSteamInitResult() {
 	return init_result;
 }
 
-
 // Shuts down the Steamworks API, releases pointers and frees memory.
 void Steam::steamShutdown() {
-	SteamAPI_Shutdown();
-
 	// If callbacks were connected internally
 	if (were_callbacks_embedded) {
 		were_callbacks_embedded = false;
-
-		auto callbacks = callable_mp(Steam::singleton, &Steam::run_callbacks);
-		SceneTree::get_singleton()->disconnect("process_frame", callbacks);
 	}
+	SteamAPI_Shutdown();
 }
 
 
@@ -1334,13 +1317,6 @@ Array Steam::getUserFriendsGroups() {
 	return friends_groups;
 }
 
-// If current user is chat restricted, he can't send or receive any text/voice chat messages. The user can't see custom avatars.
-// But the user can be online and send/recv game invites.
-uint32 Steam::getUserRestrictions() {
-	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, 0, "[STEAM] Friends class not found when calling: getUserRestrictions");
-	return SteamFriends()->GetUserRestrictions();
-}
-
 // Get a list of user's Steam friends; a mix of different Steamworks API friend functions.
 Array Steam::getUserSteamFriends() {
 	Array steam_friends;
@@ -1531,12 +1507,6 @@ void Steam::setInGameVoiceSpeaking(uint64_t steam_id, bool speaking) {
 bool Steam::setListenForFriendsMessages(bool intercept) {
 	ERR_FAIL_COND_V_MSG(SteamFriends() == NULL, false, "[STEAM] Friends class not found when calling: setListenForFriendsMessages");
 	return SteamFriends()->SetListenForFriendsMessages(intercept);
-}
-
-// Sets the player name, stores it on the server and publishes the changes to all friends who are online.
-void Steam::setPersonaName(const String &name) {
-	ERR_FAIL_COND_MSG(SteamFriends() == NULL, "[STEAM] Friends class not found when calling: setPersonaName");
-	SteamFriends()->SetPersonaName(name.utf8().get_data());
 }
 
 // Set player as 'Played With' for game.
@@ -3323,14 +3293,10 @@ static std::vector<MatchMakingKeyValuePair_t> filters_array_to_vector(const Arra
 	uint32 filter_size = filters.size();
 	std::vector<MatchMakingKeyValuePair_t> filters_array(filter_size);
 	for (uint32 i = 0; i < filter_size; i++) {
-		// Get the key/value pair
 		Array pair = filters[i];
-		// Get the key from the filter pair
 		String key = pair[0];
-		// Get the value from the filter pair
 		String value = pair[1];
-		// Create a new filter pair to populate
-		filters_array[i] = MatchMakingKeyValuePair_t(key.utf8().get_data(), value.utf8().get_data());
+		filters_array[i] = MatchMakingKeyValuePair_t(key.utf8(), value.utf8());
 	}
 	return filters_array;
 }
@@ -4876,6 +4842,98 @@ void Steam::onReservationCompleted(uint64_t beacon_id, uint64_t steam_id) {
 
 ///// REMOTE PLAY
 
+// Create a cursor that can be used with setMouseCursor()
+// This is available after calling enableRemotePlayTogetherDirectInput()
+// Parameters:
+// width - The width of the cursor, in pixels
+// height - The height of the cursor, in pixels
+// hot_x - The X coordinate of the cursor hot spot in pixels, offset from the left of the cursor
+// hot_y - The Y coordinate of the cursor hot spot in pixels, offset from the top of the cursor
+// pitch - The distance between pixel rows in bytes, defaults to nWidth * 4 
+Dictionary Steam::createMouseCursor(int width, int height, int hot_x, int hot_y, int pitch) {
+	Dictionary mouse_cursor;
+	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, mouse_cursor, "[STEAM] Remote Play class not found when calling: createMouseCursor");
+	const void *cursor_pixels;
+	uint32_t mouse_cursor_id = SteamRemotePlay()->CreateMouseCursor(width, height, hot_x, hot_y, &cursor_pixels, pitch); 
+	mouse_cursor["id"] = mouse_cursor_id;
+
+	unsigned int pixel_count = width * height;
+	PackedByteArray rgba_data;
+	rgba_data.resize(pixel_count * 4);
+	const uint8_t *bgra = (const uint8_t *)cursor_pixels;
+	uint8_t *rgba = rgba_data.ptrw();
+	
+	// Loop to swap B and R channels for the image
+	for (unsigned int i = 0; i < pixel_count; i++) {
+		rgba[i * 4 + 0] = bgra[i * 4 + 2]; // R = B
+		rgba[i * 4 + 1] = bgra[i * 4 + 1]; // G = G
+		rgba[i * 4 + 2] = bgra[i * 4 + 0]; // B = R
+		rgba[i * 4 + 3] = bgra[i * 4 + 3]; // A = A
+	}
+	mouse_cursor["cursor_pixels"] = rgba_data;
+	return mouse_cursor;
+}
+
+// Make mouse and keyboard input for Remote Play Together sessions available via GetInput() instead of being merged with local input
+bool Steam::enableRemotePlayTogetherDirectInput() {
+	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, 0, "[STEAM] Remote Play class not found when calling: enableRemotePlayTogetherDirectInput");
+	return SteamRemotePlay()->BEnableRemotePlayTogetherDirectInput();
+}
+
+// Merge Remote Play Together mouse and keyboard input with local input
+void Steam::disableRemotePlayTogetherDirectInput() {
+	ERR_FAIL_COND_MSG(SteamRemotePlay() == NULL, "[STEAM] Remote Play class not found when calling: disableRemotePlayTogetherDirectInput");
+	return SteamRemotePlay()->DisableRemotePlayTogetherDirectInput();
+}
+
+// Get input events from Remote Play Together sessions
+// This is available after calling enableRemotePlayTogetherDirectInput()
+// remote_inputs is an array of input events that will be filled in by this function, up to max_events.
+// This returns the number of events copied to remote_inputs, or the number of events available if remote_inputs is nullptr.
+Array Steam::getInput(uint32_t max_events) {
+	Array remote_inputs;
+	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, remote_inputs, "[STEAM] Remote Play class not found when calling: getInput");
+
+	RemotePlayInput_t *these_remote_inputs = nullptr;
+	uint32_t returned_inputs = SteamRemotePlay()->GetInput(these_remote_inputs, max_events);
+	for (uint32_t i = 0; i < returned_inputs; i++) {
+		Dictionary new_event;
+		new_event["session_id"] = these_remote_inputs[i].m_unSessionID;
+
+		ERemotePlayInputType event_type = these_remote_inputs[i].m_eType;
+		new_event["event_type"] = event_type;
+
+		Dictionary new_event_data;
+		if (event_type == k_ERemotePlayInputMouseMotion) {
+			RemotePlayInputMouseMotion_t this_event_data = these_remote_inputs[i].m_MouseMotion;
+			new_event_data["absolute"] = this_event_data.m_bAbsolute;
+			new_event_data["normalized_x"] = this_event_data.m_flNormalizedX;
+			new_event_data["normalized_y"] = this_event_data.m_flNormalizedY;
+			new_event_data["delta_x"] = this_event_data.m_nDeltaX;
+			new_event_data["delta_y"] = this_event_data.m_nDeltaY;
+		}
+		else if (event_type == k_ERemotePlayInputMouseButtonDown || event_type == k_ERemotePlayInputMouseButtonUp) {
+			ERemotePlayMouseButton mouse_button = these_remote_inputs[i].m_eMouseButton;
+			new_event_data["mouse_button"] = mouse_button;
+		}
+		else if (event_type == k_ERemotePlayInputMouseWheel) {
+			RemotePlayInputMouseWheel_t mouse_wheel = these_remote_inputs[i].m_MouseWheel;
+			new_event_data["direction"] = mouse_wheel.m_eDirection;
+			new_event_data["amount"] = mouse_wheel.m_flAmount;
+		}
+		else if (event_type == k_ERemotePlayInputKeyDown || event_type == k_ERemotePlayInputKeyUp) {
+			RemotePlayInputKey_t input_key = these_remote_inputs[i].m_Key;
+			new_event_data["scancode"] = input_key.m_eScancode;
+			new_event_data["modifiers"] = input_key.m_unModifiers;
+			new_event_data["keycode"] = input_key.m_unKeycode;
+		}
+
+		new_event["event_data"] = new_event_data;
+		remote_inputs.append(new_event);
+	}
+	return remote_inputs;
+}
+
 // Get the number of currently connected Steam Remote Play sessions.
 uint32 Steam::getSessionCount() {
 	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, 0, "[STEAM] Remote Play class not found when calling: getSessionCount");
@@ -4930,10 +4988,35 @@ bool Steam::sendRemotePlayTogetherInvite(uint64_t friend_id) {
 	return SteamRemotePlay()->BSendRemotePlayTogetherInvite(steam_id);
 }
 
-//
-bool Steam::startRemotePlayTogether(bool show_overlay) {
-	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, false, "[STEAM] Remote Play class not found when calling: startRemotePlayTogether");
-	return SteamRemotePlay()->BStartRemotePlayTogether(show_overlay);
+// Set the mouse cursor for a remote player
+// This is available after calling enableRemotePlayTogetherDirectInput()
+// The cursor ID is a value returned by createMouseCursor()
+void Steam::setMouseCursor(uint32 session_id, uint32 cursor_id) {
+	ERR_FAIL_COND_MSG(SteamRemotePlay() == NULL, "[STEAM] Remote Play class not found when calling: setMouseCursor");
+	SteamRemotePlay()->SetMouseCursor(session_id, cursor_id);
+}
+
+// Set the mouse cursor position for a remote player
+// This is available after calling enableRemotePlayTogetherDirectInput()
+// This is used to warp the cursor to a specific location and isn't needed during normal event processing.
+// The position is normalized relative to the window, where 0,0 is the upper left, and 1,1 is the lower right.
+void Steam::setMousePosition(uint32 session_id, float normalized_x, float normalized_y) {
+	ERR_FAIL_COND_MSG(SteamRemotePlay() == NULL, "[STEAM] Remote Play class not found when calling: setMousePosition");
+	SteamRemotePlay()->SetMousePosition(session_id, normalized_x, normalized_y);
+}
+
+// Set the mouse cursor visibility for a remote player
+// This is available after calling BEnableRemotePlayTogetherDirectInput()
+void Steam::setMouseVisibility(uint32 session_id, bool visible) {
+	ERR_FAIL_COND_MSG(SteamRemotePlay() == NULL, "[STEAM] Remote Play class not found when calling: setMouseVisibility");
+	SteamRemotePlay()->SetMouseVisibility(session_id, visible);
+}
+
+// Show the Remote Play Together UI in the game overlay.
+// This returns false if your game is not configured for Remote Play Together.
+bool Steam::showRemotePlayTogetherUI() {
+	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, false, "[STEAM] Remote Play class not found when calling: showRemotePlayTogetherUI");
+	return SteamRemotePlay()->ShowRemotePlayTogetherUI();	
 }
 
 
@@ -5464,15 +5547,15 @@ bool Steam::addItemKeyValueTag(uint64_t update_handle, const String &key, const 
 }
 
 // Adds an additional preview file for the item.
-bool Steam::addItemPreviewFile(uint64_t query_handle, const String &preview_file, ItemPreviewType type) {
+bool Steam::addItemPreviewFile(uint64_t update_handle, const String &preview_file, ItemPreviewType type) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: addItemPreviewFile");
-	return SteamUGC()->AddItemPreviewFile((UGCQueryHandle_t)query_handle, preview_file.utf8().get_data(), (EItemPreviewType)type);
+	return SteamUGC()->AddItemPreviewFile((UGCUpdateHandle_t)update_handle, preview_file.utf8().get_data(), (EItemPreviewType)type);
 }
 
 // Adds an additional video preview from YouTube for the item.
-bool Steam::addItemPreviewVideo(uint64_t query_handle, const String &video_id) {
+bool Steam::addItemPreviewVideo(uint64_t update_handle, const String &video_id) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: addItemPreviewVideo");
-	return SteamUGC()->AddItemPreviewVideo((UGCQueryHandle_t)query_handle, video_id.utf8().get_data());
+	return SteamUGC()->AddItemPreviewVideo((UGCUpdateHandle_t)update_handle, video_id.utf8().get_data());
 }
 
 // Adds a workshop item to the users favorites list.
@@ -5523,7 +5606,7 @@ bool Steam::initWorkshopForGameServer(uint32_t workshop_depot_id, String folder)
 	bool initialized_workshop = false;
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, initialized_workshop, "[STEAM] UGC class not found when calling: initWorkshopForGameServer");
 	DepotId_t workshop = (uint32_t)workshop_depot_id;
-	initialized_workshop = SteamUGC()->BInitWorkshopForGameServer(workshop, folder.utf8().get_data());
+	initialized_workshop = SteamUGC()->BInitWorkshopForGameServer(workshop, folder.utf8());
 	return initialized_workshop;
 }
 
@@ -5652,9 +5735,9 @@ Dictionary Steam::getItemUpdateProgress(uint64_t update_handle) {
 }
 
 // Gets the total number of items the current user is subscribed to for the game or application.
-uint32 Steam::getNumSubscribedItems() {
+uint32 Steam::getNumSubscribedItems(bool include_locally_disabled) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, 0, "[STEAM] UGC class not found when calling: getNumSubscribedItems");
-	return SteamUGC()->GetNumSubscribedItems();
+	return SteamUGC()->GetNumSubscribedItems(include_locally_disabled);
 }
 
 // Get the number of supported game versions for this UGC content.
@@ -5860,12 +5943,12 @@ String Steam::getQueryUGCTagDisplayName(uint64_t query_handle, uint32 index, uin
 }
 
 // Gets a list of all of the items the current user is subscribed to for the current game.
-Array Steam::getSubscribedItems() {
+Array Steam::getSubscribedItems(bool include_locally_disabled) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, Array(), "[STEAM] UGC class not found when calling: getSubscribedItems");
 	Array subscribed;
-	uint32 num_items = SteamUGC()->GetNumSubscribedItems();
+	uint32 num_items = SteamUGC()->GetNumSubscribedItems(include_locally_disabled);
 	PublishedFileId_t *items = new PublishedFileId_t[num_items];
-	uint32 item_list = SteamUGC()->GetSubscribedItems(items, num_items);
+	uint32 item_list = SteamUGC()->GetSubscribedItems(items, num_items, include_locally_disabled);
 	for (uint32 i = 0; i < item_list; i++) {
 		subscribed.append((uint64_t)items[i]);
 	}
@@ -6065,6 +6148,18 @@ bool Steam::setItemVisibility(uint64_t update_handle, RemoteStoragePublishedFile
 	return SteamUGC()->SetItemVisibility((UGCUpdateHandle_t)update_handle, (ERemoteStoragePublishedFileVisibility)visibility);
 }
 
+// Sets whether the item should be disabled locally or not. This means that it will not be returned in getSubscribedItems() by default.
+bool Steam::setItemsDisabledLocally(PackedInt64Array published_file_ids, bool disabled_locally) {
+	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: setItemsDisabledLocally");
+
+	uint32 file_count = published_file_ids.size();
+	PublishedFileId_t *file_ids = new PublishedFileId_t[file_count];
+	for (uint32_t i = 0; i < file_count; i++) {
+		file_ids[i] = (uint64_t)published_file_ids[i];
+	}
+	return SteamUGC()->SetItemsDisabledLocally(file_ids, file_count, disabled_locally);
+}
+
 // Sets the language to return the title and description in for the items on a pending UGC Query.
 bool Steam::setLanguage(uint64_t query_handle, const String &language) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: setLanguage");
@@ -6143,6 +6238,17 @@ bool Steam::setReturnTotalOnly(uint64_t query_handle, bool return_total_only) {
 bool Steam::setSearchText(uint64_t query_handle, const String &search_text) {
 	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: setSearchText");
 	return SteamUGC()->SetSearchText((UGCQueryHandle_t)query_handle, search_text.utf8().get_data());
+}
+
+// Set the local load order for these items. If there are any items not in the given list, they will sort by the time subscribed.
+bool Steam::setSubscriptionsLoadOrder(PackedInt64Array published_file_ids) {
+	ERR_FAIL_COND_V_MSG(SteamUGC() == NULL, false, "[STEAM] UGC class not found when calling: setSubscriptionsLoadOrder");
+	uint32 file_count = published_file_ids.size();
+	PublishedFileId_t *file_ids = new PublishedFileId_t[file_count];
+	for (uint32_t i = 0; i < file_count; i++) {
+		file_ids[i] = (uint64_t)published_file_ids[i];
+	}
+	return SteamUGC()->SetSubscriptionsLoadOrder(file_ids, file_count);
 }
 
 // Set the time range this item was created.
@@ -7489,14 +7595,6 @@ void Steam::persona_state_change(PersonaStateChange_t *call_data) {
 	emit_signal("persona_state_change", steam_id, flags);
 }
 
-// Reports the result of an attempt to change the user's persona name.
-void Steam::name_changed(SetPersonaNameResponse_t *call_data) {
-	bool success = call_data->m_bSuccess;
-	bool local_success = call_data->m_bLocalSuccess;
-	EResult result = call_data->m_result;
-	emit_signal("name_changed", success, local_success, result);
-}
-
 // Dispatched when an overlay browser instance is navigated to a protocol/scheme registered by RegisterProtocolInOverlayBrowser().
 void Steam::overlay_browser_protocol(OverlayBrowserProtocolNavigation_t *call_data) {
 	String uri = call_data->rgchURI;
@@ -7705,7 +7803,7 @@ void Steam::html_needs_paint(HTML_NeedsPaint_t *call_data) {
 	rgba_data.resize(pixel_count * 4);
 	const uint8_t *bgra = (const uint8_t *)call_data->pBGRA;
 	uint8_t *rgba = rgba_data.ptrw();
-	
+
 	// Loop to swap B and R channels for the image
 	for (unsigned int i = 0; i < pixel_count; i++) {
 		rgba[i * 4 + 0] = bgra[i * 4 + 2]; // R = B
@@ -7713,7 +7811,7 @@ void Steam::html_needs_paint(HTML_NeedsPaint_t *call_data) {
 		rgba[i * 4 + 2] = bgra[i * 4 + 0]; // B = R
 		rgba[i * 4 + 3] = bgra[i * 4 + 3]; // A = A
 	}
-	
+
 	page_data["rgba"] = rgba_data;
 	page_data["wide"] = call_data->unWide;
 	page_data["tall"] = call_data->unTall;
@@ -8572,11 +8670,13 @@ void Steam::filter_text_dictionary_changed(FilterTextDictionaryChanged_t *call_d
 
 ///// VIDEO
 
+// Automatically called whenever the user starts broadcasting.
 void Steam::broadcast_upload_start(BroadcastUploadStart_t *call_data){
 	bool is_rtmp = call_data->m_bIsRTMP;
 	emit_signal("broadcast_upload_start", is_rtmp);
 }
 
+// Automatically called whenever the user stops broadcasting.
 void Steam::broadcast_upload_stop(BroadcastUploadStop_t *call_data){
 	EBroadcastUploadResult result = call_data->m_eResult;
 	emit_signal("broadcast_upload_stop", result);
@@ -9292,9 +9392,8 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method("isSteamRunning", &Steam::isSteamRunning);
 	ClassDB::bind_method("run_callbacks", &Steam::run_callbacks);
 	ClassDB::bind_method(D_METHOD("restartAppIfNecessary", "app_id"), &Steam::restartAppIfNecessary);
-	ClassDB::bind_method(D_METHOD("steamInit", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(false), DEFVAL(0), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("steamInitEx", "retrieve_stats", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(false), DEFVAL(0), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("getSteamInitResult"), &Steam::getSteamInitResult);
+	ClassDB::bind_method(D_METHOD("steamInit", "app_id", "embed_callbacks"), &Steam::steamInit, DEFVAL(0), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("steamInitEx", "app_id", "embed_callbacks"), &Steam::steamInitEx, DEFVAL(0), DEFVAL(false));
 	ClassDB::bind_method("steamShutdown", &Steam::steamShutdown);
 
 	ClassDB::bind_method("get_browser_handle", &Steam::get_browser_handle);
@@ -9307,6 +9406,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method("get_leaderboard_details_max", &Steam::get_leaderboard_details_max);
 	ClassDB::bind_method("get_leaderboard_entries", &Steam::get_leaderboard_entries);
 	ClassDB::bind_method("get_server_list_request", &Steam::get_server_list_request);
+	ClassDB::bind_method("get_steam_init_result", &Steam::get_steam_init_result);
 	ClassDB::bind_method(D_METHOD("set_browser_handle", "new_browser_handle"), &Steam::set_browser_handle);
 	ClassDB::bind_method(D_METHOD("set_current_app_id", "new_current_app_id"), &Steam::set_current_app_id);
 	ClassDB::bind_method(D_METHOD("set_current_clan_id", "new_current_clan_id"), &Steam::set_current_clan_id);
@@ -9409,7 +9509,6 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method("getRecentPlayers", &Steam::getRecentPlayers);
 	ClassDB::bind_method(D_METHOD("getSmallFriendAvatar", "steam_id"), &Steam::getSmallFriendAvatar);
 	ClassDB::bind_method("getUserFriendsGroups", &Steam::getUserFriendsGroups);
-	ClassDB::bind_method("getUserRestrictions", &Steam::getUserRestrictions);
 	ClassDB::bind_method("getUserSteamFriends", &Steam::getUserSteamFriends);
 	ClassDB::bind_method("getUserSteamGroups", &Steam::getUserSteamGroups);
 	ClassDB::bind_method(D_METHOD("hasEquippedProfileItem", "steam_id", "friend_flags"), &Steam::hasEquippedProfileItem);
@@ -9433,7 +9532,6 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("sendClanChatMessage", "chat_id", "text"), &Steam::sendClanChatMessage);
 	ClassDB::bind_method(D_METHOD("setInGameVoiceSpeaking", "steam_id", "speaking"), &Steam::setInGameVoiceSpeaking);
 	ClassDB::bind_method(D_METHOD("setListenForFriendsMessages", "intercept"), &Steam::setListenForFriendsMessages);
-	ClassDB::bind_method(D_METHOD("setPersonaName", "name"), &Steam::setPersonaName);
 	ClassDB::bind_method(D_METHOD("setPlayedWith", "steam_id"), &Steam::setPlayedWith);
 	ClassDB::bind_method(D_METHOD("setRichPresence", "key", "value"), &Steam::setRichPresence);
 
@@ -9809,6 +9907,9 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("onReservationCompleted", "beacon_id", "steam_id"), &Steam::onReservationCompleted);
 
 	// REMOTE PLAY
+	ClassDB::bind_method("enableRemotePlayTogetherDirectInput", &Steam::enableRemotePlayTogetherDirectInput);
+	ClassDB::bind_method("disableRemotePlayTogetherDirectInput", &Steam::disableRemotePlayTogetherDirectInput);
+	ClassDB::bind_method(D_METHOD("getInput", "max_events"), &Steam::getInput);
 	ClassDB::bind_method("getSessionCount", &Steam::getSessionCount);
 	ClassDB::bind_method(D_METHOD("getSessionID", "index"), &Steam::getSessionID);
 	ClassDB::bind_method(D_METHOD("getSessionSteamID", "session_id"), &Steam::getSessionSteamID);
@@ -9816,7 +9917,10 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getSessionClientFormFactor", "session_id"), &Steam::getSessionClientFormFactor);
 	ClassDB::bind_method(D_METHOD("getSessionClientResolution", "session_id"), &Steam::getSessionClientResolution);
 	ClassDB::bind_method(D_METHOD("sendRemotePlayTogetherInvite", "friend_id"), &Steam::sendRemotePlayTogetherInvite);
-	ClassDB::bind_method(D_METHOD("startRemotePlayTogether", "show_overlay"), &Steam::startRemotePlayTogether, DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("setMouseCursor", "session_id", "cursor_id"), &Steam::setMouseCursor);
+	ClassDB::bind_method(D_METHOD("setMousePosition", "session_id", "normalized_x", "normalized_y"), &Steam::setMousePosition);
+	ClassDB::bind_method(D_METHOD("setMouseVisibility", "session_id", "visible"), &Steam::setMouseVisibility);
+	ClassDB::bind_method("showRemotePlayTogetherUI", &Steam::showRemotePlayTogetherUI);
 
 	// REMOTE STORAGE
 	ClassDB::bind_method("beginFileWriteBatch", &Steam::beginFileWriteBatch);
@@ -9908,7 +10012,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getItemInstallInfo", "published_file_id"), &Steam::getItemInstallInfo);
 	ClassDB::bind_method(D_METHOD("getItemState", "published_file_id"), &Steam::getItemState);
 	ClassDB::bind_method(D_METHOD("getItemUpdateProgress", "update_handle"), &Steam::getItemUpdateProgress);
-	ClassDB::bind_method("getNumSubscribedItems", &Steam::getNumSubscribedItems);
+	ClassDB::bind_method(D_METHOD("getNumSubscribedItems", "include_locally_disabled"), &Steam::getNumSubscribedItems, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("getNumSupportedGameVersions", "query_handle", "index"), &Steam::getNumSupportedGameVersions);
 	ClassDB::bind_method(D_METHOD("getQueryUGCAdditionalPreview", "query_handle", "index", "preview_index"), &Steam::getQueryUGCAdditionalPreview);
 	ClassDB::bind_method(D_METHOD("getQueryUGCChildren", "query_handle", "index", "child_count"), &Steam::getQueryUGCChildren);
@@ -9923,7 +10027,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("getQueryUGCStatistic", "query_handle", "index", "stat_type"), &Steam::getQueryUGCStatistic);
 	ClassDB::bind_method(D_METHOD("getQueryUGCTag", "query_handle", "index", "tag_index"), &Steam::getQueryUGCTag);
 	ClassDB::bind_method(D_METHOD("getQueryUGCTagDisplayName", "query_handle", "index", "tag_index"), &Steam::getQueryUGCTagDisplayName);
-	ClassDB::bind_method("getSubscribedItems", &Steam::getSubscribedItems);
+	ClassDB::bind_method(D_METHOD("getSubscribedItems", "include_locally_disabled"), &Steam::getSubscribedItems, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("getSupportedGameVersionData", "query_handle", "index", "version_index"), &Steam::getSupportedGameVersionData);
 	ClassDB::bind_method(D_METHOD("getUserContentDescriptorPreferences", "max_entries"), &Steam::getUserContentDescriptorPreferences);
 	ClassDB::bind_method(D_METHOD("getUserItemVote", "published_file_id"), &Steam::getUserItemVote);
@@ -9946,6 +10050,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setItemTitle", "update_handle", "title"), &Steam::setItemTitle);
 	ClassDB::bind_method(D_METHOD("setItemUpdateLanguage", "update_handle", "language"), &Steam::setItemUpdateLanguage);
 	ClassDB::bind_method(D_METHOD("setItemVisibility", "update_handle", "visibility"), &Steam::setItemVisibility);
+	ClassDB::bind_method(D_METHOD("setItemsDisabledLocally", "file_ids", "disabled_locally"),&Steam::setItemsDisabledLocally);
 	ClassDB::bind_method(D_METHOD("setLanguage", "query_handle", "language"), &Steam::setLanguage);
 	ClassDB::bind_method(D_METHOD("setMatchAnyTag", "query_handle", "match_any_tag"), &Steam::setMatchAnyTag);
 	ClassDB::bind_method(D_METHOD("setRankedByTrendDays", "query_handle", "days"), &Steam::setRankedByTrendDays);
@@ -9959,6 +10064,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setReturnPlaytimeStats", "query_handle", "days"), &Steam::setReturnPlaytimeStats);
 	ClassDB::bind_method(D_METHOD("setReturnTotalOnly", "query_handle", "return_total_only"), &Steam::setReturnTotalOnly);
 	ClassDB::bind_method(D_METHOD("setSearchText", "query_handle", "search_text"), &Steam::setSearchText);
+	ClassDB::bind_method(D_METHOD("setSubscriptionsLoadOrder", "published_file_ids"), &Steam::setSubscriptionsLoadOrder);
 	ClassDB::bind_method(D_METHOD("setUserItemVote", "published_file_id", "vote_up"), &Steam::setUserItemVote);
 	ClassDB::bind_method(D_METHOD("startItemUpdate", "app_id", "file_id"), &Steam::startItemUpdate);
 	ClassDB::bind_method(D_METHOD("startPlaytimeTracking", "published_file_ids"), &Steam::startPlaytimeTracking);
@@ -10118,13 +10224,12 @@ void Steam::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("join_clan_chat_complete", PropertyInfo(Variant::INT, "chat_id"), PropertyInfo(Variant::INT, "response")));
 	ADD_SIGNAL(MethodInfo("join_game_requested", PropertyInfo(Variant::INT, "user"), PropertyInfo(Variant::STRING, "connect")));
 	ADD_SIGNAL(MethodInfo("join_requested", PropertyInfo(Variant::INT, "lobby_id"), PropertyInfo(Variant::INT, "steam_id")));
-	ADD_SIGNAL(MethodInfo("name_changed", PropertyInfo(Variant::BOOL, "success"), PropertyInfo(Variant::BOOL, "local_success"), PropertyInfo(Variant::INT, "result")));
 	ADD_SIGNAL(MethodInfo("overlay_browser_protocol", PropertyInfo(Variant::STRING, "uri")));
 	ADD_SIGNAL(MethodInfo("overlay_toggled", PropertyInfo(Variant::BOOL, "active"), PropertyInfo(Variant::BOOL, "user_initiated"), PropertyInfo(Variant::INT, "app_id")));
 	ADD_SIGNAL(MethodInfo("persona_state_change", PropertyInfo(Variant::INT, "steam_id"), PropertyInfo(Variant::INT, "flags")));
 	ADD_SIGNAL(MethodInfo("request_clan_officer_list", PropertyInfo(Variant::STRING, "message"), PropertyInfo(Variant::ARRAY, "officer_list")));
 	ADD_SIGNAL(MethodInfo("unread_chat_messages_changed"));
-	
+
 	// GAME SEARCH
 	ADD_SIGNAL(MethodInfo("search_for_game_progress", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "search_id"), PropertyInfo(Variant::DICTIONARY, "search_progress")));
 	ADD_SIGNAL(MethodInfo("search_for_game_result", PropertyInfo(Variant::INT, "result"), PropertyInfo(Variant::INT, "search_id"), PropertyInfo(Variant::DICTIONARY, "search_result")));
@@ -10230,7 +10335,7 @@ void Steam::_bind_methods() {
 
 	// NETWORKING MESSAGES
 	ADD_SIGNAL(MethodInfo("network_messages_session_request", PropertyInfo(Variant::INT, "remote_steam_id")));
-	ADD_SIGNAL(MethodInfo("network_messages_session_failed", PropertyInfo(Variant::INT, "reason")));
+	ADD_SIGNAL(MethodInfo("network_messages_session_failed", PropertyInfo(Variant::INT, "reason"), PropertyInfo(Variant::INT, "remote_steam_id"), PropertyInfo(Variant::INT, "connection_state"), PropertyInfo(Variant::STRING, "debug_message")));
 
 	// NETWORKING SOCKETS
 	ADD_SIGNAL(MethodInfo("network_connection_status_changed", PropertyInfo(Variant::INT, "connect_handle"), PropertyInfo(Variant::DICTIONARY, "connection"), PropertyInfo(Variant::INT, "old_state")));
@@ -10456,7 +10561,7 @@ void Steam::_bind_methods() {
 	BIND_CONSTANT(NETWORKING_PING_UNKNOWN);
 	BIND_CONSTANT(NETWORKING_SEND_UNRELIABLE);
 	BIND_CONSTANT(NETWORKING_SEND_NO_NAGLE);
-	BIND_CONSTANT(NETWORKING_SEND_UNRELIABLE_NO_NAGLE);
+	BIND_CONSTANT(NETWORKING_SEND_URELIABLE_NO_NAGLE);
 	BIND_CONSTANT(NETWORKING_SEND_NO_DELAY);
 	BIND_CONSTANT(NETWORKING_SEND_UNRELIABLE_NO_DELAY);
 	BIND_CONSTANT(NETWORKING_SEND_RELIABLE);
@@ -11468,48 +11573,50 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(NO_SERVERS_LISTED_ON_MASTER_SERVER);
 
 	// MouseCursor Enums
-	BIND_ENUM_CONSTANT(DC_USER);
-	BIND_ENUM_CONSTANT(DC_NONE);
-	BIND_ENUM_CONSTANT(DC_ARROW);
-	BIND_ENUM_CONSTANT(DC_IBEAM);
-	BIND_ENUM_CONSTANT(DC_HOUR_GLASS);
-	BIND_ENUM_CONSTANT(DC_WAIT_ARROW);
-	BIND_ENUM_CONSTANT(DC_CROSSHAIR);
-	BIND_ENUM_CONSTANT(DC_UP);
-	BIND_ENUM_CONSTANT(DC_SIZE_NW);
-	BIND_ENUM_CONSTANT(DC_SIZE_SE);
-	BIND_ENUM_CONSTANT(DC_SIZE_NE);
-	BIND_ENUM_CONSTANT(DC_SIZE_SW);
-	BIND_ENUM_CONSTANT(DC_SIZE_W);
-	BIND_ENUM_CONSTANT(DC_SIZE_E);
-	BIND_ENUM_CONSTANT(DC_SIZE_N);
-	BIND_ENUM_CONSTANT(DC_SIZE_S);
-	BIND_ENUM_CONSTANT(DC_SIZE_WE);
-	BIND_ENUM_CONSTANT(DC_SIZE_NS);
-	BIND_ENUM_CONSTANT(DC_SIZE_ALL);
-	BIND_ENUM_CONSTANT(DC_NO);
-	BIND_ENUM_CONSTANT(DC_HAND);
-	BIND_ENUM_CONSTANT(DC_BLANK);
-	BIND_ENUM_CONSTANT(DC_MIDDLE_PAN);
-	BIND_ENUM_CONSTANT(DC_NORTH_PAN);
-	BIND_ENUM_CONSTANT(DC_NORTH_EAST_PAN);
-	BIND_ENUM_CONSTANT(DC_EAST_PAN);
-	BIND_ENUM_CONSTANT(DC_SOUTH_EAST_PAN);
-	BIND_ENUM_CONSTANT(DC_SOUTH_PAN);
-	BIND_ENUM_CONSTANT(DC_SOUTH_WEST_PAN);
-	BIND_ENUM_CONSTANT(DC_WEST_PAN);
-	BIND_ENUM_CONSTANT(DC_NORTH_WEST_PAN);
-	BIND_ENUM_CONSTANT(DC_ALIAS);
-	BIND_ENUM_CONSTANT(DC_CELL);
-	BIND_ENUM_CONSTANT(DC_COL_RESIZE);
-	BIND_ENUM_CONSTANT(DC_COPY_CUR);
-	BIND_ENUM_CONSTANT(DC_VERTICAL_TEXT);
-	BIND_ENUM_CONSTANT(DC_ROW_RESIZE);
-	BIND_ENUM_CONSTANT(DC_ZOOM_IN);
-	BIND_ENUM_CONSTANT(DC_ZOOM_OUT);
-	BIND_ENUM_CONSTANT(DC_HELP);
-	BIND_ENUM_CONSTANT(DC_CUSTOM);
-	BIND_ENUM_CONSTANT(DC_LAST);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_USER);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_NONE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_ARROW);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_IBEAM);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_HOURGLASS);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_WAIT_ARROW);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_CROSSHAIR);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_UP);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_NW);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_SE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_NE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_SW);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_W);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_E);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_N);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_S);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_WE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_NS);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_ALL);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_CURSOR_NO);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_CURSOR_HAND);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_CURSOR_BLANK);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_MIDDLE_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_NORTH_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_NORTH_EAST_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_EAST_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SOUTH_EAST_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SOUTH_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SOUTH_WEST_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_WEST_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_NORTH_WEST_PAN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_ALIAS);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_CELL);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_COL_RESIZE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_COPY_CUR);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_VERTICAL_TEXT);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_ROW_RESIZE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_ZOOM_IN);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_ZOOM_OUT);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_HELP);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_CUSTOM);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_NWSE);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_SIZE_NESW);
+	BIND_ENUM_CONSTANT(HTML_MOUSE_CURSOR_LAST);
 
 	// NetworkingAvailability Enums
 	BIND_ENUM_CONSTANT(NETWORKING_AVAILABILITY_CANNOT_TRY);
@@ -11792,6 +11899,128 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(PLAYER_RESULT_INCOMPLETE);
 	BIND_ENUM_CONSTANT(PLAYER_RESULT_COMPLETED);
 
+	// RemotePlayInputType Enums
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_UNKNOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_MOUSE_MOTION);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_MOUSE_BUTTON_DOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_MOUSE_BUTTON_UP);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_MOUSE_WHEEL);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_KEY_DOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_INPUT_KEY_UP);
+
+	// RemotePlayKeyModifier Enums
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_NONE);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_LEFT_SHIFT);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_RIGHT_SHIFT);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_LEFT_CONTROL);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_RIGHT_CONTROL);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_LEFT_ALT);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_RIGHT_ALT);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_LEFT_GUI);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_RIGHT_GUI);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_NUM_LOCK);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_CAPS_LOCK);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_KEY_MODIFIER_MASK);
+
+	// RemotePlayMouseButton Enums
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_MOUSE_BUTTON_LEFT);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_MOUSE_BUTTON_RIGHT);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_MOUSE_BUTTON_MIDDLE);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_MOUSE_BUTTON_X1);
+	BIND_BITFIELD_FLAG(REMOTE_PLAY_MOUSE_BUTTON_X2);
+
+	// RemotePlayMouseWheelDirection Enums
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_MOUSE_WHEEL_UP);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_MOUSE_WHEEL_DOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_MOUSE_WHEEL_LEFT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAY_MOUSE_WHEEL_RIGHT);
+
+	// RemotePlayScancode Enums
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_UNKNOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_A);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_B);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_C);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_D);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_E);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_G);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_H);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_I);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_J);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_K);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_L);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_M);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_N);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_O);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_P);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_Q);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_R);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_S);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_T);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_U);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_V);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_W);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_X);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_Y);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_Z);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_1);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_2);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_3);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_4);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_5);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_6);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_7);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_8);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_9);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_0);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RETURN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_ESCAPE);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_BACKSPACE);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_TAB);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_SPACE);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_MINUS);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_EQUALS);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_LEFT_BRACKET);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RIGHT_BRACKET);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_BACKSLASH);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_SEMICOLON);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_APOSTROPHE);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_GRAVE);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_COMMA);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_PERIOD);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_SLASH);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_CAPSLOCK);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F1);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F2);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F3);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F4);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F5);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F6);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F7);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F8);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F9);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F10);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F11);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_F12);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_INSERT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_HOME);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_PAGE_UP);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_DELETE);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_END);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_PAGE_DOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RIGHT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_LEFT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_DOWN);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_UP);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_LEFT_CONTROL);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_LEFT_SHIFT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_LEFT_ALT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_LEFT_GUI);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RIGHT_CONTROL);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RIGHT_SHIFT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RIGHT_ALT);
+	BIND_ENUM_CONSTANT(REMOTE_PLAYER_SCANCODE_RIGHT_GUI);
+
 	// RemoteStoragePlatform Enums
 	BIND_BITFIELD_FLAG(REMOTE_STORAGE_PLATFORM_NONE);
 	BIND_BITFIELD_FLAG(REMOTE_STORAGE_PLATFORM_WINDOWS);
@@ -12057,16 +12286,6 @@ void Steam::_bind_methods() {
 	BIND_ENUM_CONSTANT(USER_HAS_LICENSE_RESULT_DOES_NOT_HAVE_LICENSE);
 	BIND_ENUM_CONSTANT(USER_HAS_LICENSE_RESULT_NO_AUTH);
 
-	// UserRestriction Enums
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_NONE);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_UNKNOWN);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_ANY_CHAT);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_VOICE_CHAT);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_GROUP_CHAT);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_RATING);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_GAME_INVITES);
-	BIND_BITFIELD_FLAG(USER_RESTRICTION_TRADING);
-
 	// UserUGCList Enums
 	BIND_ENUM_CONSTANT(USER_UGC_LIST_PUBLISHED);
 	BIND_ENUM_CONSTANT(USER_UGC_LIST_VOTED_ON);
@@ -12190,15 +12409,5 @@ Steam::~Steam() {
 		steamShutdown();
 	}
 
-	current_clan_id = 0;
-	browser_handle = 0;
-	inventory_handle = 0;
-	inventory_update_handle = 0;
-	current_steam_id = 0;
-	leaderboard_details_max = LEADERBOARD_DETAIL_MAX;
-	leaderboard_entries_array = Array();
-	leaderboard_handle = 0;
-	current_app_id = 0;
-
-	singleton = NULL;
+	singleton = nullptr;
 }
