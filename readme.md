@@ -24,21 +24,12 @@ Current Build
 ---
 You can [download pre-compiled versions of this repo here](https://github.com/GodotSteam/GodotSteam/releases).
 
-**Version 4.14 Changes**
-- Added: new functions and enums to SteamRemotePlay
-- Added: Steam icon to the class
-- Added: Project Settings for Steam, optional app ID, can set auto-initialization, can set embedded callbacks, thanks to ***TriMay***
-- Added: new functions to UGC
-- Changed: replaced previous `MouseCursor` enum with new `HTMLMouseCursor` enum
-- Changed: updated docs
-- Changed: updated to Steamworks SDK 1.62
-- Changed: `getNumSubscribedItems` and `getSubscribedItems` now take include_locally_disabled argument
-- Changed: `steamInit` now return intended boolean and first argument removed since client syncs stats/achieves at boot
-- Fixed: various bits in the in-editor docs
-- Fixed: `network_messages_session_failed` missing returned properties in bind
-- Removed: `UserRestrictions` enum
-- Removed: `SetPersonaName` function and related callback `name_changed`
-- Removed: `GetUserRestrictions` function
+**Version 4.15 Changes**
+- Added: missing functions `checkFileSignature`, `getConnectedUniverse()` and `getIPv6ConnectivityState` to Utils class
+- Changed: added default of true to  `setVRHeadsetStreamingEnabled()`
+- Fixed: embedding callbacks not working correctly
+- Fixed: `check_file_signature` variant now int instead of string
+- Removed: `storeStats()` from deconstructor as it should be storing them automatically
 
 [You can read more change-logs here](https://godotsteam.com/changelog/godot4/).
 

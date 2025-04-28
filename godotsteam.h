@@ -47,8 +47,6 @@
 // Include Godot headers
 #include "core/config/project_settings.h"
 #include "core/object/object.h"
-
-#include "core/object/ref_counted.h"
 #include "core/variant/dictionary.h"
 #include "scene/main/scene_tree.h"
 #include "scene/resources/texture.h"
@@ -865,16 +863,19 @@ public:
 	void uploadLeaderboardScore(int score, bool keep_best = false, PackedInt32Array details = PackedInt32Array(), uint64_t this_leaderboard = 0);
 
 	// Utils
+	void checkFileSignature(const String &filename);
 	bool dismissFloatingGamepadTextInput();
 	bool dismissGamepadTextInput();
 	String filterText(TextFilteringContext context, uint64_t steam_id, const String &message);
 	String getAPICallFailureReason();
 	uint32_t getAppID();
+	Universe getConnectedUniverse();
 	int getCurrentBatteryPower();
 	Dictionary getImageRGBA(int image);
 	Dictionary getImageSize(int image);
 	uint32 getIPCCallCount();
 	String getIPCountry();
+	IPv6ConnectivityState getIPv6ConnectivityState(IPv6ConnectivityProtocol protocol);
 	int getSecondsSinceAppActive();
 	int getSecondsSinceComputerActive();
 	int getServerRealTime();
@@ -891,7 +892,7 @@ public:
 	void setGameLauncherMode(bool mode);
 	void setOverlayNotificationInset(int horizontal, int vertical);
 	void setOverlayNotificationPosition(int pos);
-	void setVRHeadsetStreamingEnabled(bool enabled);
+	void setVRHeadsetStreamingEnabled(bool enabled = true);
 	bool showFloatingGamepadTextInput(FloatingGamepadTextInputMode input_mode, int text_field_x_position, int text_field_y_position, int text_field_width, int text_field_height);
 	bool showGamepadTextInput(GamepadTextInputMode input_mode, GamepadTextInputLineMode line_input_mode, const String &description, uint32 max_text, const String &preset_text);
 	void startVRDashboard();
@@ -928,13 +929,12 @@ public:
 
 protected:
 	static void _bind_methods();
-	void _process(double_t delta);
 	static Steam *singleton;
 
 
 private:
 	// Main
-	String godotsteam_version = "4.14";
+	String godotsteam_version = "4.15";
 	Dictionary init_result;
 	bool is_init_success;
 	bool were_callbacks_embedded;
@@ -1061,20 +1061,20 @@ private:
 
 	// Matchmaking Server
 	// ISteamMatchmakingServerListResponse
-	void ServerResponded(HServerListRequest list_request_handle, int server);
-	void ServerFailedToRespond(HServerListRequest list_request_handle, int server);
-	void RefreshComplete (HServerListRequest list_request_handle, EMatchMakingServerResponse response);
+	void ServerResponded(HServerListRequest list_request_handle, int server) override;
+	void ServerFailedToRespond(HServerListRequest list_request_handle, int server) override;
+	void RefreshComplete (HServerListRequest list_request_handle, EMatchMakingServerResponse response) override;
 	// ISteamMatchmakingPingResponse
-	void ServerResponded(gameserveritem_t &server);
-	void ServerFailedToRespond();
+	void ServerResponded(gameserveritem_t &server) override;
+	void ServerFailedToRespond() override;
 	// ISteamMatchmakingPlayersResponse
-	void AddPlayerToList(const char *player_name, int score, float time_played);
-	void PlayersFailedToRespond();
-	void PlayersRefreshComplete();
+	void AddPlayerToList(const char *player_name, int score, float time_played) override;
+	void PlayersFailedToRespond() override;
+	void PlayersRefreshComplete() override;
 	// ISteamMatchmakingRulesResponse
-	void RulesResponded(const char *rule, const char *value);
-	void RulesFailedToRespond();
-	void RulesRefreshComplete();
+	void RulesResponded(const char *rule, const char *value) override;
+	void RulesFailedToRespond() override;
+	void RulesRefreshComplete() override;
 
 	// Music
 	STEAM_CALLBACK(Steam, music_playback_status_has_changed, PlaybackStatusHasChanged_t, callbackMusicPlaybackStatusHasChanged);

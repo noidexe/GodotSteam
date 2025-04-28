@@ -512,6 +512,13 @@
 				Triggers a [signal Steam.change_num_open_slots] call result.
 			</description>
 		</method>
+		<method name="checkFileSignature">
+			<return type="void" />
+			<param index="0" name="_unnamed_arg0" type="String" />
+			<description>
+				Asynchronous call to check if an executable file has been signed using the public key set on the signing tab of the partner site, for example to refuse to load modified executable files.
+			</description>
+		</method>
 		<method name="checkPingDataUpToDate">
 			<return type="bool" />
 			<param index="0" name="max_age_in_seconds" type="float" />
@@ -1847,6 +1854,12 @@
 				Contains a list of controller handle (int).
 			</description>
 		</method>
+		<method name="getConnectedUniverse">
+			<return type="int" enum="Universe" />
+			<description>
+				The universe this client is connecting to.
+			</description>
+		</method>
 		<method name="getConnectionInfo">
 			<return type="Dictionary" />
 			<param index="0" name="connection_handle" type="int" />
@@ -2522,6 +2535,13 @@
 			<description>
 				Returns the 2 digit ISO 3166-1-alpha-2 format country code which client is running in. e.g "US" or "UK".
 				This is looked up via an IP-to-location database.
+			</description>
+		</method>
+		<method name="getIPv6ConnectivityState">
+			<return type="int" enum="IPv6ConnectivityState" />
+			<param index="0" name="protocol" type="int" enum="IPv6ConnectivityProtocol" />
+			<description>
+				Return what we believe your current ipv6 connectivity to "the internet" is on the specified protocol. This does not tell you if the Steam client is currently connected to Steam via ipv6.
 			</description>
 		</method>
 		<method name="getImageRGBA">
@@ -5972,7 +5992,7 @@
 				- height - The height of the cursor, in pixels
 				- hot_x - The X coordinate of the cursor hot spot in pixels, offset from the left of the cursor
 				- hot_y - The Y coordinate of the cursor hot spot in pixels, offset from the top of the cursor
-				- pitch - The distance between pixel rows in bytes, defaults to nWidth * 4 
+				- pitch - The distance between pixel rows in bytes, defaults to width * 4
 			</description>
 		</method>
 		<method name="setMousePosition">
@@ -6311,7 +6331,7 @@
 		</method>
 		<method name="setVRHeadsetStreamingEnabled">
 			<return type="void" />
-			<param index="0" name="enabled" type="bool" />
+			<param index="0" name="enabled" type="bool" default="true" />
 			<description>
 				Set whether the HMD content will be streamed via Steam In-Home Streaming.
 			</description>
@@ -6982,7 +7002,7 @@
 			</description>
 		</signal>
 		<signal name="check_file_signature">
-			<param index="0" name="signature" type="String" />
+			<param index="0" name="signature" type="int" />
 			<description>
 				Sent after the device returns from sleep/suspend mode. Call result for [method Steam.checkFileSignature].
 			</description>
