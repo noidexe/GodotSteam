@@ -14,13 +14,13 @@ on:
         description: 'Godot Github tag:'
         required: true
         type: string
-        default: '4.4-stable'
+        default: '4.4.1-stable'
 
       godotsteam_version:
         description: 'GodotSteam version number:'
         required: true
         type: string
-        default: '4.14'
+        default: '4.15'
 
 
 jobs:
