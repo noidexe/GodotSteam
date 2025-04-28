@@ -65,18 +65,6 @@ jobs:
           token: ${{ secrets.steamworks_sdk_repo_token }}
           ref: ${{ inputs.steamworks_sdk_tag }}
 
-      # Testing set GCC version
-      - name: Setup GCC
-        shell: sh
-        run: |
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10
-          sudo update-alternatives --set gcc /usr/bin/gcc-9
-          sudo update-alternatives --set g++ /usr/bin/g++-9
-
-          gcc --version
-          g++ --version
-
       # Install Godot requirements
       - name: Install Godot requirements
         shell: sh
@@ -113,7 +101,6 @@ jobs:
       - name: Debug Template Compilation (target=template_debug)
         uses: ./.github/actions/build-godot
         with:
-          buildroot: "${{ github.workspace }}/x86_64-godot-linux-gnu_sdk-buildroot/bin"
           arch: ${{ matrix.arch }}
           platform: linux
           target: template_debug
@@ -127,7 +114,6 @@ jobs:
       - name: Release Template Compilation (target=template_release)
         uses: ./.github/actions/build-godot
         with:
-          buildroot: "${{ github.workspace }}/x86_64-godot-linux-gnu_sdk-buildroot/bin"
           arch: ${{ matrix.arch }}
           platform: linux
           target: template_release
