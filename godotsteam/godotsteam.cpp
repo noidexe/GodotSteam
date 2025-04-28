@@ -391,12 +391,6 @@ String Steam::getStringFromSteamIP(SteamNetworkingIPAddr this_address) {
 	return String(this_ip);
 }
 
-void Steam::_process(double_t delta) {
-	if (were_callbacks_embedded) {
-		Steam::run_callbacks();
-	}
-}
-
 
 ///// MAIN FUNCTIONS
 
@@ -478,6 +472,9 @@ bool Steam::steamInit(uint32_t app_id, bool embed_callbacks) {
 		// Attach the callbacks, if set
 		if (embed_callbacks || ProjectSettings::get_singleton()->get_setting_with_override("steam/initialization/embed_callbacks")) {
 			were_callbacks_embedded = true;
+
+			auto callbacks = callable_mp(this, &Steam::run_callbacks);
+			RenderingServer::get_singleton()->connect("frame_post_draw", callbacks);
 		}
 		return true;
 	}
@@ -509,6 +506,9 @@ Dictionary Steam::steamInitEx(uint32_t app_id, bool embed_callbacks) {
 		// Attach the callbacks, if set
 		if (embed_callbacks || ProjectSettings::get_singleton()->get_setting_with_override("steam/initialization/embed_callbacks")) {
 			were_callbacks_embedded = true;
+
+			auto callbacks = callable_mp(this, &Steam::run_callbacks);
+			RenderingServer::get_singleton()->connect("frame_post_draw", callbacks);
 		}
 	}
 	init_result["status"] = initialize_result;
@@ -522,6 +522,9 @@ void Steam::steamShutdown() {
 	// If callbacks were connected internally
 	if (were_callbacks_embedded) {
 		were_callbacks_embedded = false;
+
+		auto callbacks = callable_mp(this, &Steam::run_callbacks);
+		RenderingServer::get_singleton()->disconnect("frame_post_draw", callbacks);
 	}
 	SteamAPI_Shutdown();
 }
@@ -2518,7 +2521,7 @@ void Steam::stopAnalogActionMomentum(uint64_t input_handle, uint64_t action) {
 }
 
 // Get the equivalent origin for a given controller type or the closest controller type that existed in the SDK you built into
-// your game if eDestinationInputType is k_ESteamInputType_Unknown. This action origin can be used in your glyph look up table
+// your game if eDestinationInputType is INPUT_TYPE_UNKNOWN. This action origin can be used in your glyph look up table
 // or passed into GetGlyphForActionOrigin or GetStringForActionOrigin.
 int Steam::translateActionOrigin(InputType destination_input, InputActionOrigin source_origin) {
 	ERR_FAIL_COND_V_MSG(SteamInput() == NULL, 0, "[STEAM] Input not found when calling: translateActionOrigin");
@@ -4857,7 +4860,7 @@ void Steam::onReservationCompleted(uint64_t beacon_id, uint64_t steam_id) {
 Dictionary Steam::createMouseCursor(int width, int height, int hot_x, int hot_y, int pitch) {
 	Dictionary mouse_cursor;
 	ERR_FAIL_COND_V_MSG(SteamRemotePlay() == NULL, mouse_cursor, "[STEAM] Remote Play class not found when calling: createMouseCursor");
-	const void *cursor_pixels;
+	const void *cursor_pixels = nullptr;
 	uint32_t mouse_cursor_id = SteamRemotePlay()->CreateMouseCursor(width, height, hot_x, hot_y, &cursor_pixels, pitch); 
 	mouse_cursor["id"] = mouse_cursor_id;
 
@@ -7137,6 +7140,14 @@ void Steam::uploadLeaderboardScore(int score, bool keep_best, PackedInt32Array d
 
 ///// UTILS
 
+// Asynchronous call to check if an executable file has been signed using the public key set on the signing tab of the partner
+// site, for example to refuse to load modified executable files.
+void Steam::checkFileSignature(const String &filename) {
+	ERR_FAIL_COND_MSG(SteamUtils() == NULL, "[STEAM] Utils class not found when calling: checkFileSignature");
+	SteamAPICall_t api_call = SteamUtils()->CheckFileSignature(filename.utf8().get_data());
+	callResultCheckFileSignature.Set(api_call, this, &Steam::check_file_signature);
+}
+
 // Dismisses the floating keyboard.
 bool Steam::dismissFloatingGamepadTextInput() {
 	ERR_FAIL_COND_V_MSG(SteamUtils() == NULL, false, "[STEAM] Utils class not found when calling: dismissFloatingGamepadTextInput");
@@ -7190,6 +7201,12 @@ uint32_t Steam::getAppID() {
 	return SteamUtils()->GetAppID();
 }
 
+// The universe this client is connecting to.
+Universe Steam::getConnectedUniverse() {
+	ERR_FAIL_COND_V_MSG(SteamUtils() == NULL, UNIVERSE_INVALID,"[Steam] Utils class not found when calling: getConnectedUniverse");
+	return Universe(SteamUtils()->GetConnectedUniverse());
+}
+
 // Get the amount of battery power, clearly for laptops.
 int Steam::getCurrentBatteryPower() {
 	ERR_FAIL_COND_V_MSG(SteamUtils() == NULL, 0, "[STEAM] Utils class not found when calling: getCurrentBatteryPower");
@@ -7235,6 +7252,13 @@ uint32 Steam::getIPCCallCount() {
 String Steam::getIPCountry() {
 	ERR_FAIL_COND_V_MSG(SteamUtils() == NULL, "", "[STEAM] Utils class not found when calling: getIPCountry");
 	return SteamUtils()->GetIPCountry();
+}
+
+// Return what we believe your current ipv6 connectivity to "the internet" is on the specified protocol.
+// This does NOT tell you if the Steam client is currently connected to Steam via ipv6.
+IPv6ConnectivityState Steam::getIPv6ConnectivityState(IPv6ConnectivityProtocol protocol) {
+	ERR_FAIL_COND_V_MSG(SteamUtils() == NULL, IPV6_CONNECTIVITY_STATE_BAD, "[Steam] Utils class not found when calling: getIPv6ConnectivityState");
+	return IPv6ConnectivityState(SteamUtils()->GetIPv6ConnectivityState((ESteamIPv6ConnectivityProtocol)protocol));
 }
 
 // Return amount of time, in seconds, user has spent in this session.
@@ -8615,7 +8639,7 @@ void Steam::user_stats_unloaded(UserStatsUnloaded_t *call_data) {
 }
 
 
-///// UTILITY
+///// UTILS
 
 // Called when the big picture gamepad text input has been closed.
 void Steam::gamepad_text_input_dismissed(GamepadTextInputDismissed_t *call_data) {
@@ -8821,14 +8845,14 @@ void Steam::inventory_eligible_promo_item(SteamInventoryEligiblePromoItemDefIDs_
 	ERR_FAIL_COND_MSG(io_failure, "[STEAM] inventory_eligible_promo_item signal failed internally");
 	CSteamID steam_id = call_data->m_steamID;
 	int result = call_data->m_result;
-	int eligible = call_data->m_numEligiblePromoItemDefs;
+	uint32_t eligible = call_data->m_numEligiblePromoItemDefs;
 	bool cached = call_data->m_bCachedData;
 	Array definitions;
 	SteamItemDef_t *id_array = new SteamItemDef_t[eligible];
 	uint32 array_size = (int)eligible;
 
 	if (SteamInventory()->GetEligiblePromoItemDefinitionIDs(steam_id, id_array, &array_size)) {
-		for (int i = 0; i < eligible; i++) {
+		for (uint32_t i = 0; i < eligible; i++) {
 			definitions.append(id_array[i]);
 		}
 	}
@@ -10164,16 +10188,19 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("uploadLeaderboardScore", "score", "keep_best", "details", "this_leaderboard"), &Steam::uploadLeaderboardScore, DEFVAL(true), DEFVAL(PackedInt32Array()), DEFVAL(0));
 
 	// UTILS
+	ClassDB::bind_method(D_METHOD("checkFileSignature"), &Steam::checkFileSignature);
 	ClassDB::bind_method(D_METHOD("dismissFloatingGamepadTextInput"), &Steam::dismissFloatingGamepadTextInput);
 	ClassDB::bind_method(D_METHOD("dismissGamepadTextInput"), &Steam::dismissGamepadTextInput);
 	ClassDB::bind_method(D_METHOD("filterText", "context", "steam_id", "message"), &Steam::filterText);
 	ClassDB::bind_method(D_METHOD("getAPICallFailureReason"), &Steam::getAPICallFailureReason);
 	ClassDB::bind_method(D_METHOD("getAppID"), &Steam::getAppID);
+	ClassDB::bind_method(D_METHOD("getConnectedUniverse"), &Steam::getConnectedUniverse);
 	ClassDB::bind_method(D_METHOD("getCurrentBatteryPower"), &Steam::getCurrentBatteryPower);
 	ClassDB::bind_method(D_METHOD("getImageRGBA", "image"), &Steam::getImageRGBA);
 	ClassDB::bind_method(D_METHOD("getImageSize", "image"), &Steam::getImageSize);
 	ClassDB::bind_method(D_METHOD("getIPCCallCount"), &Steam::getIPCCallCount);
 	ClassDB::bind_method(D_METHOD("getIPCountry"), &Steam::getIPCountry);
+	ClassDB::bind_method(D_METHOD("getIPv6ConnectivityState", "protocol"), &Steam::getIPv6ConnectivityState);
 	ClassDB::bind_method(D_METHOD("getSecondsSinceAppActive"), &Steam::getSecondsSinceAppActive);
 	ClassDB::bind_method(D_METHOD("getSecondsSinceComputerActive"), &Steam::getSecondsSinceComputerActive);
 	ClassDB::bind_method(D_METHOD("getServerRealTime"), &Steam::getServerRealTime);
@@ -10190,7 +10217,7 @@ void Steam::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("setGameLauncherMode", "mode"), &Steam::setGameLauncherMode);
 	ClassDB::bind_method(D_METHOD("setOverlayNotificationInset", "horizontal", "vertical"), &Steam::setOverlayNotificationInset);
 	ClassDB::bind_method(D_METHOD("setOverlayNotificationPosition", "pos"), &Steam::setOverlayNotificationPosition);
-	ClassDB::bind_method(D_METHOD("setVRHeadsetStreamingEnabled", "enabled"), &Steam::setVRHeadsetStreamingEnabled);
+	ClassDB::bind_method(D_METHOD("setVRHeadsetStreamingEnabled", "enabled"), &Steam::setVRHeadsetStreamingEnabled, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("showFloatingGamepadTextInput", "input_mode", "text_field_x_position", "text_field_y_position", "text_field_width", "text_field_height"), &Steam::showFloatingGamepadTextInput);
 	ClassDB::bind_method(D_METHOD("showGamepadTextInput", "input_mode", "line_input_mode", "description", "max_text", "preset_text"), &Steam::showGamepadTextInput);
 	ClassDB::bind_method(D_METHOD("startVRDashboard"), &Steam::startVRDashboard);
@@ -12409,7 +12436,6 @@ void Steam::_bind_methods() {
 
 Steam::~Steam() {
 	if (is_init_success) {
-		SteamUserStats()->StoreStats();
 		steamShutdown();
 	}
 

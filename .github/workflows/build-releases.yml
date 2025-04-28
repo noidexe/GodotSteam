@@ -20,7 +20,7 @@ on:
         description: 'GodotSteam GDExtension Tag:'
         required: true
         type: string
-        default: 'v4.14-gde'
+        default: 'v4.15-gde'
 
 
 jobs:
