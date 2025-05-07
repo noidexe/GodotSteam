@@ -474,7 +474,7 @@ bool Steam::steamInit(uint32_t app_id, bool embed_callbacks) {
 			were_callbacks_embedded = true;
 
 			auto callbacks = callable_mp(this, &Steam::run_callbacks);
-			RenderingServer::get_singleton()->connect("frame_post_draw", callbacks);
+			SceneTree::get_singleton()->connect("process_frame", callbacks);
 		}
 		return true;
 	}
@@ -508,7 +508,7 @@ Dictionary Steam::steamInitEx(uint32_t app_id, bool embed_callbacks) {
 			were_callbacks_embedded = true;
 
 			auto callbacks = callable_mp(this, &Steam::run_callbacks);
-			RenderingServer::get_singleton()->connect("frame_post_draw", callbacks);
+			SceneTree::get_singleton()->connect("process_frame", callbacks);
 		}
 	}
 	init_result["status"] = initialize_result;
@@ -524,7 +524,7 @@ void Steam::steamShutdown() {
 		were_callbacks_embedded = false;
 
 		auto callbacks = callable_mp(this, &Steam::run_callbacks);
-		RenderingServer::get_singleton()->disconnect("frame_post_draw", callbacks);
+		SceneTree::get_singleton()->disconnect("process_frame", callbacks);
 	}
 	SteamAPI_Shutdown();
 }
